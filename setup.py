@@ -10,7 +10,7 @@ setup(
     include_package_data=True,
     version=version,
     license='BSD',
-    description='Encrypted field dealing with pgcrypto postgres extension.',
+    description='Encrypted fields dealing with pgcrypto postgres extension.',
     classifiers=(
         'Development Status :: 1 - Planning',
         'Framework :: Django',
