@@ -1,0 +1,3 @@
+[run]
+source = pgcrypto_fields
+omit = *migrations*, *tests*
