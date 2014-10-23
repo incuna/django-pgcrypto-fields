@@ -31,7 +31,7 @@ class TestEncryptedTextField(TestCase):
 
 
 class TestEncryptedTextFieldModel(TestCase):
-    """Test `EncryptedTextField` can be integred in a `Django` model."""
+    """Test `EncryptedTextField` can be integrated in a `Django` model."""
     model = EncryptedTextFieldModel
 
     def test_fields(self):

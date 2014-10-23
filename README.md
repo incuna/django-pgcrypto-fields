@@ -18,7 +18,7 @@ pip install django-pgcrypto-fields
 ### Generate GPG keys.
 
 The public key is going to encrypt the message and the private key will be
-needed to decrypt the content. The following commands has been taken from the
+needed to decrypt the content. The following commands have been taken from the
 [pgcrypto documentation](http://www.postgresql.org/docs/devel/static/pgcrypto.html)
 (see Generating PGP Keys with GnuPG).
 
