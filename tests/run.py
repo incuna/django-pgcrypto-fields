@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 """From http://stackoverflow.com/a/12260597/400691."""
+import os
 import sys
 
 import dj_database_url
@@ -7,6 +8,10 @@ import django
 from colour_runner.django_runner import ColourRunnerMixin
 from django.conf import settings
 from django.test.runner import DiscoverRunner
+
+
+BASEDIR = os.path.dirname(os.path.dirname(__file__))
+PUBLIC_PGP_KEY_PATH = os.path.abspath(os.path.join(BASEDIR, 'tests/keys/public.key'))
 
 
 settings.configure(
@@ -17,7 +22,7 @@ settings.configure(
     },
     INSTALLED_APPS=('tests',),
     MIDDLEWARE_CLASSES = (),
-    PUBLIC_PGP_KEY='',
+    PUBLIC_PGP_KEY=open(PUBLIC_PGP_KEY_PATH, 'r').read(),
 )
 
 

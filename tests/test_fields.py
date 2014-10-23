@@ -40,6 +40,9 @@ class TestEncryptedTextFieldModel(TestCase):
         expected = ('id', 'encrypted_value')
         self.assertCountEqual(fields, expected)
 
-    def test_value(self):
-        instance = EncryptedTextFieldModelFactory.create()
-        self.assertEqual(instance.encrypted_value, '')
+    def test_value_returned_is_bytea(self):
+        """Assert value returned is a memoryview instance."""
+        EncryptedTextFieldModelFactory.create()
+
+        instance = EncryptedTextFieldModel.objects.get()
+        self.assertIsInstance(instance.encrypted_value, memoryview)
