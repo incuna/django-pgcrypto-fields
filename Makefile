@@ -9,6 +9,6 @@ release:
 	python setup.py register sdist bdist_wheel upload
 
 test:
-	@coverage run ./pgcrypto_fields/tests/run.py
+	@coverage run ./tests/run.py
 	@coverage report --show-missing
 	@flake8 .
