@@ -49,4 +49,13 @@ PRIVATE_PGP_KEY_PATH = os.path.abspath(os.path.join(BASEDIR, 'private.key'))
 
 PUBLIC_PGP_KEY = open(PUBLIC_PGP_KEY_PATH).read()
 PRIVATE_PGP_KEY = open(PRIVATE_PGP_KEY_PATH).read()
+
+# And add 'pgcrypto_fields' to `INSTALLED_APPS` to create the extension for
+# pgcrypto (in a migration).
+INSTALLED_APPS = (
+    ...
+    'pgcrypto_fields',
+    ...
+)
+
 ```

@@ -20,7 +20,10 @@ settings.configure(
             default='postgres://localhost/pgcrypto_fields'
         ),
     },
-    INSTALLED_APPS=('tests',),
+    INSTALLED_APPS=(
+        'pgcrypto_fields',
+        'tests',
+    ),
     MIDDLEWARE_CLASSES = (),
     PUBLIC_PGP_KEY=open(PUBLIC_PGP_KEY_PATH, 'r').read(),
 )
