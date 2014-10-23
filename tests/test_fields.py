@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 
 from pgcrypto_fields import fields
+from .factories import EncryptedTextFieldModelFactory
 from .models import EncryptedTextFieldModel
 
 
@@ -38,3 +39,7 @@ class TestEncryptedTextFieldModel(TestCase):
         fields = self.model._meta.get_all_field_names()
         expected = ('id', 'encrypted_value')
         self.assertCountEqual(fields, expected)
+
+    def test_value(self):
+        instance = EncryptedTextFieldModelFactory.create()
+        self.assertEqual(instance.encrypted_value, '')
