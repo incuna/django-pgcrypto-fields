@@ -29,6 +29,6 @@ class TestRunner(ColourRunnerMixin, DiscoverRunner):
 
 
 test_runner = TestRunner(verbosity=1)
-failures = test_runner.run_tests(['pgcrypto_fields'])
+failures = test_runner.run_tests(['tests'])
 if failures:
     sys.exit(1)
