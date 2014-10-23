@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 """From http://stackoverflow.com/a/12260597/400691."""
+import os
 import sys
 
 import dj_database_url
@@ -9,14 +10,22 @@ from django.conf import settings
 from django.test.runner import DiscoverRunner
 
 
+BASEDIR = os.path.dirname(os.path.dirname(__file__))
+PUBLIC_PGP_KEY_PATH = os.path.abspath(os.path.join(BASEDIR, 'tests/keys/public.key'))
+
+
 settings.configure(
     DATABASES={
         'default': dj_database_url.config(
             default='postgres://localhost/pgcrypto_fields'
         ),
     },
-    INSTALLED_APPS=(),
+    INSTALLED_APPS=(
+        'pgcrypto_fields',
+        'tests',
+    ),
     MIDDLEWARE_CLASSES = (),
+    PUBLIC_PGP_KEY=open(PUBLIC_PGP_KEY_PATH, 'r').read(),
 )
 
 
@@ -29,6 +38,6 @@ class TestRunner(ColourRunnerMixin, DiscoverRunner):
 
 
 test_runner = TestRunner(verbosity=1)
-failures = test_runner.run_tests(['pgcrypto_fields'])
+failures = test_runner.run_tests(['tests'])
 if failures:
     sys.exit(1)
