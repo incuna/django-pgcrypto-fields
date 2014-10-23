@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 
 from pgcrypto_fields import fields
+from .models import EncryptedTextFieldModel
 
 
 PUBLIC_PGP_KEY = 'my public key'
@@ -26,3 +27,14 @@ class TestEncryptedTextField(TestCase):
         south_triple = fields.EncryptedTextField().south_field_triple()
         expected = ('pgcrypto_fields.fields.EncryptedTextField', [], {})
         self.assertEqual(south_triple, expected)
+
+
+class TestEncryptedTextFieldModel(TestCase):
+    """Test `EncryptedTextField` can be integred in a `Django` model."""
+    model = EncryptedTextFieldModel
+
+    def test_fields(self):
+        """Assert fields are representing our model."""
+        fields = self.model._meta.get_all_field_names()
+        expected = ('id', 'encrypted_value')
+        self.assertCountEqual(fields, expected)

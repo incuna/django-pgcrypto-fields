@@ -1,7 +1,8 @@
 from django.conf import settings
+from django.db import models
 
 
-class EncryptedTextField:
+class EncryptedTextField(models.TextField):
     """Encrypted TextField.
 
     `EncryptedTextField` deals with postgres and use pgcrypto to encode
