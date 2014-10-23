@@ -13,7 +13,17 @@ class EncryptedTextField(models.TextField):
         return 'bytea'
 
     def get_placeholder(self, value=None, connection=None):
-        """Allow to wrap the field before being inserted."""
+        """
+        Tell postgres to encrypt this field with our public pgp key.
+
+        `%s` is replaced with the field's value.
+
+        `value` and `connection` are ignored here as we don't need other custom
+        operator depending on the value.
+
+        `pgp_pub_encrypt` and `dearmor` are `pgcrypto` functions which encrypt
+        the field's value with the PGP key unwrapped by `dearmor`.
+        """
         return "pgp_pub_encrypt(%s, dearmor('{}'))".format(settings.PUBLIC_PGP_KEY)
 
     def south_field_triple(self):
