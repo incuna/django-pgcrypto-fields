@@ -48,7 +48,7 @@ class TestEncryptedTextFieldModel(TestCase):
         self.assertIsInstance(instance.encrypted_value, memoryview)
 
     def test_value(self):
-        """Assert we can get back the value decrypted."""
+        """Assert we can get back the decrypted value."""
         expected = 'bonjour'
         EncryptedTextFieldModelFactory.create(encrypted_value=expected)
 

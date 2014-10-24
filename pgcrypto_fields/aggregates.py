@@ -3,15 +3,21 @@ from django.db import models
 
 
 class DecryptFunctionSQL(models.sql.aggregates.Aggregate):
-    """Decrypt function SQL.
+    """Custom SQL aggregate to decrypt a field.
 
-    `DecryptFunctionSQL` defines a template to render the SQL for decrypting
-    a a field's value.
+    `DecryptFunctionSQL` provides a SQL template using pgcrypto to decrypt
+    data from a field in the database.
 
-    It defines the `function` that implements the aggregate and the private key
-    unwrapped by the `dearmor` function.
+    `sql_function` defines `pgp_pub_decrypt` which is a pgcrypto SQL function.
+    This function takes two arguments:
+      - a encrypted message (bytea);
+      - a key (bytea).
 
-    `field` would receive the lookup name value.
+    `%(function)s` in `sql_template` is populated by `sql_function`.
+
+    `%(field)s` is replaced with the field's name.
+
+    `dearmor` is used to unwrap the key from the PGP key.
     """
     sql_function = 'pgp_pub_decrypt'
     sql_template = "%(function)s(%(field)s, dearmor('{}'))".format(
@@ -20,10 +26,11 @@ class DecryptFunctionSQL(models.sql.aggregates.Aggregate):
 
 
 class Decrypt(models.Aggregate):
-    """Decrypt aggregate.
+    """`Decrypt` creates an alias for `DecryptFunctionSQL`.
 
-    `Decrypt` setup an alias which would be populated following the template
-    defined in `DecryptFunctionSQL`.
+    `alias` is `{self.lookup}__decrypt` where 'decrypt' is `self.name.lower()`.
+
+    `self.lookup` is defined in `models.Aggregate.__init__`.
     """
     name = 'Decrypt'
 
