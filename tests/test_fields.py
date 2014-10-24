@@ -52,7 +52,8 @@ class TestEncryptedTextFieldModel(TestCase):
         expected = 'bonjour'
         EncryptedTextFieldModelFactory.create(encrypted_value=expected)
 
-        instance = EncryptedTextFieldModel.objects.annotate(
+        queryset = EncryptedTextFieldModel.objects.annotate(
             aggregates.Decrypt('encrypted_value'),
         )
-        self.assertEqual(instance.get().encrypted_value__decrypt, expected)
+        instance = queryset.get()
+        self.assertEqual(instance.encrypted_value__decrypt, expected)
