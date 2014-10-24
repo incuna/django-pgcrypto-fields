@@ -59,3 +59,37 @@ INSTALLED_APPS = (
 )
 
 ```
+
+### Usage
+
+#### Model definition
+
+```python
+from django.db import models
+
+from pgcrypto_fields import fields
+
+class MyModel(models.Model):
+    value = fields.EncryptedTextField()
+```
+
+#### Encrypting
+
+Data is encrypted when inserted into the database.
+
+Example:
+```python
+>>> MyModel.objects.create(value='Value to be encrypted...')
+```
+
+#### Decrypting
+
+Data is decrypted when using the `Decrypt` aggregate class.
+
+Example:
+```python
+>>> from pgcrypto_fields.aggregates import Decrypt
+>>> my_model = MyModel.objects.annotate(Decrypt('value')).get()
+>>> my_model.value__decrypt
+'Value decrypted'
+```
