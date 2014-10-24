@@ -5,7 +5,7 @@ from django.db import models
 class DecryptFunctionSQL(models.sql.aggregates.Aggregate):
     """Decrypt function SQL.
 
-    `WithDecryptFunctionSQL` defines a template to render the SQL for decrypting
+    `DecryptFunctionSQL` defines a template to render the SQL for decrypting
     a a field's value.
 
     It defines the `function` that implements the aggregate and the private key

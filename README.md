@@ -75,7 +75,7 @@ class MyModel(models.Model):
 
 #### Encrypting
 
-Encrypting data happens when doing an insert to the database.
+Data is encrypted when inserted into the database.
 
 Example:
 ```python
@@ -84,11 +84,12 @@ Example:
 
 #### Decrypting
 
-Decrypting data should be done using the `Decrypt` aggregate class.
+Data is decrypted when using the `Decrypt` aggregate class.
 
 Example:
 ```python
->>> my_model = MyModel.objects.annotate(Decrypt('value'))
+>>> from pgcrypto_fields.aggregates import Decrypt
+>>> my_model = MyModel.objects.annotate(Decrypt('value')).get()
 >>> my_model.value__decrypt
-'Value to be encrypted....'
+'Value decrypted'
 ```
