@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.test.utils import override_settings
 
-from pgcrypto_fields import fields
+from pgcrypto_fields import aggregates, fields
 from .factories import EncryptedTextFieldModelFactory
 from .models import EncryptedTextFieldModel
 
@@ -46,3 +46,13 @@ class TestEncryptedTextFieldModel(TestCase):
 
         instance = EncryptedTextFieldModel.objects.get()
         self.assertIsInstance(instance.encrypted_value, memoryview)
+
+    def test_value(self):
+        """Assert we can get back the value decrypted."""
+        expected = 'bonjour'
+        EncryptedTextFieldModelFactory.create(encrypted_value=expected)
+
+        instance = EncryptedTextFieldModel.objects.annotate(
+            aggregates.Decrypt('encrypted_value'),
+        )
+        self.assertEqual(instance.get().encrypted_value__decrypt, expected)

@@ -12,6 +12,7 @@ from django.test.runner import DiscoverRunner
 
 BASEDIR = os.path.dirname(os.path.dirname(__file__))
 PUBLIC_PGP_KEY_PATH = os.path.abspath(os.path.join(BASEDIR, 'tests/keys/public.key'))
+PRIVATE_PGP_KEY_PATH = os.path.abspath(os.path.join(BASEDIR, 'tests/keys/private.key'))
 
 
 settings.configure(
@@ -26,6 +27,7 @@ settings.configure(
     ),
     MIDDLEWARE_CLASSES = (),
     PUBLIC_PGP_KEY=open(PUBLIC_PGP_KEY_PATH, 'r').read(),
+    PRIVATE_PGP_KEY=open(PRIVATE_PGP_KEY_PATH, 'r').read(),
 )
 
 
