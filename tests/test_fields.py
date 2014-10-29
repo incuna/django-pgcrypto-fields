@@ -59,6 +59,13 @@ class TestEncryptedTextFieldModel(TestCase):
 
         self.assertEqual(value, expected)
 
+    def test_instance_not_saved(self):
+        """Assert not saved instance return the value to be encrypted."""
+        expected = 'bonjour'
+        instance = EncryptedTextFieldModelFactory.build(encrypted_value=expected)
+        self.assertEqual(instance.encrypted_value, expected)
+        self.assertEqual(instance.encrypted_value_raw, expected)
+
     def test_decrypt_annotate(self):
         """Assert we can get back the decrypted value."""
         expected = 'bonjour'
