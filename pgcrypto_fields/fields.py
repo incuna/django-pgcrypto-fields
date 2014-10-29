@@ -4,6 +4,16 @@ from django.db import models
 from pgcrypto_fields.aggregates import Decrypt
 
 
+ENCRYPTION_TYPES = {
+    'digest': "digest(%s, 'md5')",
+    'hmac': "hmac(%s, '{}', 'md5')".format(settings.PGCRYPRO_PASSWORD),
+    'pgp_pub': "pgp_pub_encrypt(%s, dearmor('{}'))".format(settings.PUBLIC_PGP_KEY),
+    'pgp_sym': "pgp_sym_encrypt(%s, '{}')".format(settings.PGCRYPRO_PASSWORD),
+}
+
+_DEFAULT = ENCRYPTION_TYPES['pgp_pub']
+
+
 class EncryptedProxyField:
     """Descriptor for encrypted values.
 
@@ -60,6 +70,11 @@ class EncryptedTextField(models.TextField):
     `EncryptedTextField` deals with postgres and use pgcrypto to encode
     data to the database. Compatible with django 1.6.x for migration.
     """
+    def __init__(self, encryption_method=_DEFAULT, *args, **kwargs):
+        """Allow to define an encryption method."""
+        self.encryption_method = encryption_method
+        super().__init__(*args, **kwargs)
+
     def db_type(self, connection=None):
         """Value stored in the database is hexadecimal."""
         return 'bytea'
@@ -76,7 +91,7 @@ class EncryptedTextField(models.TextField):
         `pgp_pub_encrypt` and `dearmor` are `pgcrypto` functions which encrypt
         the field's value with the PGP key unwrapped by `dearmor`.
         """
-        return "pgp_pub_encrypt(%s, dearmor('{}'))".format(settings.PUBLIC_PGP_KEY)
+        return self.encryption_method
 
     def south_field_triple(self):
         """Return a suitable description of this field for South."""

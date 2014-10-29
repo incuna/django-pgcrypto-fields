@@ -1,12 +1,9 @@
+from django.conf import settings
 from django.test import TestCase
-from django.test.utils import override_settings
 
 from pgcrypto_fields import aggregates, fields
 from .factories import EncryptedTextFieldModelFactory
 from .models import EncryptedTextFieldModel
-
-
-PUBLIC_PGP_KEY = 'my public key'
 
 
 class TestEncryptedTextField(TestCase):
@@ -17,10 +14,9 @@ class TestEncryptedTextField(TestCase):
         """Check db_type is `bytea`."""
         self.assertEqual(self.field().db_type(), 'bytea')
 
-    @override_settings(PUBLIC_PGP_KEY=PUBLIC_PGP_KEY)
     def test_get_placeholder(self):
         """Check `get_placeholder` returns the right string function to encrypt data."""
-        expected = "pgp_pub_encrypt(%s, dearmor('{}'))".format(PUBLIC_PGP_KEY)
+        expected = "pgp_pub_encrypt(%s, dearmor('{}'))".format(settings.PUBLIC_PGP_KEY)
         self.assertEqual(self.field().get_placeholder(), expected)
 
     def test_south_field_triple(self):
@@ -37,7 +33,13 @@ class TestEncryptedTextFieldModel(TestCase):
     def test_fields(self):
         """Assert fields are representing our model."""
         fields = self.model._meta.get_all_field_names()
-        expected = ('id', 'encrypted_value')
+        expected = (
+            'id',
+            'digest_field',
+            'hmac_field',
+            'pgp_pub_field',
+            'pgp_sym_field',
+        )
         self.assertCountEqual(fields, expected)
 
     def test_value_returned_is_bytea(self):
@@ -45,34 +47,37 @@ class TestEncryptedTextFieldModel(TestCase):
         EncryptedTextFieldModelFactory.create()
 
         instance = EncryptedTextFieldModel.objects.get()
-        self.assertIsInstance(instance.encrypted_value_raw, memoryview)
+        self.assertIsInstance(instance.digest_field_raw, memoryview)
+        self.assertIsInstance(instance.hmac_field_raw, memoryview)
+        self.assertIsInstance(instance.pgp_pub_field_raw, memoryview)
+        self.assertIsInstance(instance.pgp_sym_field_raw, memoryview)
 
     def test_value(self):
         """Assert we can get back the decrypted value."""
         expected = 'bonjour'
-        EncryptedTextFieldModelFactory.create(encrypted_value=expected)
+        EncryptedTextFieldModelFactory.create(pgp_pub_field=expected)
 
         instance = EncryptedTextFieldModel.objects.get()
 
         with self.assertNumQueries(1):
-            value = instance.encrypted_value
+            value = instance.pgp_pub_field
 
         self.assertEqual(value, expected)
 
     def test_instance_not_saved(self):
         """Assert not saved instance return the value to be encrypted."""
         expected = 'bonjour'
-        instance = EncryptedTextFieldModelFactory.build(encrypted_value=expected)
-        self.assertEqual(instance.encrypted_value, expected)
-        self.assertEqual(instance.encrypted_value_raw, expected)
+        instance = EncryptedTextFieldModelFactory.build(pgp_pub_field=expected)
+        self.assertEqual(instance.pgp_pub_field, expected)
+        self.assertEqual(instance.pgp_pub_field_raw, expected)
 
     def test_decrypt_annotate(self):
         """Assert we can get back the decrypted value."""
         expected = 'bonjour'
-        EncryptedTextFieldModelFactory.create(encrypted_value=expected)
+        EncryptedTextFieldModelFactory.create(pgp_pub_field=expected)
 
         queryset = EncryptedTextFieldModel.objects.annotate(
-            aggregates.Decrypt('encrypted_value'),
+            aggregates.Decrypt('pgp_pub_field'),
         )
         instance = queryset.get()
-        self.assertEqual(instance.encrypted_value__decrypt, expected)
+        self.assertEqual(instance.pgp_pub_field__decrypt, expected)
