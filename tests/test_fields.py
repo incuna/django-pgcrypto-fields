@@ -45,9 +45,28 @@ class TestEncryptedTextFieldModel(TestCase):
         EncryptedTextFieldModelFactory.create()
 
         instance = EncryptedTextFieldModel.objects.get()
-        self.assertIsInstance(instance.encrypted_value, memoryview)
+        self.assertIsInstance(instance.encrypted_value_raw, memoryview)
 
     def test_value(self):
+        """Assert we can get back the decrypted value."""
+        expected = 'bonjour'
+        EncryptedTextFieldModelFactory.create(encrypted_value=expected)
+
+        instance = EncryptedTextFieldModel.objects.get()
+
+        with self.assertNumQueries(1):
+            value = instance.encrypted_value
+
+        self.assertEqual(value, expected)
+
+    def test_instance_not_saved(self):
+        """Assert not saved instance return the value to be encrypted."""
+        expected = 'bonjour'
+        instance = EncryptedTextFieldModelFactory.build(encrypted_value=expected)
+        self.assertEqual(instance.encrypted_value, expected)
+        self.assertEqual(instance.encrypted_value_raw, expected)
+
+    def test_decrypt_annotate(self):
         """Assert we can get back the decrypted value."""
         expected = 'bonjour'
         EncryptedTextFieldModelFactory.create(encrypted_value=expected)
