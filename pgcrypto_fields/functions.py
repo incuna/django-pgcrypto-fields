@@ -1,7 +1,19 @@
-class FunctionMixin:
-    """SQL cryptographic mixin."""
+from django.conf import settings
 
-    def sql_function(self, function, arguments):
+from pgcrypto_fields import aggregates
+
+
+class FunctionMixin:
+    """SQL cryptographic mixin for django field."""
+
+    @classmethod
+    def aggregate(cls, field):
+        """Return an 'Aggregate' function to decrypt the field."""
+        klass = getattr(aggregates, cls.__name__)
+        return klass(field)
+
+    @classmethod
+    def sql_function(cls, function, arguments):
         """
         Generate a SQL function string.
 
@@ -11,85 +23,74 @@ class FunctionMixin:
         """
         return '{}({})'.format(function, arguments)
 
-    def sql_encrypt_function(self, arguments):
+    @classmethod
+    def sql_encrypt_function(cls, arguments):
         """Generate SQL function string for encryption."""
-        return self.sql_function(self.encrypt_function, arguments)
+        return cls.sql_function(cls.encrypt_function, arguments)
 
-    def sql_decrypt_function(self, arguments):
-        """Generate SQL function string for decryption."""
-        return self.sql_function(self.decrypt_function, arguments)
+    @classmethod
+    def sql_decrypt_function(cls, arguments):
+        """Generate SQL function string for decryption.
+
+        `%(function)s` in `sql_template` is populated by `sql_function`.
+        """
+        return cls.sql_function('%(function)s', arguments)
 
 
 class Digest(FunctionMixin):
-    """Encrypt/decrypt a binary hash based on encryption method.
+    """Create a binary hash based on encryption method.
 
     `encrypt_function` and `decrypt_function` are pgcrypto cryprographic
     functions.
 
     `arguments` is passed to the 'digest' function.
     """
-    encrypt_function = decrypt_function = 'digest'
+    encrypt_function = 'digest'
+    encryption = 'md5'
     arguments = "{}, '{}'"
 
-    def sql_encrypt_function(self, value, encryption):
+    @classmethod
+    def sql_encrypt_function(cls):
         """
         Return a 'digest' function to encrypt a value.
 
-        `value` is the value to encrypt.
+        `%s` is replaced with the field's value.
 
         `encryption` is the encryption type.
         """
-        arguments = self.arguments.format(value, encryption)
+        arguments = cls.arguments.format('%s', cls.encryption)
         return super().sql_encrypt_function(arguments)
-
-    def sql_decrypt_function(self, field, encryption):
-        """
-        Return a 'digest' function to decrypt a value.
-
-        `field` is the field/column to decrypt.
-
-        `encryption` is the encryption type.
-        """
-        arguments = self.arguments.format(field, encryption)
-        return super().sql_decrypt_function(arguments)
 
 
 class HMAC(FunctionMixin):
-    """Encrypt/decrypt a hashed MAC with key and encryption.
+    """Create a hashed MAC with key and encryption.
 
     `encrypt_function` and `decrypt_function` are pgcrypto cryprographic
     functions.
 
     `arguments` is passed to the 'hmac' function.
     """
-    encrypt_function = decrypt_function = 'hmac'
+    encrypt_function = 'hmac'
+    encryption = 'md5'
     arguments = "{}, '{}', '{}'"
 
-    def sql_encrypt_function(self, field, password, encryption):
+    @classmethod
+    def sql_encrypt_function(cls):
         """
         Return a 'hmac' function to encrypt a value.
 
-        `value` is the value to encrypt.
+        `%s` is replaced with the field's value.
 
-        `password` is the key to encrypt/decrypt the `value`.
+        `PGCRYPTO_KEY` is the key to encrypt/decrypt the `value`.
 
         `encryption` is the encryption type.
         """
-        arguments = self.arguments.format(field, password, encryption)
+        arguments = cls.arguments.format(
+            '%s',
+            settings.PGCRYPTO_KEY,
+            cls.encryption,
+        )
         return super().sql_encrypt_function(arguments)
-
-    def sql_decrypt_function(self, field, password, encryption):
-        """
-        Return a 'hmac' function to decrypt a value.
-
-        `field` is the field/column to decrypt.
-
-        `password` is the key to encrypt/decrypt the `value`.
-
-        `encryption` is the encryption type.
-        """
-        arguments = self.arguments.format(field, password, encryption)
-        return super().sql_decrypt_function(arguments)
 
 
 class PGPPub(FunctionMixin):
@@ -99,31 +100,38 @@ class PGPPub(FunctionMixin):
     functions.
 
     `arguments` is passed to the function.
+
+    `dearmor` is used to unwrap the key from the PGP key.
     """
     encrypt_function = 'pgp_pub_encrypt'
     decrypt_function = 'pgp_pub_decrypt'
     arguments = "{}, dearmor('{}')"
 
-    def sql_encrypt_function(self, value, public_key):
+    @classmethod
+    def sql_encrypt_function(cls):
         """
         Return a public key based function to encrypt a value.
 
-        `value` is the data to encrypt.
+        `%s` is replaced with the field's value.
 
-        `public_key` is a PGP key to encrypt the `value`.
+        `public_key` is a PGP key to encrypt a `value`.
         """
-        arguments = self.arguments.format(value, public_key)
+        arguments = cls.arguments.format('%s', settings.PUBLIC_PGP_KEY)
         return super().sql_encrypt_function(arguments)
 
-    def sql_decrypt_function(self, field, private_key):
+    @classmethod
+    def sql_decrypt_function(cls):
         """
         Return a public key based function to decrypt a value.
 
-        `field` is the field/column to decrypt.
+        `%(field)s` is replaced by django with the field's name.
 
         `private_key` is PGP private key to decrypt the `field`'s value'.
         """
-        arguments = self.arguments.format(field, private_key)
+        arguments = cls.arguments.format(
+            '%(field)s',
+            settings.PRIVATE_PGP_KEY,
+        )
         return super().sql_decrypt_function(arguments)
 
 
@@ -139,24 +147,29 @@ class PGPSym(FunctionMixin):
     decrypt_function = 'pgp_sym_decrypt'
     arguments = "{}, '{}'"
 
-    def sql_encrypt_function(self, value, key):
+    @classmethod
+    def sql_encrypt_function(cls):
         """
         Return a symmetric key based function to encrypt a value.
 
-        `value` is the data to encrypt.
+        `%s` is replaced with the field's value.
 
-        `key` is the key to encrypt/decrypt the `value`.
+        `PGCRYPTO_KEY` is the key to encrypt/decrypt the `value`.
         """
-        arguments = self.arguments.format(value, key)
+        arguments = cls.arguments.format('%s', settings.PGCRYPTO_KEY)
         return super().sql_encrypt_function(arguments)
 
-    def sql_decrypt_function(self, field, key):
+    @classmethod
+    def sql_decrypt_function(cls):
         """
         Return a symmetric key based function to decrypt a field.
 
-        `field` is the field/column name to decrypt.
+        `%(field)s` is replaced by django with the field's name.
 
-        `key` is the key to encrypt/decrypt the `value`.
+        `PGCRYPTO_KEY` is the key to encrypt/decrypt the `value`.
         """
-        arguments = self.arguments.format(field, key)
+        arguments = cls.arguments.format(
+            '%(field)s',
+            settings.PGCRYPTO_KEY,
+        )
         return super().sql_decrypt_function(arguments)

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.test import TestCase
 
 from pgcrypto_fields import functions
@@ -9,23 +10,13 @@ class TestDigest(TestCase):
 
     def test_encrypt(self):
         """Assert the encrypt SQL 'digest' function is correct."""
-        expected = "digest(field, 'md5')"
-        sql = self.function.sql_encrypt_function('field', 'md5')
+        expected = "digest(%s, 'md5')"
+        sql = self.function.sql_encrypt_function()
         self.assertEqual(sql, expected)
 
     def test_encrypt_function(self):
         """Assert the 'digest' encrypting function is the correct one."""
         self.assertEqual(self.function.encrypt_function, 'digest')
-
-    def test_decrypt(self):
-        """Assert the decrypt SQL 'digest' function is correct."""
-        expected = "digest(field, 'md5')"
-        sql = self.function.sql_decrypt_function('field', 'md5')
-        self.assertEqual(sql, expected)
-
-    def test_decrypt_function(self):
-        """Assert the 'digest' decrypting function is the correct one."""
-        self.assertEqual(self.function.decrypt_function, 'digest')
 
 
 class TestHMAC(TestCase):
@@ -34,23 +25,13 @@ class TestHMAC(TestCase):
 
     def test_encrypt(self):
         """Assert the encrypt SQL 'hmac' function is correct."""
-        expected = "hmac(field, 'password', 'md5')"
-        sql = self.function.sql_encrypt_function('field', 'password', 'md5')
+        expected = "hmac(%s, 'ultrasecret', 'md5')"
+        sql = self.function.sql_encrypt_function()
         self.assertEqual(sql, expected)
 
     def test_encrypt_function(self):
         """Assert the 'hmac' encrypting function is the correct one."""
         self.assertEqual(self.function.encrypt_function, 'hmac')
-
-    def test_decrypt(self):
-        """Assert the decrypt SQL 'hmac' function is correct."""
-        expected = "hmac(field, 'password', 'md5')"
-        sql = self.function.sql_decrypt_function('field', 'password', 'md5')
-        self.assertEqual(sql, expected)
-
-    def test_decrypt_function(self):
-        """Assert the 'hmac' decrypting function is the correct one."""
-        self.assertEqual(self.function.decrypt_function, 'hmac')
 
 
 class TestPGPPub(TestCase):
@@ -59,8 +40,8 @@ class TestPGPPub(TestCase):
 
     def test_encrypt(self):
         """Assert the encrypt SQL public-key based function is correct."""
-        expected = "pgp_pub_encrypt(field, dearmor('publickey'))"
-        sql = self.function.sql_encrypt_function('field', 'publickey')
+        expected = "pgp_pub_encrypt(%s, dearmor('{}'))".format(settings.PUBLIC_PGP_KEY)
+        sql = self.function.sql_encrypt_function()
         self.assertEqual(sql, expected)
 
     def test_encrypt_function(self):
@@ -69,8 +50,10 @@ class TestPGPPub(TestCase):
 
     def test_decrypt(self):
         """Assert the decrypt SQL public-key based function is correct."""
-        expected = "pgp_pub_decrypt(field, dearmor('publickey'))"
-        sql = self.function.sql_decrypt_function('field', 'publickey')
+        expected = "%(function)s(%(field)s, dearmor('{}'))".format(
+            settings.PRIVATE_PGP_KEY,
+        )
+        sql = self.function.sql_decrypt_function()
         self.assertEqual(sql, expected)
 
     def test_decrypt_function(self):
@@ -84,8 +67,8 @@ class TestPGPSym(TestCase):
 
     def test_encrypt(self):
         """Assert the encrypt SQL symmetric-key based function is correct."""
-        expected = "pgp_sym_encrypt(field, 'password')"
-        sql = self.function.sql_encrypt_function('field', 'password')
+        expected = "pgp_sym_encrypt(%s, 'ultrasecret')"
+        sql = self.function.sql_encrypt_function()
         self.assertEqual(sql, expected)
 
     def test_encrypt_function(self):
@@ -94,8 +77,8 @@ class TestPGPSym(TestCase):
 
     def test_decrypt(self):
         """Assert the decrypt SQL symmetric-key based function is correct."""
-        expected = "pgp_sym_decrypt(field, 'password')"
-        sql = self.function.sql_decrypt_function('field', 'password')
+        expected = "%(function)s(%(field)s, 'ultrasecret')"
+        sql = self.function.sql_decrypt_function()
         self.assertEqual(sql, expected)
 
     def test_decrypt_function(self):

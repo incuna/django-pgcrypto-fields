@@ -4,9 +4,11 @@ from .models import EncryptedTextFieldModel
 
 
 class EncryptedTextFieldModelFactory(factory.DjangoModelFactory):
-    """Factory to generate `pgp_pub_field`."""
+    """Factory to generate hashed and encrypted data."""
     class Meta:
         model = EncryptedTextFieldModel
 
-    pgp_pub_field = factory.Sequence('Text with public key {}'.format)
     digest_field = factory.Sequence('Text digest {}'.format)
+    hmac_field = factory.Sequence('Text hmac {}'.format)
+    pgp_pub_field = factory.Sequence('Text with public key {}'.format)
+    pgp_sym_field = factory.Sequence('Text with symmetric key {}'.format)

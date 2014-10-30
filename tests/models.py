@@ -1,11 +1,13 @@
 from django.db import models
 
-from pgcrypto_fields.fields import EncryptedTextField, ENCRYPTION_TYPES
+from pgcrypto_fields import functions
+from pgcrypto_fields.fields import EncryptedTextField, HashedTextField
 
 
 class EncryptedTextFieldModel(models.Model):
     """Dummy model used for tests to check `EncryptedTextField`."""
-    digest_field = EncryptedTextField(ENCRYPTION_TYPES['digest'])
-    hmac_field = EncryptedTextField(ENCRYPTION_TYPES['hmac'])
-    pgp_pub_field = EncryptedTextField(ENCRYPTION_TYPES['pgp_pub'])
-    pgp_sym_field = EncryptedTextField(ENCRYPTION_TYPES['pgp_sym'])
+    digest_field = HashedTextField(encryption_method=functions.Digest)
+    hmac_field = HashedTextField(encryption_method=functions.HMAC)
+
+    pgp_pub_field = EncryptedTextField(encryption_method=functions.PGPPub)
+    pgp_sym_field = EncryptedTextField(encryption_method=functions.PGPSym)

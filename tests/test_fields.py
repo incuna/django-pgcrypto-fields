@@ -47,20 +47,39 @@ class TestEncryptedTextFieldModel(TestCase):
         EncryptedTextFieldModelFactory.create()
 
         instance = EncryptedTextFieldModel.objects.get()
-        self.assertIsInstance(instance.digest_field_raw, memoryview)
-        self.assertIsInstance(instance.hmac_field_raw, memoryview)
+        self.assertIsInstance(instance.digest_field, memoryview)
+        self.assertIsInstance(instance.hmac_field, memoryview)
+
         self.assertIsInstance(instance.pgp_pub_field_raw, memoryview)
         self.assertIsInstance(instance.pgp_sym_field_raw, memoryview)
 
-    def test_value(self):
-        """Assert we can get back the decrypted value."""
+    def test_value_query(self):
+        """Assert querying the field's value is making one query."""
         expected = 'bonjour'
         EncryptedTextFieldModelFactory.create(pgp_pub_field=expected)
 
         instance = EncryptedTextFieldModel.objects.get()
 
         with self.assertNumQueries(1):
-            value = instance.pgp_pub_field
+            instance.pgp_pub_field
+
+    def test_value_pgp_pub(self):
+        """Assert we can get back the decrypted value."""
+        expected = 'bonjour'
+        EncryptedTextFieldModelFactory.create(pgp_pub_field=expected)
+
+        instance = EncryptedTextFieldModel.objects.get()
+        value = instance.pgp_pub_field
+
+        self.assertEqual(value, expected)
+
+    def test_value_pgp_sym(self):
+        """Assert we can get back the decrypted value."""
+        expected = 'bonjour'
+        EncryptedTextFieldModelFactory.create(pgp_sym_field=expected)
+
+        instance = EncryptedTextFieldModel.objects.get()
+        value = instance.pgp_sym_field
 
         self.assertEqual(value, expected)
 
@@ -77,7 +96,7 @@ class TestEncryptedTextFieldModel(TestCase):
         EncryptedTextFieldModelFactory.create(pgp_pub_field=expected)
 
         queryset = EncryptedTextFieldModel.objects.annotate(
-            aggregates.Decrypt('pgp_pub_field'),
+            aggregates.PGPPub('pgp_pub_field'),
         )
         instance = queryset.get()
-        self.assertEqual(instance.pgp_pub_field__decrypt, expected)
+        self.assertEqual(instance.pgp_pub_field__pgppub, expected)
