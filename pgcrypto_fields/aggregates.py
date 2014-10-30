@@ -1,5 +1,7 @@
 from django.db import models
 
+from pgcrypto_fields.sql import aggregates
+
 
 class Decrypt(models.Aggregate):
     """`Decrypt` creates an alias for `DecryptFunctionSQL`.
@@ -11,8 +13,6 @@ class Decrypt(models.Aggregate):
 
     def add_to_query(self, query, alias, col, source, is_summary):
         """Add the aggregate to the query."""
-        from pgcrypto_fields.sql import aggregates
-
         klass = getattr(aggregates, self.name)
         aggregate = klass(
             col,
