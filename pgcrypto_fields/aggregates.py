@@ -1,6 +1,6 @@
 from django.db import models
 
-from pgcrypto_fields.sequel import aggregates
+from pgcrypto_fields.sql import aggregates
 
 
 class Decrypt(models.Aggregate):
