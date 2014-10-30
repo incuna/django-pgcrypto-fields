@@ -1,6 +1,14 @@
+from django.conf import settings
 from django.db import models
 
-from pgcrypto_fields.functions import Digest, PGPPub
+
+from pgcrypto_fields import aggregates
+
+
+DIGEST = "digest(%s, 'md5')"
+HMAC = "hmac(%s, '{}', 'md5')".format(settings.PGCRYPTO_KEY)
+PGP_PUB = "pgp_pub_encrypt(%s, dearmor('{}'))".format(settings.PUBLIC_PGP_KEY)
+PGP_SYM = "pgp_sym_encrypt(%s, '{}')".format(settings.PGCRYPTO_KEY)
 
 
 class EncryptedProxyField:
@@ -40,7 +48,12 @@ class EncryptedProxyField:
         if self.raw or not obj.pk:
             return obj.__dict__[self.field.name]
 
-        kwargs = {self.field.name: self.encryption_method.aggregate(self.field.name)}
+        if self.encryption_method == PGP_PUB:
+            aggregate = aggregates.PGPPub
+        else:
+            aggregate = aggregates.PGPSym
+
+        kwargs = {self.field.name: aggregate(self.field.name)}
         kw_value = self.model.objects.aggregate(**kwargs)
         return kw_value[self.field.name]
 
@@ -74,7 +87,7 @@ class TextFieldMixin:
         `pgp_pub_encrypt` and `dearmor` are `pgcrypto` functions which encrypt
         the field's value with the PGP key unwrapped by `dearmor`.
         """
-        return self.encryption_method.sql_encrypt_function()
+        return self.encryption_method
 
     def south_field_triple(self):
         """Return a suitable description of this field for South."""
@@ -90,10 +103,10 @@ class EncryptedTextField(TextFieldMixin, models.TextField):
     `EncryptedTextField` deals with postgres and use pgcrypto to encode
     data to the database. Compatible with django 1.6.x for migration.
     """
-    def __init__(self, encryption_method=PGPPub, *args, **kwargs):
+    def __init__(self, encryption_method=PGP_PUB, *args, **kwargs):
         """Allow to define an encryption method."""
         super().__init__(*args, **kwargs)
-        self.encryption_method = encryption_method()
+        self.encryption_method = encryption_method
 
     def contribute_to_class(self, cls, name, **kwargs):
         """
@@ -118,7 +131,7 @@ class HashedTextField(TextFieldMixin, models.TextField):
     `HashedTextField` deals with postgres and use pgcrypto to encode
     data to the database. Compatible with django 1.6.x for migration.
     """
-    def __init__(self, encryption_method=Digest, *args, **kwargs):
+    def __init__(self, encryption_method=DIGEST, *args, **kwargs):
         """Allow to define an encryption method."""
         super().__init__(*args, **kwargs)
-        self.encryption_method = encryption_method()
+        self.encryption_method = encryption_method
