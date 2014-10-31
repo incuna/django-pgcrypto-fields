@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.test import TestCase
 
-from pgcrypto_fields import aggregates, fields
+from pgcrypto_fields import fields
 from .factories import EncryptedTextFieldModelFactory
 from .models import EncryptedTextFieldModel
 
@@ -93,10 +93,15 @@ class TestEncryptedTextFieldModel(TestCase):
     def test_decrypt_annotate(self):
         """Assert we can get back the decrypted value."""
         expected = 'bonjour'
-        EncryptedTextFieldModelFactory.create(pgp_pub_field=expected)
+        EncryptedTextFieldModelFactory.create(
+            pgp_pub_field=expected,
+            pgp_sym_field=expected,
+        )
 
         queryset = EncryptedTextFieldModel.objects.annotate(
-            aggregates.PGPPub('pgp_pub_field'),
+            fields.PGPPublicKey('pgp_pub_field'),
+            fields.PGPSymmetricKey('pgp_sym_field'),
         )
         instance = queryset.get()
         self.assertEqual(instance.pgp_pub_field__pgppub, expected)
+        self.assertEqual(instance.pgp_sym_field__pgpsym, expected)

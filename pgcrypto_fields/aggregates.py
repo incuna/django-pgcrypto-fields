@@ -21,13 +21,3 @@ class Decrypt(models.Aggregate):
             **self.extra
         )
         query.aggregates[alias] = aggregate
-
-
-class PGPPub(Decrypt):
-    """PGP public key based aggregation."""
-    name = 'PGPPub'
-
-
-class PGPSym(Decrypt):
-    """PGP symmetric key based aggregation."""
-    name = 'PGPSym'
