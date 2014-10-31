@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.test import TestCase
 
-from pgcrypto_fields import fields
+from pgcrypto_fields import aggregates, fields
 from .factories import EncryptedTextFieldModelFactory
 from .models import EncryptedTextFieldModel
 
@@ -99,8 +99,8 @@ class TestEncryptedTextFieldModel(TestCase):
         )
 
         queryset = EncryptedTextFieldModel.objects.annotate(
-            fields.PGPPublicKey('pgp_pub_field'),
-            fields.PGPSymmetricKey('pgp_sym_field'),
+            aggregates.PGPPublicKey('pgp_pub_field'),
+            aggregates.PGPSymmetricKey('pgp_sym_field'),
         )
         instance = queryset.get()
         self.assertEqual(instance.pgp_pub_field__pgppub, expected)
