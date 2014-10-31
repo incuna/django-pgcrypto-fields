@@ -5,23 +5,47 @@ from pgcrypto_fields import aggregates
 
 
 class Digest:
-    """Convert a value to a hash based encryption."""
+    """Convert a value to a hash based encryption.
+
+    `digest` is a pgcrypto SQL function.
+
+    `%s` is replaced with the field's value.
+
+    `sha512` is the algorythm used to compute the hash.
+    """
     encrypt_sql = "digest(%s, 'sha512')"
 
 
 class HMAC:
-    """Convert a value to a hash based on key and encryption."""
+    """Convert a value to a hash based on key and encryption.
+
+    `hmac` is a pgcrypto SQL function. It works the same as `Digest` but it
+    needs a key to recalculate the hash.
+
+    `%s` is replaced with the field's value.
+
+    `sha512` is the algorythm used to compute the hash.
+
+    """
     encrypt_sql = "hmac(%s, '{}', 'sha512')".format(settings.PGCRYPTO_KEY)
 
 
 class PGPPublicKey(aggregates.Decrypt):
-    """PGP public key based aggregation."""
+    """PGP public key based aggregation.
+
+    `pgp_pub_encrypt` and `dearmor` are pgcrypto functions which encrypt
+    the field's value with the PGP key unwrapped by `dearmor`.
+    """
     name = 'PGPPub'
     encrypt_sql = "pgp_pub_encrypt(%s, dearmor('{}'))".format(settings.PUBLIC_PGP_KEY)
 
 
 class PGPSymmetricKey(aggregates.Decrypt):
-    """PGP symmetric key based aggregation."""
+    """PGP symmetric key based aggregation.
+
+    `pgp_sym_encrypt` is a pgcrypto functions which encrypt the field's value
+    with a key.
+    """
     name = 'PGPSym'
     encrypt_sql = "pgp_sym_encrypt(%s, '{}')".format(settings.PGCRYPTO_KEY)
 
@@ -93,9 +117,6 @@ class TextFieldMixin:
 
         `value` and `connection` are ignored here as we don't need other custom
         operator depending on the value.
-
-        `pgp_pub_encrypt` and `dearmor` are `pgcrypto` functions which encrypt
-        the field's value with the PGP key unwrapped by `dearmor`.
         """
         return self.encryption_method.encrypt_sql
 
@@ -108,10 +129,11 @@ class TextFieldMixin:
 
 
 class EncryptedTextField(TextFieldMixin, models.TextField):
-    """Encrypted TextField.
+    """
+    An encrypted TextField for postgres.
 
-    `EncryptedTextField` deals with postgres and use pgcrypto to encode
-    data to the database. Compatible with django 1.6.x for migration.
+    `EncryptedTextField` uses pgcrypto to encrypt data in the database.
+    South migrations on django 1.6.x are supported.
     """
     def __init__(self, encryption_method=PGPPublicKey, *args, **kwargs):
         """Allow to define an encryption method."""
