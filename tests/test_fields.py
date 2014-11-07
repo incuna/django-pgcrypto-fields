@@ -19,12 +19,6 @@ class TestEncryptedTextField(TestCase):
         expected = "pgp_pub_encrypt(%s, dearmor('{}'))".format(settings.PUBLIC_PGP_KEY)
         self.assertEqual(self.field().get_placeholder(), expected)
 
-    def test_south_field_triple(self):
-        """Check return a suitable description for south migration."""
-        south_triple = fields.EncryptedTextField().south_field_triple()
-        expected = ('pgcrypto_fields.fields.EncryptedTextField', [], {})
-        self.assertEqual(south_triple, expected)
-
 
 class TestEncryptedTextFieldModel(TestCase):
     """Test `EncryptedTextField` can be integrated in a `Django` model."""

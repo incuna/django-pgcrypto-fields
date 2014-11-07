@@ -58,7 +58,7 @@ class TextFieldMixin:
     """Encrypted TextField.
 
     `TextFieldMixin` deals with postgres and use pgcrypto to encode
-    data to the database. Compatible with django 1.6.x for migration.
+    data to the database.
     """
     def db_type(self, connection=None):
         """Value stored in the database is hexadecimal."""
@@ -73,20 +73,12 @@ class TextFieldMixin:
         """
         return self.encryption_method.encrypt_sql
 
-    def south_field_triple(self):
-        """Return a suitable description of this field for South."""
-        from south.modelsinspector import introspector
-        field_class = '{}.{}'.format(self.__class__.__module__, self.__class__.__name__)
-        args, kwargs = introspector(self)
-        return (field_class, args, kwargs)
-
 
 class EncryptedTextField(TextFieldMixin, models.TextField):
     """
     An encrypted TextField for postgres.
 
     `EncryptedTextField` uses pgcrypto to encrypt data in the database.
-    South migrations on django 1.6.x are supported.
     """
     def __init__(self, encryption_method=aggregates.PGPPublicKey, *args, **kwargs):
         """Allow to define an encryption method."""
