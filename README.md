@@ -3,6 +3,17 @@
 `django-pgcrypto-fields` is a `Django` extension which relies upon pgcrypto to
 encrypt and decrypt data for fields.
 
+`django-pgcrypto-fields` has 4 fields
+  - `DigestField`;
+  - `HMACField`;
+  - `PGPPublicKeyField`;
+  - `PGPSymmetricKeyField`;
+
+regrouped in two categories:
+  - hash based fields (`DigestField` and `HMACField`);
+  - pgp fields (`PGPPublicKeyField` and `PGPSymmetricKeyField`).
+
+
 ## Requirements
 
  - postgres with pgcrypto
@@ -15,7 +26,15 @@ encrypt and decrypt data for fields.
 pip install django-pgcrypto-fields
 ```
 
-### Generate GPG keys.
+### Fields
+
+#### DigestField
+
+#### HMACField
+
+#### PGPPublicKeyField
+
+##### Generate GPG keys.
 
 The public key is going to encrypt the message and the private key will be
 needed to decrypt the content. The following commands have been taken from the
@@ -38,6 +57,9 @@ ssb   2048R/42 2014-10-23
 $ gpg -a --export 42 > public.key
 $ gpg -a --export-secret-keys 21 > private.key
 ```
+
+#### PGPSymmetricKeyField
+
 
 ### `settings.py`
 
@@ -70,7 +92,11 @@ from django.db import models
 from pgcrypto_fields import fields
 
 class MyModel(models.Model):
-    value = fields.EncryptedTextField()
+    digest_field = fields.DigestField()
+    hmac_field = fields.HMACField()
+
+    pgp_pub_field = fields.PGPPublicKeyField()
+    pgp_sym_field = fields.PGPSymmetricKeyField()
 ```
 
 #### Encrypting
