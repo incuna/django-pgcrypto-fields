@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 
-from pgcrypto_fields.aggregates import PGPPubAggregate, PGPSymAggregate
+from pgcrypto_fields.aggregates import PGPPublicKeyAggregate, PGPSymmetricKeyAggregate
 from pgcrypto_fields.proxy import EncryptedProxyField
 
 
@@ -63,13 +63,13 @@ class HMACField(TextFieldBase):
     encrypt_sql = HMAC_SQL
 
 
-class PGPPubField(PGPDecryptMixin, TextFieldBase):
+class PGPPublicKeyField(PGPDecryptMixin, TextFieldBase):
     """PGP public key based field for postgres."""
     encrypt_sql = PGP_PUB_ENCRYPT_SQL
-    aggregate = PGPPubAggregate
+    aggregate = PGPPublicKeyAggregate
 
 
-class PGPSymField(PGPDecryptMixin, TextFieldBase):
-    """PGP public key based field for postgres."""
+class PGPSymmetricKeyField(PGPDecryptMixin, TextFieldBase):
+    """PGP symmetric key based field for postgres."""
     encrypt_sql = PGP_SYM_ENCRYPT_SQL
-    aggregate = PGPSymAggregate
+    aggregate = PGPSymmetricKeyAggregate

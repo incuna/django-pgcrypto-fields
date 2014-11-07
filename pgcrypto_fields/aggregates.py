@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models
 
 
-class PGPPub(models.sql.aggregates.Aggregate):
+class PGPPublicKeySQL(models.sql.aggregates.Aggregate):
     """Custom SQL aggregate to decrypt a field with public key.
 
     `Decrypt` provides a SQL template using pgcrypto to decrypt
@@ -25,7 +25,7 @@ class PGPPub(models.sql.aggregates.Aggregate):
     )
 
 
-class PGPSym(models.sql.aggregates.Aggregate):
+class PGPSymmetricKeySQL(models.sql.aggregates.Aggregate):
     """Custom SQL aggregate to decrypt a field with public key.
 
     `Decrypt` provides a SQL template using pgcrypto to decrypt
@@ -65,21 +65,21 @@ class EncryptionBase(models.Aggregate):
         query.aggregates[alias] = aggregate
 
 
-class PGPPubAggregate(EncryptionBase):
+class PGPPublicKeyAggregate(EncryptionBase):
     """PGP public key based aggregation.
 
     `pgp_pub_encrypt` and `dearmor` are pgcrypto functions which encrypt
     the field's value with the PGP key unwrapped by `dearmor`.
     """
     name = 'PGPPub'
-    sql = PGPPub
+    sql = PGPPublicKeySQL
 
 
-class PGPSymAggregate(EncryptionBase):
+class PGPSymmetricKeyAggregate(EncryptionBase):
     """PGP symmetric key based aggregation.
 
     `pgp_sym_encrypt` is a pgcrypto functions, encrypts the field's value
     with a key.
     """
     name = 'PGPSym'
-    sql = PGPSym
+    sql = PGPSymmetricKeySQL

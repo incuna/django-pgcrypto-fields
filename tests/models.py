@@ -8,5 +8,5 @@ class EncryptedTextFieldModel(models.Model):
     digest_field = fields.DigestField()
     hmac_field = fields.HMACField()
 
-    pgp_pub_field = fields.PGPPubField()
-    pgp_sym_field = fields.PGPSymField()
+    pgp_pub_field = fields.PGPPublicKeyField()
+    pgp_sym_field = fields.PGPSymmetricKeyField()

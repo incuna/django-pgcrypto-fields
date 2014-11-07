@@ -88,8 +88,8 @@ class TestEncryptedTextFieldModel(TestCase):
         )
 
         queryset = EncryptedTextFieldModel.objects.annotate(
-            aggregates.PGPPubAggregate('pgp_pub_field'),
-            aggregates.PGPSymAggregate('pgp_sym_field'),
+            aggregates.PGPPublicKeyAggregate('pgp_pub_field'),
+            aggregates.PGPSymmetricKeyAggregate('pgp_sym_field'),
         )
         instance = queryset.get()
         self.assertEqual(instance.pgp_pub_field__pgppub, expected)
