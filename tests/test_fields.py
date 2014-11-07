@@ -1,23 +1,18 @@
-from django.conf import settings
 from django.test import TestCase
 
 from pgcrypto_fields import aggregates, fields
+
 from .factories import EncryptedTextFieldModelFactory
 from .models import EncryptedTextFieldModel
 
 
-class TestEncryptedTextField(TestCase):
+class TestTextFieldBase(TestCase):
     """Test `EncryptedTextField` behave properly."""
-    field = fields.EncryptedTextField
+    field = fields.TextFieldBase
 
     def test_db_type(self):
         """Check db_type is `bytea`."""
         self.assertEqual(self.field().db_type(), 'bytea')
-
-    def test_get_placeholder(self):
-        """Check `get_placeholder` returns the right string function to encrypt data."""
-        expected = "pgp_pub_encrypt(%s, dearmor('{}'))".format(settings.PUBLIC_PGP_KEY)
-        self.assertEqual(self.field().get_placeholder(), expected)
 
 
 class TestEncryptedTextFieldModel(TestCase):
@@ -93,8 +88,8 @@ class TestEncryptedTextFieldModel(TestCase):
         )
 
         queryset = EncryptedTextFieldModel.objects.annotate(
-            aggregates.PGPPublicKey('pgp_pub_field'),
-            aggregates.PGPSymmetricKey('pgp_sym_field'),
+            aggregates.PGPPubAggregate('pgp_pub_field'),
+            aggregates.PGPSymAggregate('pgp_sym_field'),
         )
         instance = queryset.get()
         self.assertEqual(instance.pgp_pub_field__pgppub, expected)

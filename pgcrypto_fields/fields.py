@@ -1,90 +1,21 @@
+from django.conf import settings
 from django.db import models
 
-from pgcrypto_fields import aggregates
+from pgcrypto_fields.aggregates import PGPPubAggregate, PGPSymAggregate
+from pgcrypto_fields.proxy import EncryptedProxyField
 
 
-class EncryptedProxyField:
-    """Descriptor for encrypted values.
+DIGEST_SQL = "digest(%s, 'sha512')"
+HMAC_SQL = "hmac(%s, '{}', 'sha512')".format(settings.PGCRYPTO_KEY)
 
-    Decrypted values will query the database through the field's model.
-
-    When accessing the field name attribute on a model instance we are
-    generating N+1 query.
-    """
-    def __init__(self, field, raw=True):
-        """
-        Accept two arguments.
-
-        `field` is a django field.
-
-        `raw` is an indicator defining if we need to decrypt the value.
-        """
-        self.field = field
-        self.model = field.model
-        self.encryption_method = field.encryption_method
-        self.raw = raw
-
-    def __get__(self, obj, type=None):
-        """
-        Getter for field's value.
-
-        Get original value when `raw` is set to `True` or when the model
-        instance is not saved.
-
-        Get the decrypted value when `raw` is False by querying the database
-        with an alias set with `Decrypt`.
-        """
-        if not obj:
-            return self
-
-        if self.raw or not obj.pk:
-            return obj.__dict__[self.field.name]
-
-        kwargs = {self.field.name: self.encryption_method(self.field.name)}
-        kw_value = self.model.objects.aggregate(**kwargs)
-        return kw_value[self.field.name]
-
-    def __set__(self, obj, value):
-        """
-        Setter for field's value.
-
-        Set ensures new values are always set on the model field name
-        defined.
-        """
-        obj.__dict__[self.field.name] = value
+PGP_PUB_ENCRYPT_SQL = "pgp_pub_encrypt(%s, dearmor('{}'))".format(
+    settings.PUBLIC_PGP_KEY,
+)
+PGP_SYM_ENCRYPT_SQL = "pgp_sym_encrypt(%s, '{}')".format(settings.PGCRYPTO_KEY)
 
 
-class TextFieldMixin:
-    """Encrypted TextField.
-
-    `TextFieldMixin` deals with postgres and use pgcrypto to encode
-    data to the database.
-    """
-    def db_type(self, connection=None):
-        """Value stored in the database is hexadecimal."""
-        return 'bytea'
-
-    def get_placeholder(self, value=None, connection=None):
-        """
-        Tell postgres to encrypt this field with our public pgp key.
-
-        `value` and `connection` are ignored here as we don't need other custom
-        operator depending on the value.
-        """
-        return self.encryption_method.encrypt_sql
-
-
-class EncryptedTextField(TextFieldMixin, models.TextField):
-    """
-    An encrypted TextField for postgres.
-
-    `EncryptedTextField` uses pgcrypto to encrypt data in the database.
-    """
-    def __init__(self, encryption_method=aggregates.PGPPublicKey, *args, **kwargs):
-        """Allow to define an encryption method."""
-        super().__init__(*args, **kwargs)
-        self.encryption_method = encryption_method
-
+class PGPDecryptMixin:
+    """Sets two attributes on the fields."""
     def contribute_to_class(self, cls, name, **kwargs):
         """
         Add two fields on the model.
@@ -102,13 +33,43 @@ class EncryptedTextField(TextFieldMixin, models.TextField):
         setattr(cls, raw_name, EncryptedProxyField(field=self))
 
 
-class HashedTextField(TextFieldMixin, models.TextField):
-    """Hashed TextField.
+class TextFieldBase(models.TextField):
+    """Encrypted TextField.
 
-    `HashedTextField` deals with postgres and use pgcrypto to encode
-    data to the database. Compatible with django 1.6.x for migration.
+    `TextFieldBase` deals with postgres and use pgcrypto to encode
+    data to the database.
     """
-    def __init__(self, encryption_method=aggregates.Digest, *args, **kwargs):
-        """Allow to define an encryption method."""
-        super().__init__(*args, **kwargs)
-        self.encryption_method = encryption_method
+    def db_type(self, connection=None):
+        """Value stored in the database is hexadecimal."""
+        return 'bytea'
+
+    def get_placeholder(self, value=None, connection=None):
+        """
+        Tell postgres to encrypt this field with our public pgp key.
+
+        `value` and `connection` are ignored here as we don't need other custom
+        operator depending on the value.
+        """
+        return self.encrypt_sql
+
+
+class DigestField(TextFieldBase):
+    """Digest field for postgres."""
+    encrypt_sql = DIGEST_SQL
+
+
+class HMACField(TextFieldBase):
+    """HMAC field for postgres."""
+    encrypt_sql = HMAC_SQL
+
+
+class PGPPubField(PGPDecryptMixin, TextFieldBase):
+    """PGP public key based field for postgres."""
+    encrypt_sql = PGP_PUB_ENCRYPT_SQL
+    aggregate = PGPPubAggregate
+
+
+class PGPSymField(PGPDecryptMixin, TextFieldBase):
+    """PGP public key based field for postgres."""
+    encrypt_sql = PGP_SYM_ENCRYPT_SQL
+    aggregate = PGPSymAggregate
