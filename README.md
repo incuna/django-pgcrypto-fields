@@ -30,9 +30,27 @@ pip install django-pgcrypto-fields
 
 #### DigestField
 
+`DigestField` is a hashed based field. Value is hashed in the database when
+saved with the `digest` pgcrypto function using the `sha512` algorithm.
+
+Querying `DigestField` can only happen when knowing the hash.
+
 #### HMACField
 
+`HMACField` is a hashed based field. Value is hashed in the database when
+saved with the `hmac` pgcrypto function using a key and the `sha512` algorithm.
+
+`key` is sets in `settings.PGCRYPTO_KEY`.
+
+Querying `HMACField` can only happen when knowing the hash.
+
 #### PGPPublicKeyField
+
+Public key encryption. It generates a token generated with a public key to
+encrypt the data and a private key to decrypt it.
+
+Public and private keys can be sets in settings with `PUBLIC_PGP_KEY` and
+`PRIVATE_PGP_KEY`.
 
 ##### Generate GPG keys.
 
@@ -60,6 +78,8 @@ $ gpg -a --export-secret-keys 21 > private.key
 
 #### PGPSymmetricKeyField
 
+Symmetric key encryption. Encrypt and decrypt the data with a key sets in
+`settings.PGCRYPTO_KEY`.
 
 ### `settings.py`
 
@@ -69,8 +89,13 @@ PUBLIC_PGP_KEY_PATH = os.path.abspath(os.path.join(BASEDIR, 'public.key'))
 PRIVATE_PGP_KEY_PATH = os.path.abspath(os.path.join(BASEDIR, 'private.key'))
 
 
+# Used by PGPPublicKeyField
 PUBLIC_PGP_KEY = open(PUBLIC_PGP_KEY_PATH).read()
 PRIVATE_PGP_KEY = open(PRIVATE_PGP_KEY_PATH).read()
+
+# Used by HMACField and PGPSymmetricKeyField
+PGCRYPTO_KEY='ultrasecret'
+
 
 # And add 'pgcrypto_fields' to `INSTALLED_APPS` to create the extension for
 # pgcrypto (in a migration).
