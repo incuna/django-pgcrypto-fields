@@ -1,29 +1,18 @@
-from django.conf import settings
 from django.test import TestCase
 
-from pgcrypto_fields import aggregates, fields
+from pgcrypto_fields import aggregates, fields, proxy
+
 from .factories import EncryptedTextFieldModelFactory
 from .models import EncryptedTextFieldModel
 
 
-class TestEncryptedTextField(TestCase):
+class TestTextFieldBase(TestCase):
     """Test `EncryptedTextField` behave properly."""
-    field = fields.EncryptedTextField
+    field = fields.TextFieldBase
 
     def test_db_type(self):
         """Check db_type is `bytea`."""
         self.assertEqual(self.field().db_type(), 'bytea')
-
-    def test_get_placeholder(self):
-        """Check `get_placeholder` returns the right string function to encrypt data."""
-        expected = "pgp_pub_encrypt(%s, dearmor('{}'))".format(settings.PUBLIC_PGP_KEY)
-        self.assertEqual(self.field().get_placeholder(), expected)
-
-    def test_south_field_triple(self):
-        """Check return a suitable description for south migration."""
-        south_triple = fields.EncryptedTextField().south_field_triple()
-        expected = ('pgcrypto_fields.fields.EncryptedTextField', [], {})
-        self.assertEqual(south_triple, expected)
 
 
 class TestEncryptedTextFieldModel(TestCase):
@@ -46,19 +35,24 @@ class TestEncryptedTextFieldModel(TestCase):
         """Assert value returned is a memoryview instance."""
         EncryptedTextFieldModelFactory.create()
 
-        instance = EncryptedTextFieldModel.objects.get()
+        instance = self.model.objects.get()
         self.assertIsInstance(instance.digest_field, memoryview)
         self.assertIsInstance(instance.hmac_field, memoryview)
 
         self.assertIsInstance(instance.pgp_pub_field_raw, memoryview)
         self.assertIsInstance(instance.pgp_sym_field_raw, memoryview)
 
+    def test_fields_descriptor_is_not_instance(self):
+        """`EncryptedProxyField` instance returns itself when accessed from the model."""
+        self.assertIsInstance(self.model.pgp_pub_field, proxy.EncryptedProxyField)
+        self.assertIsInstance(self.model.pgp_sym_field, proxy.EncryptedProxyField)
+
     def test_value_query(self):
         """Assert querying the field's value is making one query."""
         expected = 'bonjour'
         EncryptedTextFieldModelFactory.create(pgp_pub_field=expected)
 
-        instance = EncryptedTextFieldModel.objects.get()
+        instance = self.model.objects.get()
 
         with self.assertNumQueries(1):
             instance.pgp_pub_field
@@ -68,7 +62,7 @@ class TestEncryptedTextFieldModel(TestCase):
         expected = 'bonjour'
         EncryptedTextFieldModelFactory.create(pgp_pub_field=expected)
 
-        instance = EncryptedTextFieldModel.objects.get()
+        instance = self.model.objects.get()
         value = instance.pgp_pub_field
 
         self.assertEqual(value, expected)
@@ -78,7 +72,7 @@ class TestEncryptedTextFieldModel(TestCase):
         expected = 'bonjour'
         EncryptedTextFieldModelFactory.create(pgp_sym_field=expected)
 
-        instance = EncryptedTextFieldModel.objects.get()
+        instance = self.model.objects.get()
         value = instance.pgp_sym_field
 
         self.assertEqual(value, expected)
@@ -98,10 +92,23 @@ class TestEncryptedTextFieldModel(TestCase):
             pgp_sym_field=expected,
         )
 
-        queryset = EncryptedTextFieldModel.objects.annotate(
-            aggregates.PGPPublicKey('pgp_pub_field'),
-            aggregates.PGPSymmetricKey('pgp_sym_field'),
+        queryset = self.model.objects.annotate(
+            aggregates.PGPPublicKeyAggregate('pgp_pub_field'),
+            aggregates.PGPSymmetricKeyAggregate('pgp_sym_field'),
         )
         instance = queryset.get()
         self.assertEqual(instance.pgp_pub_field__pgppub, expected)
         self.assertEqual(instance.pgp_sym_field__pgpsym, expected)
+
+    def test_decrypt_filter(self):
+        """Assert we can get filter the decrypted value."""
+        expected = 'bonjour'
+        EncryptedTextFieldModelFactory.create(
+            pgp_pub_field=expected,
+        )
+
+        queryset = self.model.objects.annotate(
+            aggregates.PGPPublicKeyAggregate('pgp_pub_field'),
+        )
+        instance = queryset.filter(pgp_pub_field__pgppub=expected).first()
+        self.assertEqual(instance.pgp_pub_field__pgppub, expected)
