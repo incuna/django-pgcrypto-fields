@@ -3,13 +3,7 @@
 `django-pgcrypto-fields` is a `Django` extension which relies upon pgcrypto to
 encrypt and decrypt data for fields.
 
-`django-pgcrypto-fields` has 4 fields
-  - `DigestField`;
-  - `HMACField`;
-  - `PGPPublicKeyField`;
-  - `PGPSymmetricKeyField`;
-
-regrouped in two categories:
+`django-pgcrypto-fields` has 4 fields grouped in two categories:
   - hash based fields (`DigestField` and `HMACField`);
   - pgp fields (`PGPPublicKeyField` and `PGPSymmetricKeyField`).
 
@@ -30,26 +24,22 @@ pip install django-pgcrypto-fields
 
 #### DigestField
 
-`DigestField` is a hashed based field. Value is hashed in the database when
+`DigestField` is a hash based field. The value is hashed in the database when
 saved with the `digest` pgcrypto function using the `sha512` algorithm.
-
-Querying `DigestField` can only happen when knowing the hash.
 
 #### HMACField
 
-`HMACField` is a hashed based field. Value is hashed in the database when
+`HMACField` is a hash based field. Value is hashed in the database when
 saved with the `hmac` pgcrypto function using a key and the `sha512` algorithm.
 
-`key` is sets in `settings.PGCRYPTO_KEY`.
-
-Querying `HMACField` can only happen when knowing the hash.
+`key` is set in `settings.PGCRYPTO_KEY`.
 
 #### PGPPublicKeyField
 
 Public key encryption. It generates a token generated with a public key to
 encrypt the data and a private key to decrypt it.
 
-Public and private keys can be sets in settings with `PUBLIC_PGP_KEY` and
+Public and private keys can be set in settings with `PUBLIC_PGP_KEY` and
 `PRIVATE_PGP_KEY`.
 
 ##### Generate GPG keys.
@@ -78,8 +68,7 @@ $ gpg -a --export-secret-keys 21 > private.key
 
 #### PGPSymmetricKeyField
 
-Symmetric key encryption. Encrypt and decrypt the data with a key sets in
-`settings.PGCRYPTO_KEY`.
+Symmetric key encryption. Encrypt and decrypt the data with `settings.PGCRYPTO_KEY`.
 
 ### `settings.py`
 

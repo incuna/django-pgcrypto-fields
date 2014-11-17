@@ -5,7 +5,7 @@ from django.db import models
 class PGPPublicKeySQL(models.sql.aggregates.Aggregate):
     """Custom SQL aggregate to decrypt a field with public key.
 
-    `Decrypt` provides a SQL template using pgcrypto to decrypt
+    `PGPPublicKeySQL` provides a SQL template using pgcrypto to decrypt
     data from a field in the database.
 
     `sql_function` defines `pgp_pub_decrypt` which is a pgcrypto SQL function.
@@ -28,7 +28,7 @@ class PGPPublicKeySQL(models.sql.aggregates.Aggregate):
 class PGPSymmetricKeySQL(models.sql.aggregates.Aggregate):
     """Custom SQL aggregate to decrypt a field with public key.
 
-    `Decrypt` provides a SQL template using pgcrypto to decrypt
+    `PGPSymmetricKeySQL` provides a SQL template using pgcrypto to decrypt
     data from a field in the database.
 
     `sql_function` defines `pgp_sym_decrypt` which is a pgcrypto SQL function.

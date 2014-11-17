@@ -15,10 +15,10 @@ PGP_SYM_ENCRYPT_SQL = "pgp_sym_encrypt(%s, '{}')".format(settings.PGCRYPTO_KEY)
 
 
 class PGPDecryptMixin:
-    """Sets two attributes on the fields."""
+    """Decrypt the field's value."""
     def contribute_to_class(self, cls, name, **kwargs):
         """
-        Add two fields on the model.
+        Add a raw field and a proxy field to the model.
 
         Add to the field model an `EncryptedProxyField` to get the raw and
         decrypted values of the field.
@@ -30,14 +30,13 @@ class PGPDecryptMixin:
 
         raw_name = '{}_raw'.format(self.name)
         setattr(cls, self.name, EncryptedProxyField(field=self, raw=False))
-        setattr(cls, raw_name, EncryptedProxyField(field=self))
+        setattr(cls, raw_name, EncryptedProxyField(field=self, raw=True))
 
 
 class TextFieldBase(models.TextField):
     """Encrypted TextField.
 
-    `TextFieldBase` deals with postgres and use pgcrypto to encode
-    data to the database.
+    `TextFieldBase` uses 'pgcrypto' to encrypt data in a postgres database.
     """
     def db_type(self, connection=None):
         """Value stored in the database is hexadecimal."""
@@ -64,12 +63,12 @@ class HMACField(TextFieldBase):
 
 
 class PGPPublicKeyField(PGPDecryptMixin, TextFieldBase):
-    """PGP public key based field for postgres."""
+    """PGP public key encrypted field for postgres."""
     encrypt_sql = PGP_PUB_ENCRYPT_SQL
     aggregate = PGPPublicKeyAggregate
 
 
 class PGPSymmetricKeyField(PGPDecryptMixin, TextFieldBase):
-    """PGP symmetric key based field for postgres."""
+    """PGP symmetric key encrypted field for postgres."""
     encrypt_sql = PGP_SYM_ENCRYPT_SQL
     aggregate = PGPSymmetricKeyAggregate

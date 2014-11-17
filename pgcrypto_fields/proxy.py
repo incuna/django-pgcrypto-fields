@@ -4,11 +4,11 @@ class EncryptedProxyField:
     Decrypted values will query the database through the field's model.
 
     When accessing the field name attribute on a model instance we are
-    generating N+1 query.
+    generating N+1 queries.
     """
-    def __init__(self, field, raw=True):
+    def __init__(self, field, raw):
         """
-        Accept two arguments.
+        Create a proxy for a django field.
 
         `field` is a django field.
 
