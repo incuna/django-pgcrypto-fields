@@ -29,7 +29,7 @@ saved with the `digest` pgcrypto function using the `sha512` algorithm.
 
 #### HMACField
 
-`HMACField` is a hash based field. Value is hashed in the database when
+`HMACField` is a hash based field. The value is hashed in the database when
 saved with the `hmac` pgcrypto function using a key and the `sha512` algorithm.
 
 `key` is set in `settings.PGCRYPTO_KEY`.
@@ -124,12 +124,28 @@ Example:
 
 #### Decrypting
 
-Data is decrypted when using the `Decrypt` aggregate class.
+When accessing the field name attribute on a model instance we are getting the
+decrypted value.
 
 Example:
 ```python
->>> from pgcrypto_fields.aggregates import Decrypt
->>> my_model = MyModel.objects.annotate(Decrypt('value')).get()
->>> my_model.value__decrypt
+>>> # When using a PGP public key based encryption
+>>> my_model = MyModel.objects.get()
+>>> my_model.value
+'Value decrypted'
+```
+
+Data can be decrypted when using an aggregate class too when filtering a model.
+
+Example:
+```python
+>>> from pgcrypto_fields.aggregates import PGPPublicKeyAggregate, PGPSymmetricKeyAggregate
+>>> # When using a PGP public key based encryption
+>>> my_model = MyModel.objects.annotate(PGPPublicKeyAggregate('value')).get()
+>>> my_model.value__pgppub
+'Value decrypted'
+>>> # When using a symmetric key based encryption
+>>> my_model = MyModel.objects.annotate(PGPSymmetricKeyAggregate('value')).get()
+>>> my_model.value__pgpsym
 'Value decrypted'
 ```

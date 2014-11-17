@@ -94,3 +94,16 @@ class TestEncryptedTextFieldModel(TestCase):
         instance = queryset.get()
         self.assertEqual(instance.pgp_pub_field__pgppub, expected)
         self.assertEqual(instance.pgp_sym_field__pgpsym, expected)
+
+    def test_decrypt_filter(self):
+        """Assert we can get filter the decrypted value."""
+        expected = 'bonjour'
+        EncryptedTextFieldModelFactory.create(
+            pgp_pub_field=expected,
+        )
+
+        queryset = EncryptedTextFieldModel.objects.annotate(
+            aggregates.PGPPublicKeyAggregate('pgp_pub_field'),
+        )
+        instance = queryset.filter(pgp_pub_field__pgppub=expected).first()
+        self.assertEqual(instance.pgp_pub_field__pgppub, expected)
