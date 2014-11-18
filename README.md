@@ -147,7 +147,7 @@ Example when using a `PGPPublicKeyField`:
 [<MyModel: MyModel object>, <MyModel: MyModel object>]
 >>> my_models.filter(pgp_pub_field__decrypted='Value decrypted')
 [<MyModel: MyModel object>]
->>> my_models.pgp_pub_field__decrypted
+>>> my_models.first().pgp_pub_field__decrypted
 'Value decrypted'
 ```
 
@@ -158,7 +158,7 @@ Example when using a `PGPSymmetricKeyField`:
 [<MyModel: MyModel object>, <MyModel: MyModel object>]
 >>> my_models.filter(pgp_pub_field__decrypted='Value decrypted')
 [<MyModel: MyModel object>]
->>> my_models.pgp_sym_field__decrypted
+>>> my_models.first().pgp_sym_field__decrypted
 'Value decrypted'
 ```
 
