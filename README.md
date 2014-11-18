@@ -124,6 +124,8 @@ Example:
 
 #### Decrypting
 
+##### PGP fields
+
 When accessing the field name attribute on a model instance we are getting the
 decrypted value.
 
@@ -135,17 +137,41 @@ Example:
 'Value decrypted'
 ```
 
-Data can be decrypted when using an aggregate class too when filtering a model.
+To be able to filter PGP values we first need to use an aggregate method to
+decrypt the values.
+
+Example when using a `PGPPublicKeyField`:
+```python
+>>> from pgcrypto_fields.aggregates import PGPPublicKeyAggregate
+>>> my_models = MyModel.objects.annotate(PGPPublicKeyAggregate('pgp_pub_field'))
+[<MyModel: MyModel object>, <MyModel: MyModel object>]
+>>> my_models.filter(pgp_pub_field__pgppub='Value decrypted')
+[<MyModel: MyModel object>]
+>>> my_models.pgp_pub_field__pgppub
+'Value decrypted'
+```
+
+Example when using a `PGPSymmetricKeyField`:
+```python
+>>> from pgcrypto_fields.aggregates import PGPSymmetricKeyAggregate
+>>> my_models = MyModel.objects.annotate(PGPSymmetricKeyAggregate('pgp_sym_field'))
+[<MyModel: MyModel object>, <MyModel: MyModel object>]
+>>> my_models.filter(pgp_pub_field__pgpsym='Value decrypted')
+[<MyModel: MyModel object>]
+>>> my_models.pgp_sym_field__pgpsym
+'Value decrypted'
+```
+
+##### Hash fields
+
+To filter hash based values we need to compare hashes. This is achieved by using
+a `__hash` lookup.
 
 Example:
 ```python
->>> from pgcrypto_fields.aggregates import PGPPublicKeyAggregate, PGPSymmetricKeyAggregate
->>> # When using a PGP public key based encryption
->>> my_model = MyModel.objects.annotate(PGPPublicKeyAggregate('value')).get()
->>> my_model.value__pgppub
-'Value decrypted'
->>> # When using a symmetric key based encryption
->>> my_model = MyModel.objects.annotate(PGPSymmetricKeyAggregate('value')).get()
->>> my_model.value__pgpsym
-'Value decrypted'
+>>> my_model = MyModel.objects.filter(digest_field__hash='value')
+[<MyModel: MyModel object>]
+>>> my_model = MyModel.objects.filter(hmac_field__hash='value')
+[<MyModel: MyModel object>]
+
 ```
