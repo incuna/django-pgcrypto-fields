@@ -1,4 +1,4 @@
-## Upcoming
+## v0.2.0
 
 * Add hash based lookup for `DigestField` and `HMACField`.
 * Add `DigestField`, `HMACField`, `PGPPublicKeyAggregate`, `PGPSymmetricKeyAggregate`.
