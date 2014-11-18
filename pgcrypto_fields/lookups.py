@@ -9,6 +9,8 @@ class HashLookupBase(Lookup):
     `HashLookup` is hashing the value on the right hand side with
     the function specified in `encrypt_sql`.
     """
+    lookup_name = 'hash_of'
+
     def as_sql(self, qn, connection):
         """Responsible for creating the lookup with the digest SQL.
 
@@ -29,7 +31,6 @@ class DigestLookup(HashLookupBase):
     `encrypt_sql` uses pgcrypto 'digest' function to create a hash based version
     of the field's value.
     """
-    lookup_name = 'hash'
     encrypt_sql = DIGEST_SQL
 
 
@@ -39,5 +40,4 @@ class HMACLookup(HashLookupBase):
     `encrypt_sql` uses pgcrypto 'hmac' function to create a hash based version
     the field's value.
     """
-    lookup_name = 'hash'
     encrypt_sql = HMAC_SQL

@@ -119,7 +119,7 @@ class TestEncryptedTextFieldModel(TestCase):
         expected = EncryptedTextFieldModelFactory.create(digest_field=value)
         EncryptedTextFieldModelFactory.create()
 
-        queryset = EncryptedTextFieldModel.objects.filter(digest_field__hash=value)
+        queryset = EncryptedTextFieldModel.objects.filter(digest_field__hash_of=value)
 
         self.assertCountEqual(queryset, [expected])
 
@@ -129,7 +129,7 @@ class TestEncryptedTextFieldModel(TestCase):
         expected = EncryptedTextFieldModelFactory.create(hmac_field=value)
         EncryptedTextFieldModelFactory.create()
 
-        queryset = EncryptedTextFieldModel.objects.filter(hmac_field__hash=value)
+        queryset = EncryptedTextFieldModel.objects.filter(hmac_field__hash_of=value)
         self.assertCountEqual(queryset, [expected])
 
     def test_default_lookup(self):

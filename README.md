@@ -165,13 +165,13 @@ Example when using a `PGPSymmetricKeyField`:
 ##### Hash fields
 
 To filter hash based values we need to compare hashes. This is achieved by using
-a `__hash` lookup.
+a `__hash_of` lookup.
 
 Example:
 ```python
->>> my_model = MyModel.objects.filter(digest_field__hash='value')
+>>> my_model = MyModel.objects.filter(digest_field__hash_of='value')
 [<MyModel: MyModel object>]
->>> my_model = MyModel.objects.filter(hmac_field__hash='value')
+>>> my_model = MyModel.objects.filter(hmac_field__hash_of='value')
 [<MyModel: MyModel object>]
 
 ```
