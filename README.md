@@ -145,9 +145,9 @@ Example when using a `PGPPublicKeyField`:
 >>> from pgcrypto_fields.aggregates import PGPPublicKeyAggregate
 >>> my_models = MyModel.objects.annotate(PGPPublicKeyAggregate('pgp_pub_field'))
 [<MyModel: MyModel object>, <MyModel: MyModel object>]
->>> my_models.filter(pgp_pub_field__pgppub='Value decrypted')
+>>> my_models.filter(pgp_pub_field__decrypted='Value decrypted')
 [<MyModel: MyModel object>]
->>> my_models.pgp_pub_field__pgppub
+>>> my_models.pgp_pub_field__decrypted
 'Value decrypted'
 ```
 
@@ -156,9 +156,9 @@ Example when using a `PGPSymmetricKeyField`:
 >>> from pgcrypto_fields.aggregates import PGPSymmetricKeyAggregate
 >>> my_models = MyModel.objects.annotate(PGPSymmetricKeyAggregate('pgp_sym_field'))
 [<MyModel: MyModel object>, <MyModel: MyModel object>]
->>> my_models.filter(pgp_pub_field__pgpsym='Value decrypted')
+>>> my_models.filter(pgp_pub_field__decrypted='Value decrypted')
 [<MyModel: MyModel object>]
->>> my_models.pgp_sym_field__pgpsym
+>>> my_models.pgp_sym_field__decrypted
 'Value decrypted'
 ```
 

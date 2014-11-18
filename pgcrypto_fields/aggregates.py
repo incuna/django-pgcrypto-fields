@@ -71,7 +71,7 @@ class PGPPublicKeyAggregate(EncryptionBase):
     `pgp_pub_encrypt` and `dearmor` are pgcrypto functions which encrypt
     the field's value with the PGP key unwrapped by `dearmor`.
     """
-    name = 'PGPPub'
+    name = 'decrypted'
     sql = PGPPublicKeySQL
 
 
@@ -81,5 +81,5 @@ class PGPSymmetricKeyAggregate(EncryptionBase):
     `pgp_sym_encrypt` is a pgcrypto functions, encrypts the field's value
     with a key.
     """
-    name = 'PGPSym'
+    name = 'decrypted'
     sql = PGPSymmetricKeySQL

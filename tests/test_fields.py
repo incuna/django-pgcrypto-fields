@@ -97,8 +97,8 @@ class TestEncryptedTextFieldModel(TestCase):
             aggregates.PGPSymmetricKeyAggregate('pgp_sym_field'),
         )
         instance = queryset.get()
-        self.assertEqual(instance.pgp_pub_field__pgppub, expected)
-        self.assertEqual(instance.pgp_sym_field__pgpsym, expected)
+        self.assertEqual(instance.pgp_pub_field__decrypted, expected)
+        self.assertEqual(instance.pgp_sym_field__decrypted, expected)
 
     def test_decrypt_filter(self):
         """Assert we can get filter the decrypted value."""
@@ -110,8 +110,8 @@ class TestEncryptedTextFieldModel(TestCase):
         queryset = self.model.objects.annotate(
             aggregates.PGPPublicKeyAggregate('pgp_pub_field'),
         )
-        instance = queryset.filter(pgp_pub_field__pgppub=expected).first()
-        self.assertEqual(instance.pgp_pub_field__pgppub, expected)
+        instance = queryset.filter(pgp_pub_field__decrypted=expected).first()
+        self.assertEqual(instance.pgp_pub_field__decrypted, expected)
 
     def test_digest_lookup(self):
         """Assert we can filter a digest value."""
