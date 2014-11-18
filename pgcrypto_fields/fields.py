@@ -1,17 +1,14 @@
-from django.conf import settings
 from django.db import models
 
-from pgcrypto_fields.aggregates import PGPPublicKeyAggregate, PGPSymmetricKeyAggregate
-from pgcrypto_fields.proxy import EncryptedProxyField
-
-
-DIGEST_SQL = "digest(%s, 'sha512')"
-HMAC_SQL = "hmac(%s, '{}', 'sha512')".format(settings.PGCRYPTO_KEY)
-
-PGP_PUB_ENCRYPT_SQL = "pgp_pub_encrypt(%s, dearmor('{}'))".format(
-    settings.PUBLIC_PGP_KEY,
+from pgcrypto_fields import (
+    DIGEST_SQL,
+    HMAC_SQL,
+    PGP_PUB_ENCRYPT_SQL,
+    PGP_SYM_ENCRYPT_SQL,
 )
-PGP_SYM_ENCRYPT_SQL = "pgp_sym_encrypt(%s, '{}')".format(settings.PGCRYPTO_KEY)
+from pgcrypto_fields.aggregates import PGPPublicKeyAggregate, PGPSymmetricKeyAggregate
+from pgcrypto_fields.lookups import DigestLookup, HMACLookup
+from pgcrypto_fields.proxy import EncryptedProxyField
 
 
 class PGPDecryptMixin:
@@ -55,11 +52,13 @@ class TextFieldBase(models.TextField):
 class DigestField(TextFieldBase):
     """Digest field for postgres."""
     encrypt_sql = DIGEST_SQL
+DigestField.register_lookup(DigestLookup)
 
 
 class HMACField(TextFieldBase):
     """HMAC field for postgres."""
     encrypt_sql = HMAC_SQL
+HMACField.register_lookup(HMACLookup)
 
 
 class PGPPublicKeyField(PGPDecryptMixin, TextFieldBase):
