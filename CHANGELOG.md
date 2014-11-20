@@ -1,3 +1,9 @@
+## Upcoming
+
+* Access `PGPPublicKeyField`  and `PGPSymmetricKeySQL` decrypted values with
+field's proxy `_decrypted`.
+* Remove descriptor for field's name and raw value.
+
 ## v0.2.0
 
 * Add hash based lookup for `DigestField` and `HMACField`.
