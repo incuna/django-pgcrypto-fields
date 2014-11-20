@@ -1,4 +1,4 @@
-## Upcoming
+## v0.3.0
 
 * Access `PGPPublicKeyField`  and `PGPSymmetricKeySQL` decrypted values with
 field's proxy `_decrypted`.
