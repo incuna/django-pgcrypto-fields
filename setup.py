@@ -11,7 +11,7 @@ setup(
     version=version,
     license='BSD',
     description='Encrypted fields dealing with pgcrypto postgres extension.',
-    classifiers=(
+    classifiers=[
         'Development Status :: 4 - Beta',
         'Framework :: Django',
         'Intended Audience :: Developers',
@@ -20,7 +20,7 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Topic :: Database',
         'Topic :: Security :: Cryptography',
-    ),
+    ],
     author='Incuna Ltd',
     author_email='admin@incuna.com',
     url='https://github.com/incuna/django-pgcrypto-fields',

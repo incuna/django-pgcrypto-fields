@@ -15,19 +15,17 @@ class PGPDecryptMixin:
     """Decrypt the field's value."""
     def contribute_to_class(self, cls, name, **kwargs):
         """
-        Add a raw field and a proxy field to the model.
+        Add a decrypted field proxy to the model.
 
-        Add to the field model an `EncryptedProxyField` to get the raw and
-        decrypted values of the field.
+        Add to the field model an `EncryptedProxyField` to get the decrypted
+        values of the field.
 
-        Raw value is accessible through `{field_name}_raw`.
-        Decrypted value is accessible the usual way.
+        Decrypted value is accessible through `{field_name}_decrypted`.
         """
         super().contribute_to_class(cls, name, **kwargs)
 
-        raw_name = '{}_raw'.format(self.name)
-        setattr(cls, self.name, EncryptedProxyField(field=self, raw=False))
-        setattr(cls, raw_name, EncryptedProxyField(field=self, raw=True))
+        decrypted_name = '{}_decrypted'.format(self.name)
+        setattr(cls, decrypted_name, EncryptedProxyField(field=self))
 
 
 class TextFieldBase(models.TextField):
