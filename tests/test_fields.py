@@ -76,7 +76,7 @@ class TestEncryptedTextFieldModel(TestCase):
     def test_value_pgp_pub_multipe(self):
         """Assert we get back the correct value when the table contains data."""
         expected = 'bonjour'
-        EncryptedTextFieldModelFactory.create(pgp_pub_field='aureroir')
+        EncryptedTextFieldModelFactory.create(pgp_pub_field='au revoir')
         created = EncryptedTextFieldModelFactory.create(pgp_pub_field=expected)
 
         instance = self.model.objects.get(pk=created.pk)
