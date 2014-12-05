@@ -30,5 +30,5 @@ class EncryptedProxyField:
             return obj.__dict__[self.field.name]
 
         kwargs = {self.field.name: self.aggregate(self.field.name)}
-        kw_value = self.model.objects.aggregate(**kwargs)
+        kw_value = self.model.objects.filter(pk=obj.pk).aggregate(**kwargs)
         return kw_value[self.field.name]

@@ -73,6 +73,17 @@ class TestEncryptedTextFieldModel(TestCase):
 
         self.assertEqual(value, expected)
 
+    def test_value_pgp_pub_multipe(self):
+        """Assert we get back the correct value when the table contains data."""
+        expected = 'bonjour'
+        EncryptedTextFieldModelFactory.create(pgp_pub_field='au revoir')
+        created = EncryptedTextFieldModelFactory.create(pgp_pub_field=expected)
+
+        instance = self.model.objects.get(pk=created.pk)
+        value = instance.pgp_pub_field_decrypted
+
+        self.assertEqual(value, expected)
+
     def test_value_pgp_sym(self):
         """Assert we can get back the decrypted value."""
         expected = 'bonjour'
