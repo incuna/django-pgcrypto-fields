@@ -1,3 +1,7 @@
+## v0.3.1
+
+* Fix `EncryptedProxyField` to select the correct item.
+
 ## v0.3.0
 
 * Access `PGPPublicKeyField`  and `PGPSymmetricKeySQL` decrypted values with
