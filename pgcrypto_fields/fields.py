@@ -13,6 +13,8 @@ from pgcrypto_fields.proxy import EncryptedProxyField
 
 class PGPDecryptMixin:
     """Decrypt the field's value."""
+    descriptor_class = EncryptedProxyField
+
     def contribute_to_class(self, cls, name, **kwargs):
         """
         Add a decrypted field proxy to the model.
@@ -20,18 +22,33 @@ class PGPDecryptMixin:
         Add to the field model an `EncryptedProxyField` to get the decrypted
         values of the field.
 
-        Decrypted value is accessible through `{field_name}_decrypted`.
+        Decrypted value is accessible the usual way.
         """
         super().contribute_to_class(cls, name, **kwargs)
-
-        decrypted_name = '{}_decrypted'.format(self.name)
-        setattr(cls, decrypted_name, EncryptedProxyField(field=self))
+        setattr(cls, self.name, self.descriptor_class(field=self))
 
 
-class TextFieldBase(models.TextField):
+class TextFieldHash(models.TextField):
+    """Keyed hash TextField.
+
+    `TextFieldHash` uses 'pgcrypto' to encrypt data in a postgres database.
+    """
+    def get_placeholder(self, value=None, connection=None):
+        """
+        Tell postgres to encrypt this field with a hashing function.
+
+        `value` and `connection` are ignored here as we don't need other custom
+        operator depending on the value.
+        """
+        if value.startswith('\\x'):
+            return '%s'
+        return self.encrypt_sql
+
+
+class TextFieldPGP(PGPDecryptMixin, models.TextField):
     """Encrypted TextField.
 
-    `TextFieldBase` uses 'pgcrypto' to encrypt data in a postgres database.
+    `TextFieldPGP` uses 'pgcrypto' to encrypt data in a postgres database.
     """
     def db_type(self, connection=None):
         """Value stored in the database is hexadecimal."""
@@ -39,7 +56,7 @@ class TextFieldBase(models.TextField):
 
     def get_placeholder(self, value=None, connection=None):
         """
-        Tell postgres to encrypt this field with our public pgp key.
+        Tell postgres to encrypt this field with a PGP.
 
         `value` and `connection` are ignored here as we don't need other custom
         operator depending on the value.
@@ -47,25 +64,25 @@ class TextFieldBase(models.TextField):
         return self.encrypt_sql
 
 
-class DigestField(TextFieldBase):
+class DigestField(TextFieldHash):
     """Digest field for postgres."""
     encrypt_sql = DIGEST_SQL
 DigestField.register_lookup(DigestLookup)
 
 
-class HMACField(TextFieldBase):
+class HMACField(TextFieldHash):
     """HMAC field for postgres."""
     encrypt_sql = HMAC_SQL
 HMACField.register_lookup(HMACLookup)
 
 
-class PGPPublicKeyField(PGPDecryptMixin, TextFieldBase):
+class PGPPublicKeyField(TextFieldPGP):
     """PGP public key encrypted field for postgres."""
     encrypt_sql = PGP_PUB_ENCRYPT_SQL
     aggregate = PGPPublicKeyAggregate
 
 
-class PGPSymmetricKeyField(PGPDecryptMixin, TextFieldBase):
+class PGPSymmetricKeyField(TextFieldPGP):
     """PGP symmetric key encrypted field for postgres."""
     encrypt_sql = PGP_SYM_ENCRYPT_SQL
     aggregate = PGPSymmetricKeyAggregate

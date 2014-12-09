@@ -133,7 +133,7 @@ Example:
 ```python
 >>> # When using a PGP public key based encryption
 >>> my_model = MyModel.objects.get()
->>> my_model.value_decrypted  # field's proxy
+>>> my_model.value  # field's proxy
 'Value decrypted'
 ```
 
