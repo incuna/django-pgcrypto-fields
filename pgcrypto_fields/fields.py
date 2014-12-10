@@ -22,7 +22,8 @@ class PGPDecryptMixin:
         Add to the field model an `EncryptedProxyField` to get the decrypted
         values of the field.
 
-        Decrypted value is accessible the usual way.
+        The decrypted value can be accessed using the field's name attribute on
+        the model instance.
         """
         super().contribute_to_class(cls, name, **kwargs)
         setattr(cls, self.name, self.descriptor_class(field=self))
@@ -37,8 +38,10 @@ class TextFieldHash(models.TextField):
         """
         Tell postgres to encrypt this field with a hashing function.
 
-        `value` and `connection` are ignored here as we don't need other custom
-        operator depending on the value.
+        The `value` string is checked to determine if we need to hash or keep
+        the current value.
+
+        `connection` is ignored here as we don't need custom operators.
         """
         if value.startswith('\\x'):
             return '%s'
@@ -56,10 +59,9 @@ class TextFieldPGP(PGPDecryptMixin, models.TextField):
 
     def get_placeholder(self, value=None, connection=None):
         """
-        Tell postgres to encrypt this field with a PGP.
+        Tell postgres to encrypt this field using PGP.
 
-        `value` and `connection` are ignored here as we don't need other custom
-        operator depending on the value.
+        `value` and `connection` are ignored here as we don't need custom operators.
         """
         return self.encrypt_sql
 

@@ -18,10 +18,9 @@ class EncryptedProxyField:
 
     def __get__(self, instance, owner=None):
         """
-        Getter for field's value.
+        Retrieve the value of the field from the instance.
 
-        Get the decrypted value by querying the database with an alias set with
-        an aggregate class.
+        If the value has been saved to the database, decrypt it using an aggregate query.
         """
         if not instance:
             return self
@@ -44,8 +43,8 @@ class EncryptedProxyField:
 
     def __set__(self, instance, value):
         """
-        Setter for field's value.
+        Store a value in the model instance's __dict__.
 
-        Set ensures new values are always set on the model field name defined.
+        The value will be keyed by the field's name.
         """
         instance.__dict__[self.field.name] = value

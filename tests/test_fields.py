@@ -33,7 +33,7 @@ class TestEncryptedTextFieldModel(TestCase):
         self.assertCountEqual(fields, expected)
 
     def test_value_returned_is_not_bytea(self):
-        """Assert value returned is a memoryview instance."""
+        """Assert value returned is not a memoryview instance."""
         EncryptedTextFieldModelFactory.create()
 
         instance = self.model.objects.get()
@@ -195,7 +195,7 @@ class TestEncryptedTextFieldModel(TestCase):
         self.assertEqual(updated_instance.pgp_sym_field, expected)
 
     def test_update_one_attribute(self):
-        """Assert value are not overriden when update one attribute."""
+        """Assert value are not overriden when updating one attribute."""
         expected = 'initial value'
         new_value = 'new_value'
 
