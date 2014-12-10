@@ -205,8 +205,6 @@ class TestEncryptedTextFieldModel(TestCase):
             digest_field=expected,
             hmac_field=expected,
         )
-
-        instance = self.model.objects.get()
         instance.pgp_sym_field = new_value
         instance.save()
 
