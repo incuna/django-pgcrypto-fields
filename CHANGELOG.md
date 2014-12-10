@@ -1,4 +1,4 @@
-## Upcoming
+## v0.4.0
 
 * Make accessing decrypted value transparent. Fix bug when field had a string
 representation of `memoryview` for PGP and keyed hash fields.
