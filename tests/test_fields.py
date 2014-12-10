@@ -1,14 +1,24 @@
 from django.test import TestCase
 
 from pgcrypto_fields import aggregates, proxy
-from pgcrypto_fields.fields import TextFieldPGP
+from pgcrypto_fields.fields import TextFieldHash, TextFieldPGP
 
 from .factories import EncryptedTextFieldModelFactory
 from .models import EncryptedTextFieldModel
 
 
+class TestTextFieldHash(TestCase):
+    """Test `TextFieldHash` behave properly."""
+    field = TextFieldHash
+
+    def test_get_placeholder(self):
+        """Assert `get_placeholder` hash value only once."""
+        placeholder = self.field().get_placeholder('\\x')
+        self.assertEqual(placeholder, '%s')
+
+
 class TestTextFieldPGP(TestCase):
-    """Test `EncryptedTextField` behave properly."""
+    """Test `TextFieldPGP` behave properly."""
     field = TextFieldPGP
 
     def test_db_type(self):
