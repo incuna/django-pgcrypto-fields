@@ -16,19 +16,35 @@ class EncryptedProxyField:
         self.model = field.model
         self.aggregate = field.aggregate
 
-    def __get__(self, obj, type=None):
+    def __get__(self, instance, owner=None):
         """
-        Getter for field's value.
+        Retrieve the value of the field from the instance.
 
-        Get the decrypted value by querying the database with an alias set with
-        an aggregate class.
+        If the value has been saved to the database, decrypt it using an aggregate query.
         """
-        if not obj:
+        if not instance:
             return self
 
-        if not obj.pk:
-            return obj.__dict__[self.field.name]
+        if not instance.pk:
+            return instance.__dict__[self.field.name]
 
-        kwargs = {self.field.name: self.aggregate(self.field.name)}
-        kw_value = self.model.objects.filter(pk=obj.pk).aggregate(**kwargs)
-        return kw_value[self.field.name]
+        # Value assigned from `__set__`
+        value = instance.__dict__[self.field.name]
+
+        if isinstance(value, str):
+            return value
+
+        if isinstance(value, memoryview):
+            kwargs = {self.field.name: self.aggregate(self.field.name)}
+            kw_value = self.model.objects.filter(pk=instance.pk).aggregate(**kwargs)
+            instance.__dict__[self.field.name] = kw_value[self.field.name]
+
+        return instance.__dict__[self.field.name]
+
+    def __set__(self, instance, value):
+        """
+        Store a value in the model instance's __dict__.
+
+        The value will be keyed by the field's name.
+        """
+        instance.__dict__[self.field.name] = value

@@ -22,7 +22,7 @@ class HashLookupBase(Lookup):
         params = lhs_params + rhs_params
 
         rhs = self.encrypt_sql % rhs
-        return ('{} = {}'.format(lhs, rhs)), params
+        return ('{}::bytea = {}'.format(lhs, rhs)), params
 
 
 class DigestLookup(HashLookupBase):

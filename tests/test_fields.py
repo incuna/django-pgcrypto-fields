@@ -1,14 +1,25 @@
 from django.test import TestCase
 
-from pgcrypto_fields import aggregates, fields, proxy
+from pgcrypto_fields import aggregates, proxy
+from pgcrypto_fields.fields import TextFieldHash, TextFieldPGP
 
 from .factories import EncryptedTextFieldModelFactory
 from .models import EncryptedTextFieldModel
 
 
-class TestTextFieldBase(TestCase):
-    """Test `EncryptedTextField` behave properly."""
-    field = fields.TextFieldBase
+class TestTextFieldHash(TestCase):
+    """Test `TextFieldHash` behave properly."""
+    field = TextFieldHash
+
+    def test_get_placeholder(self):
+        """Assert `get_placeholder` hash value only once."""
+        placeholder = self.field().get_placeholder('\\x')
+        self.assertEqual(placeholder, '%s')
+
+
+class TestTextFieldPGP(TestCase):
+    """Test `TextFieldPGP` behave properly."""
+    field = TextFieldPGP
 
     def test_db_type(self):
         """Check db_type is `bytea`."""
@@ -31,25 +42,24 @@ class TestEncryptedTextFieldModel(TestCase):
         )
         self.assertCountEqual(fields, expected)
 
-    def test_value_returned_is_bytea(self):
-        """Assert value returned is a memoryview instance."""
+    def test_value_returned_is_not_bytea(self):
+        """Assert value returned is not a memoryview instance."""
         EncryptedTextFieldModelFactory.create()
 
         instance = self.model.objects.get()
-        self.assertIsInstance(instance.digest_field, memoryview)
-        self.assertIsInstance(instance.hmac_field, memoryview)
-
-        self.assertIsInstance(instance.pgp_pub_field, memoryview)
-        self.assertIsInstance(instance.pgp_sym_field, memoryview)
+        self.assertIsInstance(instance.digest_field, str)
+        self.assertIsInstance(instance.hmac_field, str)
+        self.assertIsInstance(instance.pgp_pub_field, str)
+        self.assertIsInstance(instance.pgp_sym_field, str)
 
     def test_fields_descriptor_is_not_instance(self):
         """`EncryptedProxyField` instance returns itself when accessed from the model."""
         self.assertIsInstance(
-            self.model.pgp_pub_field_decrypted,
+            self.model.pgp_pub_field,
             proxy.EncryptedProxyField,
         )
         self.assertIsInstance(
-            self.model.pgp_sym_field_decrypted,
+            self.model.pgp_sym_field,
             proxy.EncryptedProxyField,
         )
 
@@ -61,7 +71,7 @@ class TestEncryptedTextFieldModel(TestCase):
         instance = self.model.objects.get()
 
         with self.assertNumQueries(1):
-            instance.pgp_pub_field_decrypted
+            instance.pgp_pub_field
 
     def test_value_pgp_pub(self):
         """Assert we can get back the decrypted value."""
@@ -69,7 +79,7 @@ class TestEncryptedTextFieldModel(TestCase):
         EncryptedTextFieldModelFactory.create(pgp_pub_field=expected)
 
         instance = self.model.objects.get()
-        value = instance.pgp_pub_field_decrypted
+        value = instance.pgp_pub_field
 
         self.assertEqual(value, expected)
 
@@ -80,7 +90,7 @@ class TestEncryptedTextFieldModel(TestCase):
         created = EncryptedTextFieldModelFactory.create(pgp_pub_field=expected)
 
         instance = self.model.objects.get(pk=created.pk)
-        value = instance.pgp_pub_field_decrypted
+        value = instance.pgp_pub_field
 
         self.assertEqual(value, expected)
 
@@ -90,7 +100,7 @@ class TestEncryptedTextFieldModel(TestCase):
         EncryptedTextFieldModelFactory.create(pgp_sym_field=expected)
 
         instance = self.model.objects.get()
-        value = instance.pgp_sym_field_decrypted
+        value = instance.pgp_sym_field
 
         self.assertEqual(value, expected)
 
@@ -98,7 +108,7 @@ class TestEncryptedTextFieldModel(TestCase):
         """Assert not saved instance return the value to be encrypted."""
         expected = 'bonjour'
         instance = EncryptedTextFieldModelFactory.build(pgp_pub_field=expected)
-        self.assertEqual(instance.pgp_pub_field_decrypted, expected)
+        self.assertEqual(instance.pgp_pub_field, expected)
         self.assertEqual(instance.pgp_pub_field, expected)
 
     def test_decrypt_annotate(self):
@@ -182,7 +192,7 @@ class TestEncryptedTextFieldModel(TestCase):
         instance.save()
 
         updated_instance = self.model.objects.get()
-        self.assertEqual(updated_instance.pgp_pub_field_decrypted, expected)
+        self.assertEqual(updated_instance.pgp_pub_field, expected)
 
     def test_update_attribute_pgp_sym_field(self):
         """Assert pgp field can be updated through its attribute on the model."""
@@ -192,4 +202,28 @@ class TestEncryptedTextFieldModel(TestCase):
         instance.save()
 
         updated_instance = self.model.objects.get()
-        self.assertEqual(updated_instance.pgp_sym_field_decrypted, expected)
+        self.assertEqual(updated_instance.pgp_sym_field, expected)
+
+    def test_update_one_attribute(self):
+        """Assert value are not overriden when updating one attribute."""
+        expected = 'initial value'
+        new_value = 'new_value'
+
+        instance = EncryptedTextFieldModelFactory.create(
+            pgp_pub_field=expected,
+            pgp_sym_field=expected,
+            digest_field=expected,
+            hmac_field=expected,
+        )
+        instance.pgp_sym_field = new_value
+        instance.save()
+
+        updated_instance = self.model.objects.get()
+        self.assertEqual(updated_instance.pgp_pub_field, expected)
+        self.assertEqual(updated_instance.pgp_sym_field, new_value)
+
+        updated_instance = self.model.objects.filter(
+            digest_field__hash_of=expected,
+            hmac_field__hash_of=expected,
+        )
+        self.assertEqual(updated_instance.first(), instance)

@@ -1,3 +1,8 @@
+## Upcoming
+
+* Make accessing decrypted value transparent. Fix bug when field had a string
+representation of `memoryview` for PGP and keyed hash fields.
+
 ## v0.3.1
 
 * Fix `EncryptedProxyField` to select the correct item.
