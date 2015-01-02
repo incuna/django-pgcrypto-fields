@@ -1,4 +1,4 @@
-## Upcoming
+## v0.5.0
 
 * Rename the following fields:
   `PGPPublicKeyField` to `TextPGPPublicKeyField`;
