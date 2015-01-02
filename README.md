@@ -5,8 +5,8 @@ encrypt and decrypt data for fields.
 
 `django-pgcrypto-fields` has 4 fields grouped in two categories:
   - hash based fields (`TextDigestField` and `TextHMACField`);
-  - pgp fields (`IntegerPGPPublicKeyField, `TextPGPPublicKeyField` and
-`IntegerPGPSymmetricKeyField`, `TextPGPSymmetricKeyField`).
+  - pgp fields (`IntegerPGPPublicKeyField, `TextPGPPublicKeyField`,
+`IntegerPGPSymmetricKeyField` and `TextPGPSymmetricKeyField`).
 
 
 ## Requirements

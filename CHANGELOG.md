@@ -3,7 +3,7 @@
 * Rename the following fields:
   `PGPPublicKeyField` to `TextPGPPublicKeyField`;
   `PGPSymmetricKeyField` to `TextPGPSymmetricKeyField`;
-  `FieldHash` to `TextFieldHash`;
+  `DigestField` to `TextDigestField`;
   `HMACField` to `TextHMACField`.
 * Add new integer fields:
   `IntegerPGPPublicKeyField`;
