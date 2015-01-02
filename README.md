@@ -71,7 +71,7 @@ $ gpg -a --export-secret-keys 21 > private.key
 
 Symmetric key encryption. Encrypt and decrypt the data with `settings.PGCRYPTO_KEY`.
 
-### Djangoi settings
+### Django settings
 
 In `settings.py`:
 ```python
