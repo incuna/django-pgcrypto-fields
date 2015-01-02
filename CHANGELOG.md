@@ -5,7 +5,9 @@
   `PGPSymmetricKeyField` to `TextPGPSymmetricKeyField`;
   `FieldHash` to `TextFieldHash`;
   `HMACField` to `TextHMACField`.
-* Add `IntegerPGPPublicKeyField`.
+* Add new integer fields:
+  `IntegerPGPPublicKeyField`;
+  `IntegerPGPSymmetricKeyField`.
 
 ## v0.4.0
 

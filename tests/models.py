@@ -10,4 +10,5 @@ class EncryptedTextFieldModel(models.Model):
 
     integer_pgp_pub_field = fields.IntegerPGPPublicKeyField()
     pgp_pub_field = fields.TextPGPPublicKeyField()
+    integer_pgp_sym_field = fields.IntegerPGPSymmetricKeyField()
     pgp_sym_field = fields.TextPGPSymmetricKeyField()

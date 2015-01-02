@@ -84,6 +84,12 @@ class PGPPublicKeyFieldMixin(PGPMixin):
     aggregate = PGPPublicKeyAggregate
 
 
+class PGPSymmetricKeyFieldMixin(PGPMixin):
+    """PGP symmetric key encrypted field mixin for postgred."""
+    encrypt_sql = PGP_SYM_ENCRYPT_SQL
+    aggregate = PGPSymmetricKeyAggregate
+
+
 class IntegerPGPPublicKeyField(PGPPublicKeyFieldMixin, models.IntegerField):
     """Integer PGP public key encrypted field."""
 
@@ -92,7 +98,9 @@ class TextPGPPublicKeyField(PGPPublicKeyFieldMixin, models.TextField):
     """Text PGP public key encrypted field."""
 
 
-class TextPGPSymmetricKeyField(PGPMixin, models.TextField):
+class IntegerPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.IntegerField):
+    """Integer PGP symmetric key encryped field."""
+
+
+class TextPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.TextField):
     """Text PGP symmetric key encrypted field for postgres."""
-    encrypt_sql = PGP_SYM_ENCRYPT_SQL
-    aggregate = PGPSymmetricKeyAggregate

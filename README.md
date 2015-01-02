@@ -5,7 +5,8 @@ encrypt and decrypt data for fields.
 
 `django-pgcrypto-fields` has 4 fields grouped in two categories:
   - hash based fields (`TextDigestField` and `TextHMACField`);
-  - pgp fields (`PGPPublicKeyField` and `PGPSymmetricKeyField`).
+  - pgp fields (`IntegerPGPPublicKeyField, `TextPGPPublicKeyField` and
+`IntegerPGPSymmetricKeyField`, `TextPGPSymmetricKeyField`).
 
 
 ## Requirements
@@ -66,7 +67,7 @@ $ gpg -a --export 42 > public.key
 $ gpg -a --export-secret-keys 21 > private.key
 ```
 
-#### TextPGPSymmetricKeyField
+#### IntegerPGPSymmetricKeyField and TextPGPSymmetricKeyField
 
 Symmetric key encryption. Encrypt and decrypt the data with `settings.PGCRYPTO_KEY`.
 
@@ -111,6 +112,7 @@ class MyModel(models.Model):
 
     integer_pgp_pub_field = fields.IntegerPGPPublicKeyField()
     pgp_pub_field = fields.TextPGPPublicKeyField()
+    integer_pgp_sym_field = fields.IntegerPGPSymmetricKeyField()
     pgp_sym_field = fields.TextPGPSymmetricKeyField()
 ```
 
