@@ -4,8 +4,9 @@
 encrypt and decrypt data for fields.
 
 `django-pgcrypto-fields` has 4 fields grouped in two categories:
-  - hash based fields (`DigestField` and `HMACField`);
-  - pgp fields (`PGPPublicKeyField` and `PGPSymmetricKeyField`).
+  - hash based fields (`TextDigestField` and `TextHMACField`);
+  - pgp fields (`IntegerPGPPublicKeyField, `TextPGPPublicKeyField`,
+`IntegerPGPSymmetricKeyField` and `TextPGPSymmetricKeyField`).
 
 
 ## Requirements
@@ -22,19 +23,19 @@ pip install django-pgcrypto-fields
 
 ### Fields
 
-#### DigestField
+#### TextDigestField
 
-`DigestField` is a hash based field. The value is hashed in the database when
+`TextDigestField` is a hash based field. The value is hashed in the database when
 saved with the `digest` pgcrypto function using the `sha512` algorithm.
 
-#### HMACField
+#### TextHMACField
 
-`HMACField` is a hash based field. The value is hashed in the database when
+`TextHMACField` is a hash based field. The value is hashed in the database when
 saved with the `hmac` pgcrypto function using a key and the `sha512` algorithm.
 
 `key` is set in `settings.PGCRYPTO_KEY`.
 
-#### PGPPublicKeyField
+#### IntegerPGPPublicKeyField and TextPGPPublicKeyField
 
 Public key encryption. It generates a token generated with a public key to
 encrypt the data and a private key to decrypt it.
@@ -66,7 +67,7 @@ $ gpg -a --export 42 > public.key
 $ gpg -a --export-secret-keys 21 > private.key
 ```
 
-#### PGPSymmetricKeyField
+#### IntegerPGPSymmetricKeyField and TextPGPSymmetricKeyField
 
 Symmetric key encryption. Encrypt and decrypt the data with `settings.PGCRYPTO_KEY`.
 
@@ -82,7 +83,7 @@ PRIVATE_PGP_KEY_PATH = os.path.abspath(os.path.join(BASEDIR, 'private.key'))
 PUBLIC_PGP_KEY = open(PUBLIC_PGP_KEY_PATH).read()
 PRIVATE_PGP_KEY = open(PRIVATE_PGP_KEY_PATH).read()
 
-# Used by HMACField and PGPSymmetricKeyField
+# Used by TextHMACField and PGPSymmetricKeyField
 PGCRYPTO_KEY='ultrasecret'
 
 
@@ -106,11 +107,13 @@ from django.db import models
 from pgcrypto_fields import fields
 
 class MyModel(models.Model):
-    digest_field = fields.DigestField()
-    hmac_field = fields.HMACField()
+    digest_field = fields.TextDigestField()
+    hmac_field = fields.TextHMACField()
 
-    pgp_pub_field = fields.PGPPublicKeyField()
-    pgp_sym_field = fields.PGPSymmetricKeyField()
+    integer_pgp_pub_field = fields.IntegerPGPPublicKeyField()
+    pgp_pub_field = fields.TextPGPPublicKeyField()
+    integer_pgp_sym_field = fields.IntegerPGPSymmetricKeyField()
+    pgp_sym_field = fields.TextPGPSymmetricKeyField()
 ```
 
 #### Encrypting

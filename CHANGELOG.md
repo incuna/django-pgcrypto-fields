@@ -1,3 +1,14 @@
+## Upcoming
+
+* Rename the following fields:
+  `PGPPublicKeyField` to `TextPGPPublicKeyField`;
+  `PGPSymmetricKeyField` to `TextPGPSymmetricKeyField`;
+  `DigestField` to `TextDigestField`;
+  `HMACField` to `TextHMACField`.
+* Add new integer fields:
+  `IntegerPGPPublicKeyField`;
+  `IntegerPGPSymmetricKeyField`.
+
 ## v0.4.0
 
 * Make accessing decrypted value transparent. Fix bug when field had a string
