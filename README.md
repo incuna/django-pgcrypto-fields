@@ -71,8 +71,9 @@ $ gpg -a --export-secret-keys 21 > private.key
 
 Symmetric key encryption. Encrypt and decrypt the data with `settings.PGCRYPTO_KEY`.
 
-### `settings.py`
+### Djangoi settings
 
+In `settings.py`:
 ```python
 BASEDIR = os.path.dirname(os.path.dirname(__file__))
 PUBLIC_PGP_KEY_PATH = os.path.abspath(os.path.join(BASEDIR, 'public.key'))
