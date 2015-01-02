@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from pgcrypto_fields import aggregates, proxy
-from pgcrypto_fields.fields import TextFieldHash, TextFieldPGP
+from pgcrypto_fields.fields import PGPMixin, TextFieldHash
 
 from .factories import EncryptedTextFieldModelFactory
 from .models import EncryptedTextFieldModel
@@ -17,9 +17,9 @@ class TestTextFieldHash(TestCase):
         self.assertEqual(placeholder, '%s')
 
 
-class TestTextFieldPGP(TestCase):
-    """Test `TextFieldPGP` behave properly."""
-    field = TextFieldPGP
+class TestPGPMixin(TestCase):
+    """Test `PGPMixin` behave properly."""
+    field = PGPMixin
 
     def test_db_type(self):
         """Check db_type is `bytea`."""
@@ -37,6 +37,7 @@ class TestEncryptedTextFieldModel(TestCase):
             'id',
             'digest_field',
             'hmac_field',
+            'integer_pgp_pub_field',
             'pgp_pub_field',
             'pgp_sym_field',
         )
@@ -49,6 +50,7 @@ class TestEncryptedTextFieldModel(TestCase):
         instance = self.model.objects.get()
         self.assertIsInstance(instance.digest_field, str)
         self.assertIsInstance(instance.hmac_field, str)
+        self.assertIsInstance(instance.integer_pgp_pub_field, int)
         self.assertIsInstance(instance.pgp_pub_field, str)
         self.assertIsInstance(instance.pgp_sym_field, str)
 

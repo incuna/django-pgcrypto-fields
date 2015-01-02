@@ -6,13 +6,19 @@ from pgcrypto_fields import (
     PGP_PUB_ENCRYPT_SQL,
     PGP_SYM_ENCRYPT_SQL,
 )
-from pgcrypto_fields.aggregates import PGPPublicKeyAggregate, PGPSymmetricKeyAggregate
+from pgcrypto_fields.aggregates import (
+    PGPPublicKeyAggregate,
+    PGPSymmetricKeyAggregate,
+)
 from pgcrypto_fields.lookups import DigestLookup, HMACLookup
 from pgcrypto_fields.proxy import EncryptedProxyField
 
 
-class PGPDecryptMixin:
-    """Decrypt the field's value."""
+class PGPMixin:
+    """PGP encryption for field's value.
+
+    `PGPMixin` uses 'pgcrypto' to encrypt data in a postgres database.
+    """
     descriptor_class = EncryptedProxyField
 
     def contribute_to_class(self, cls, name, **kwargs):
@@ -27,6 +33,18 @@ class PGPDecryptMixin:
         """
         super().contribute_to_class(cls, name, **kwargs)
         setattr(cls, self.name, self.descriptor_class(field=self))
+
+    def db_type(self, connection=None):
+        """Value stored in the database is hexadecimal."""
+        return 'bytea'
+
+    def get_placeholder(self, value=None, connection=None):
+        """
+        Tell postgres to encrypt this field using PGP.
+
+        `value` and `connection` are ignored here as we don't need custom operators.
+        """
+        return self.encrypt_sql
 
 
 class TextFieldHash(models.TextField):
@@ -48,43 +66,33 @@ class TextFieldHash(models.TextField):
         return self.encrypt_sql
 
 
-class TextFieldPGP(PGPDecryptMixin, models.TextField):
-    """Encrypted TextField.
-
-    `TextFieldPGP` uses 'pgcrypto' to encrypt data in a postgres database.
-    """
-    def db_type(self, connection=None):
-        """Value stored in the database is hexadecimal."""
-        return 'bytea'
-
-    def get_placeholder(self, value=None, connection=None):
-        """
-        Tell postgres to encrypt this field using PGP.
-
-        `value` and `connection` are ignored here as we don't need custom operators.
-        """
-        return self.encrypt_sql
-
-
-class DigestField(TextFieldHash):
-    """Digest field for postgres."""
+class TextDigestField(TextFieldHash):
+    """Text digest field for postgres."""
     encrypt_sql = DIGEST_SQL
-DigestField.register_lookup(DigestLookup)
+TextDigestField.register_lookup(DigestLookup)
 
 
-class HMACField(TextFieldHash):
-    """HMAC field for postgres."""
+class TextHMACField(TextFieldHash):
+    """Text HMAC field for postgres."""
     encrypt_sql = HMAC_SQL
-HMACField.register_lookup(HMACLookup)
+TextHMACField.register_lookup(HMACLookup)
 
 
-class PGPPublicKeyField(TextFieldPGP):
-    """PGP public key encrypted field for postgres."""
+class PGPPublicKeyFieldMixin(PGPMixin):
+    """PGP public key encrypted field mixin for postgres."""
     encrypt_sql = PGP_PUB_ENCRYPT_SQL
     aggregate = PGPPublicKeyAggregate
 
 
-class PGPSymmetricKeyField(TextFieldPGP):
-    """PGP symmetric key encrypted field for postgres."""
+class IntegerPGPPublicKeyField(PGPPublicKeyFieldMixin, models.IntegerField):
+    """Integer PGP public key encrypted field."""
+
+
+class TextPGPPublicKeyField(PGPPublicKeyFieldMixin, models.TextField):
+    """Text PGP public key encrypted field."""
+
+
+class TextPGPSymmetricKeyField(PGPMixin, models.TextField):
+    """Text PGP symmetric key encrypted field for postgres."""
     encrypt_sql = PGP_SYM_ENCRYPT_SQL
     aggregate = PGPSymmetricKeyAggregate

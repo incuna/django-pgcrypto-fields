@@ -5,8 +5,9 @@ from pgcrypto_fields import fields
 
 class EncryptedTextFieldModel(models.Model):
     """Dummy model used for tests to check `EncryptedTextField`."""
-    digest_field = fields.DigestField()
-    hmac_field = fields.HMACField()
+    digest_field = fields.TextDigestField()
+    hmac_field = fields.TextHMACField()
 
-    pgp_pub_field = fields.PGPPublicKeyField()
-    pgp_sym_field = fields.PGPSymmetricKeyField()
+    integer_pgp_pub_field = fields.IntegerPGPPublicKeyField()
+    pgp_pub_field = fields.TextPGPPublicKeyField()
+    pgp_sym_field = fields.TextPGPSymmetricKeyField()
