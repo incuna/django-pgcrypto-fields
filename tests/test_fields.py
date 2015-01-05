@@ -37,8 +37,10 @@ class TestEncryptedTextFieldModel(TestCase):
             'id',
             'digest_field',
             'hmac_field',
+            'email_pgp_pub_field',
             'integer_pgp_pub_field',
             'pgp_pub_field',
+            'email_pgp_sym_field',
             'integer_pgp_sym_field',
             'pgp_sym_field',
         )
@@ -51,8 +53,12 @@ class TestEncryptedTextFieldModel(TestCase):
         instance = self.model.objects.get()
         self.assertIsInstance(instance.digest_field, str)
         self.assertIsInstance(instance.hmac_field, str)
+
+        self.assertIsInstance(instance.email_pgp_pub_field, str)
         self.assertIsInstance(instance.integer_pgp_pub_field, int)
         self.assertIsInstance(instance.pgp_pub_field, str)
+
+        self.assertIsInstance(instance.email_pgp_sym_field, str)
         self.assertIsInstance(instance.integer_pgp_sym_field, int)
         self.assertIsInstance(instance.pgp_sym_field, str)
 

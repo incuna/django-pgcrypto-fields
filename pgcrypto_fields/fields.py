@@ -90,6 +90,10 @@ class PGPSymmetricKeyFieldMixin(PGPMixin):
     aggregate = PGPSymmetricKeyAggregate
 
 
+class EmailPGPPublicKeyField(PGPPublicKeyFieldMixin, models.EmailField):
+    """Email PGP public key encrypted field."""
+
+
 class IntegerPGPPublicKeyField(PGPPublicKeyFieldMixin, models.IntegerField):
     """Integer PGP public key encrypted field."""
 
@@ -98,8 +102,12 @@ class TextPGPPublicKeyField(PGPPublicKeyFieldMixin, models.TextField):
     """Text PGP public key encrypted field."""
 
 
+class EmailPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.EmailField):
+    """Email PGP symmetric key encrypted field."""
+
+
 class IntegerPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.IntegerField):
-    """Integer PGP symmetric key encryped field."""
+    """Integer PGP symmetric key encrypted field."""
 
 
 class TextPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.TextField):
