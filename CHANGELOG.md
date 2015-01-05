@@ -1,3 +1,7 @@
+## Upcoming
+
+* Add `EmailPGPPublicKeyField` and `EmailPGPSymmetricKeyField`.
+
 ## v0.5.0
 
 * Rename the following fields:

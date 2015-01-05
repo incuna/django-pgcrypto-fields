@@ -35,7 +35,7 @@ saved with the `hmac` pgcrypto function using a key and the `sha512` algorithm.
 
 `key` is set in `settings.PGCRYPTO_KEY`.
 
-#### IntegerPGPPublicKeyField and TextPGPPublicKeyField
+#### EmailPGPPublicKeyField, IntegerPGPPublicKeyField and TextPGPPublicKeyField
 
 Public key encryption. It generates a token generated with a public key to
 encrypt the data and a private key to decrypt it.
@@ -67,7 +67,7 @@ $ gpg -a --export 42 > public.key
 $ gpg -a --export-secret-keys 21 > private.key
 ```
 
-#### IntegerPGPSymmetricKeyField and TextPGPSymmetricKeyField
+#### EmailPGPSymmetricKeyField, IntegerPGPSymmetricKeyField and TextPGPSymmetricKeyField
 
 Symmetric key encryption. Encrypt and decrypt the data with `settings.PGCRYPTO_KEY`.
 
