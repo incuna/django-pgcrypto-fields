@@ -238,12 +238,16 @@ class TestEncryptedTextFieldModel(TestCase):
         )
         self.assertEqual(updated_instance.first(), instance)
 
-    def test_negative_number(self):
-        """Assert negative number can be saved."""
+    def test_pgp_public_key_negative_number(self):
+        """Assert negative value is saved with an `IntegerPGPPublicKeyField` field."""
         expected = -1
-        instance = EncryptedTextFieldModelFactory.create(
-            integer_pgp_pub_field=expected,
-            integer_pgp_sym_field=expected,
-        )
+        instance = EncryptedTextFieldModelFactory.create(integer_pgp_pub_field=expected)
+
         self.assertEqual(instance.integer_pgp_pub_field, expected)
+
+    def test_pgp_symmetric_key_negative_number(self):
+        """Assert negative value is saved with an `IntegerPGPSymmetricKeyField` field."""
+        expected = -1
+        instance = EncryptedTextFieldModelFactory.create(integer_pgp_sym_field=expected)
+
         self.assertEqual(instance.integer_pgp_sym_field, expected)
