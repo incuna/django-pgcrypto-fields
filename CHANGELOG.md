@@ -1,10 +1,14 @@
 ## Upcoming
 
-* Allow `NULL` values for:
+* Allow/check `NULL` values for:
   `TextDigestField`;
   `TextHMACField`;
+  `EmailPGPPublicKeyField`;
   `IntegerPGPPublicKeyField`;
+  `TextPGPPublicKeyField`;
+  `EmailPGPSymmetricKeyField`.
   `IntegerPGPSymmetricKeyField`.
+  `TextPGPSymmetricKeyField`.
 
 ## v0.6.1
 

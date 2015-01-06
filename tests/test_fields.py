@@ -262,12 +262,32 @@ class TestEncryptedTextFieldModel(TestCase):
         instance = EncryptedModel.objects.create()
         self.assertEqual(instance.integer_pgp_sym_field, None)
 
+    def test_email_pgp_public_key_null(self):
+        """Assert `NULL` values are saved with an `EmailPGPPublicKeyField` field."""
+        instance = EncryptedModel.objects.create()
+        self.assertEqual(instance.email_pgp_pub_field, None)
+
     def test_integer_pgp_public_key_null(self):
         """Assert `NULL` values are saved with an `IntegerPGPPublicKeyField` field."""
         instance = EncryptedModel.objects.create()
         self.assertEqual(instance.integer_pgp_pub_field, None)
 
+    def test_text_pgp_public_key_null(self):
+        """Assert `NULL` values are saved with an `TextPGPPublicKeyField` field."""
+        instance = EncryptedModel.objects.create()
+        self.assertEqual(instance.pgp_pub_field, None)
+
+    def test_email_pgp_symmetric_key_null(self):
+        """Assert `NULL` values are saved with an `EmailPGPSymmetricKeyField` field."""
+        instance = EncryptedModel.objects.create()
+        self.assertEqual(instance.email_pgp_sym_field, None)
+
     def test_integer_pgp_symmetric_key_null(self):
         """Assert `NULL` values are saved with an `IntegerPGPSymmetricKeyField` field."""
         instance = EncryptedModel.objects.create()
         self.assertEqual(instance.integer_pgp_sym_field, None)
+
+    def test_text_pgp_symmetric_key_null(self):
+        """Assert `NULL` values are saved with an `TextPGPSymmetricKeyField` field."""
+        instance = EncryptedModel.objects.create()
+        self.assertEqual(instance.pgp_sym_field, None)
