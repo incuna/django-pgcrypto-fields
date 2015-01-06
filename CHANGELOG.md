@@ -1,3 +1,15 @@
+## Upcoming
+
+* Allow/check `NULL` values for:
+  `TextDigestField`;
+  `TextHMACField`;
+  `EmailPGPPublicKeyField`;
+  `IntegerPGPPublicKeyField`;
+  `TextPGPPublicKeyField`;
+  `EmailPGPSymmetricKeyField`.
+  `IntegerPGPSymmetricKeyField`.
+  `TextPGPSymmetricKeyField`.
+
 ## v0.6.1
 
 * Fix `cast`ing bug when sending negative values to integer fields.
