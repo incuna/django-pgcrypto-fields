@@ -1,4 +1,4 @@
-## Upcoming
+## v0.6.1
 
 * Fix `cast`ing bug when sending negative values to integer fields.
 
