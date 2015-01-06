@@ -63,7 +63,7 @@ class TextFieldHash(models.TextField):
 
         `connection` is ignored here as we don't need custom operators.
         """
-        if value.startswith('\\x'):
+        if value is None or value.startswith('\\x'):
             return '%s'
         return self.encrypt_sql
 
