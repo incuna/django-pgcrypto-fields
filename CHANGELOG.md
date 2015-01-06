@@ -1,4 +1,4 @@
-## Upcoming
+## v0.6.2
 
 * Allow/check `NULL` values for:
   `TextDigestField`;
