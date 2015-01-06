@@ -1,3 +1,7 @@
+## Upcoming
+
+* Fix `cast`ing bug when sending negative values to integer fields.
+
 ## v0.6.0
 
 * Add `EmailPGPPublicKeyField` and `EmailPGPSymmetricKeyField`.
