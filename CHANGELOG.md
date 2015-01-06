@@ -1,4 +1,4 @@
-## Upcoming
+## v0.6.0
 
 * Add `EmailPGPPublicKeyField` and `EmailPGPSymmetricKeyField`.
 
