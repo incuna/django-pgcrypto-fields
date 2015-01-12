@@ -1,4 +1,4 @@
-## Upcoming
+## v0.6.3
 
 * Avoid setting `max_length` on PGP fields.
 
