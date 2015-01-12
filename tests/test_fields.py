@@ -1,15 +1,24 @@
 from django.test import TestCase
 
 from pgcrypto_fields import aggregates, proxy
-from pgcrypto_fields.fields import PGPMixin, TextFieldHash
+from pgcrypto_fields import fields
 
 from .factories import EncryptedModelFactory
 from .models import EncryptedModel
 
+PGP_FIELDS = (
+    fields.EmailPGPPublicKeyField,
+    fields.EmailPGPSymmetricKeyField,
+    fields.IntegerPGPPublicKeyField,
+    fields.IntegerPGPSymmetricKeyField,
+    fields.TextPGPPublicKeyField,
+    fields.TextPGPSymmetricKeyField,
+)
+
 
 class TestTextFieldHash(TestCase):
     """Test `TextFieldHash` behave properly."""
-    field = TextFieldHash
+    field = fields.TextFieldHash
 
     def test_get_placeholder(self):
         """Assert `get_placeholder` hash value only once."""
@@ -19,11 +28,24 @@ class TestTextFieldHash(TestCase):
 
 class TestPGPMixin(TestCase):
     """Test `PGPMixin` behave properly."""
-    field = PGPMixin
+
+    def test_check(self):
+        """Assert `max_length` check does not return any error."""
+        for field in PGP_FIELDS:
+            with self.subTest(field=field):
+                self.assertEqual(field(name='field').check(), [])
+
+    def test_max_length(self):
+        """Assert `max_length` is ignored."""
+        for field in PGP_FIELDS:
+            with self.subTest(field=field):
+                self.assertEqual(field(max_length=42).max_length, None)
 
     def test_db_type(self):
         """Check db_type is `bytea`."""
-        self.assertEqual(self.field().db_type(), 'bytea')
+        for field in PGP_FIELDS:
+            with self.subTest(field=field):
+                self.assertEqual(field().db_type(), 'bytea')
 
 
 class TestEncryptedTextFieldModel(TestCase):

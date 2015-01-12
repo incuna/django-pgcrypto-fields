@@ -23,6 +23,11 @@ class PGPMixin:
     """
     descriptor_class = EncryptedProxyField
 
+    def __init__(self, *args, **kwargs):
+        """`max_length` should be set to None as encrypted text size is variable."""
+        kwargs['max_length'] = None
+        super().__init__(*args, **kwargs)
+
     def contribute_to_class(self, cls, name, **kwargs):
         """
         Add a decrypted field proxy to the model.
@@ -47,6 +52,10 @@ class PGPMixin:
         `value` and `connection` are ignored here as we don't need custom operators.
         """
         return self.encrypt_sql
+
+    def _check_max_length_attribute(self, **kwargs):
+        """Override `_check_max_length_attribute` to remove check on max_length."""
+        return []
 
 
 class TextFieldHash(models.TextField):
