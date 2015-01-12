@@ -1,3 +1,7 @@
+## Upcoming
+
+* Avoid setting `max_length` on PGP fields.
+
 ## v0.6.2
 
 * Allow/check `NULL` values for:
