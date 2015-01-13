@@ -7,6 +7,7 @@ from .factories import EncryptedModelFactory
 from .models import EncryptedModel
 
 
+KEYED_FIELDS = (fields.TextDigestField, fields.TextHMACField)
 PGP_FIELDS = (
     fields.EmailPGPPublicKeyField,
     fields.EmailPGPSymmetricKeyField,
@@ -18,13 +19,14 @@ PGP_FIELDS = (
 
 
 class TestTextFieldHash(TestCase):
-    """Test `TextFieldHash` behave properly."""
-    field = fields.TextFieldHash
+    """Test hash fields behave properly."""
 
     def test_get_placeholder(self):
         """Assert `get_placeholder` hash value only once."""
-        placeholder = self.field().get_placeholder('\\x')
-        self.assertEqual(placeholder, '%s')
+        for field in KEYED_FIELDS:
+            with self.subTest(field=field):
+                placeholder = field().get_placeholder('\\x')
+                self.assertEqual(placeholder, '%s')
 
 
 class TestPGPMixin(TestCase):
