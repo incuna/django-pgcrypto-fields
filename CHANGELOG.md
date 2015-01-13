@@ -1,4 +1,4 @@
-## Upcoming
+## v0.6.4
 
 * Remove `MaxLengthValidator` from email fields.
 
