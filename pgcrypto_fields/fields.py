@@ -10,6 +10,8 @@ from pgcrypto_fields import (
 )
 from pgcrypto_fields.lookups import DigestLookup, HMACLookup
 from pgcrypto_fields.mixins import (
+    EmailPGPPublicKeyFieldMixin,
+    EmailPGPSymmetricKeyFieldMixin,
     HashMixin,
     PGPPublicKeyFieldMixin,
     PGPSymmetricKeyFieldMixin,
@@ -28,7 +30,7 @@ class TextHMACField(HashMixin, models.TextField):
 TextHMACField.register_lookup(HMACLookup)
 
 
-class EmailPGPPublicKeyField(PGPPublicKeyFieldMixin, models.EmailField):
+class EmailPGPPublicKeyField(EmailPGPPublicKeyFieldMixin, models.EmailField):
     """Email PGP public key encrypted field."""
     encrypt_sql = PGP_PUB_ENCRYPT_SQL
 
@@ -43,7 +45,7 @@ class TextPGPPublicKeyField(PGPPublicKeyFieldMixin, models.TextField):
     encrypt_sql = PGP_PUB_ENCRYPT_SQL
 
 
-class EmailPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.EmailField):
+class EmailPGPSymmetricKeyField(EmailPGPSymmetricKeyFieldMixin, models.EmailField):
     """Email PGP symmetric key encrypted field."""
     encrypt_sql = PGP_SYM_ENCRYPT_SQL
 

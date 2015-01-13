@@ -1,3 +1,5 @@
+from django.core.validators import MaxLengthValidator
+
 from pgcrypto_fields.aggregates import (
     PGPPublicKeyAggregate,
     PGPSymmetricKeyAggregate,
@@ -74,3 +76,22 @@ class PGPPublicKeyFieldMixin(PGPMixin):
 class PGPSymmetricKeyFieldMixin(PGPMixin):
     """PGP symmetric key encrypted field mixin for postgred."""
     aggregate = PGPSymmetricKeyAggregate
+
+
+class RemoveMaxLengthValidatorMixin:
+    """Exclude `MaxLengthValidator` from field validators."""
+    def __init__(self, *args, **kwargs):
+        """Remove `MaxLengthValidator` in parent's `.__init__`."""
+        super().__init__(*args, **kwargs)
+        for validator in self.validators:
+            if isinstance(validator, MaxLengthValidator):
+                self.validators.remove(validator)
+
+
+class EmailPGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin, RemoveMaxLengthValidatorMixin):
+    """Email mixin for PGP public key fields."""
+
+
+class EmailPGPSymmetricKeyFieldMixin(
+        PGPSymmetricKeyFieldMixin, RemoveMaxLengthValidatorMixin):
+    """Email mixin for PGP symmetric key fields."""

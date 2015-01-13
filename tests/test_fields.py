@@ -8,9 +8,8 @@ from .models import EncryptedModel
 
 
 KEYED_FIELDS = (fields.TextDigestField, fields.TextHMACField)
-PGP_FIELDS = (
-    fields.EmailPGPPublicKeyField,
-    fields.EmailPGPSymmetricKeyField,
+EMAIL_PGP_FIELDS = (fields.EmailPGPPublicKeyField, fields.EmailPGPSymmetricKeyField)
+PGP_FIELDS = EMAIL_PGP_FIELDS + (
     fields.IntegerPGPPublicKeyField,
     fields.IntegerPGPSymmetricKeyField,
     fields.TextPGPPublicKeyField,
@@ -20,7 +19,6 @@ PGP_FIELDS = (
 
 class TestTextFieldHash(TestCase):
     """Test hash fields behave properly."""
-
     def test_get_placeholder(self):
         """Assert `get_placeholder` hash value only once."""
         for field in KEYED_FIELDS:
@@ -31,7 +29,6 @@ class TestTextFieldHash(TestCase):
 
 class TestPGPMixin(TestCase):
     """Test `PGPMixin` behave properly."""
-
     def test_check(self):
         """Assert `max_length` check does not return any error."""
         for field in PGP_FIELDS:
@@ -49,6 +46,16 @@ class TestPGPMixin(TestCase):
         for field in PGP_FIELDS:
             with self.subTest(field=field):
                 self.assertEqual(field().db_type(), 'bytea')
+
+
+class TestEmailPGPMixin(TestCase):
+    """Test emails fields behave properly."""
+    def test_max_length_validator(self):
+        """Check `MaxLengthValidator` is not set."""
+        for field in EMAIL_PGP_FIELDS:
+            with self.subTest(field=field):
+                field_validated = field().run_validators(value='value@value.com')
+                self.assertEqual(field_validated, None)
 
 
 class TestEncryptedTextFieldModel(TestCase):
