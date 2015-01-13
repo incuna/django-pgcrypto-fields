@@ -6,6 +6,7 @@ from pgcrypto_fields import fields
 from .factories import EncryptedModelFactory
 from .models import EncryptedModel
 
+
 PGP_FIELDS = (
     fields.EmailPGPPublicKeyField,
     fields.EmailPGPSymmetricKeyField,
