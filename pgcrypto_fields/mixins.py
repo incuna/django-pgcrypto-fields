@@ -7,6 +7,11 @@ from pgcrypto_fields.aggregates import (
 from pgcrypto_fields.proxy import EncryptedProxyField
 
 
+def remove_validators(validators, validator_class):
+    """Exclude `validator_class` instances from `validators` list."""
+    return [v for v in validators if not isinstance(v, validator_class)]
+
+
 class HashMixin:
     """Keyed hash mixin.
 
@@ -83,9 +88,7 @@ class RemoveMaxLengthValidatorMixin:
     def __init__(self, *args, **kwargs):
         """Remove `MaxLengthValidator` in parent's `.__init__`."""
         super().__init__(*args, **kwargs)
-        for validator in self.validators:
-            if isinstance(validator, MaxLengthValidator):
-                self.validators.remove(validator)
+        self.validators = remove_validators(self.validators, MaxLengthValidator)
 
 
 class EmailPGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin, RemoveMaxLengthValidatorMixin):
