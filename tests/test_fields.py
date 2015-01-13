@@ -6,6 +6,8 @@ from pgcrypto_fields import fields
 from .factories import EncryptedModelFactory
 from .models import EncryptedModel
 
+
+KEYED_FIELDS = (fields.TextDigestField, fields.TextHMACField)
 PGP_FIELDS = (
     fields.EmailPGPPublicKeyField,
     fields.EmailPGPSymmetricKeyField,
@@ -17,13 +19,14 @@ PGP_FIELDS = (
 
 
 class TestTextFieldHash(TestCase):
-    """Test `TextFieldHash` behave properly."""
-    field = fields.TextFieldHash
+    """Test hash fields behave properly."""
 
     def test_get_placeholder(self):
         """Assert `get_placeholder` hash value only once."""
-        placeholder = self.field().get_placeholder('\\x')
-        self.assertEqual(placeholder, '%s')
+        for field in KEYED_FIELDS:
+            with self.subTest(field=field):
+                placeholder = field().get_placeholder('\\x')
+                self.assertEqual(placeholder, '%s')
 
 
 class TestPGPMixin(TestCase):
@@ -274,42 +277,11 @@ class TestEncryptedTextFieldModel(TestCase):
 
         self.assertEqual(instance.integer_pgp_sym_field, expected)
 
-    def test_digest_null(self):
-        """Assert `NULL` values are saved with a `TextDigestField` field."""
+    def test_null(self):
+        """Assert `NULL` values are saved."""
         instance = EncryptedModel.objects.create()
-        self.assertEqual(instance.integer_pgp_pub_field, None)
-
-    def test_hmac_null(self):
-        """Assert `NULL` values are saved with an `TextHMACField` field."""
-        instance = EncryptedModel.objects.create()
-        self.assertEqual(instance.integer_pgp_sym_field, None)
-
-    def test_email_pgp_public_key_null(self):
-        """Assert `NULL` values are saved with an `EmailPGPPublicKeyField` field."""
-        instance = EncryptedModel.objects.create()
-        self.assertEqual(instance.email_pgp_pub_field, None)
-
-    def test_integer_pgp_public_key_null(self):
-        """Assert `NULL` values are saved with an `IntegerPGPPublicKeyField` field."""
-        instance = EncryptedModel.objects.create()
-        self.assertEqual(instance.integer_pgp_pub_field, None)
-
-    def test_text_pgp_public_key_null(self):
-        """Assert `NULL` values are saved with an `TextPGPPublicKeyField` field."""
-        instance = EncryptedModel.objects.create()
-        self.assertEqual(instance.pgp_pub_field, None)
-
-    def test_email_pgp_symmetric_key_null(self):
-        """Assert `NULL` values are saved with an `EmailPGPSymmetricKeyField` field."""
-        instance = EncryptedModel.objects.create()
-        self.assertEqual(instance.email_pgp_sym_field, None)
-
-    def test_integer_pgp_symmetric_key_null(self):
-        """Assert `NULL` values are saved with an `IntegerPGPSymmetricKeyField` field."""
-        instance = EncryptedModel.objects.create()
-        self.assertEqual(instance.integer_pgp_sym_field, None)
-
-    def test_text_pgp_symmetric_key_null(self):
-        """Assert `NULL` values are saved with an `TextPGPSymmetricKeyField` field."""
-        instance = EncryptedModel.objects.create()
-        self.assertEqual(instance.pgp_sym_field, None)
+        fields = self.model._meta.get_all_field_names()
+        fields.remove('id')
+        for field in fields:
+            with self.subTest(field=field):
+                self.assertEqual(getattr(instance, field), None)
