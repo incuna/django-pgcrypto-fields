@@ -25,7 +25,7 @@ settings.configure(
         'pgcrypto_fields',
         'tests',
     ),
-    MIDDLEWARE_CLASSES = (),
+    MIDDLEWARE_CLASSES=(),
     PUBLIC_PGP_KEY=open(PUBLIC_PGP_KEY_PATH, 'r').read(),
     PRIVATE_PGP_KEY=open(PRIVATE_PGP_KEY_PATH, 'r').read(),
     PGCRYPTO_KEY='ultrasecret',
