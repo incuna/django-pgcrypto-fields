@@ -1,17 +1,31 @@
 # django-pgcrypto-fields [![Build Status](https://travis-ci.org/incuna/django-pgcrypto-fields.svg?branch=master)](https://travis-ci.org/incuna/django-pgcrypto-fields?branch=master) [![Requirements Status](https://requires.io/github/incuna/django-pgcrypto-fields/requirements.svg?branch=master)](https://requires.io/github/incuna/django-pgcrypto-fields/requirements/?branch=master)
 
-`django-pgcrypto-fields` is a `Django` extension which relies upon pgcrypto to
+`django-pgcrypto-fields` is a `Django` extension which relies upon `pgcrypto` to
 encrypt and decrypt data for fields.
 
-`django-pgcrypto-fields` has 4 fields grouped in two categories:
-  - hash based fields (`TextDigestField` and `TextHMACField`);
-  - pgp fields (`IntegerPGPPublicKeyField`, `TextPGPPublicKeyField`,
-`IntegerPGPSymmetricKeyField` and `TextPGPSymmetricKeyField`).
+`django-pgcrypto-fields` has 3 kinds of fields:
+  - hash based fields
+  - PGP fields
+  - Symmetric fields
+
+Hash based fields are:
+ - `TextDigestField`
+ - `TextHMACField`
+
+PGP key fields are:
+ - `EmailPGPPublicKeyField`
+ - `IntegerPGPPublicKeyField`
+ - `TextPGPPublicKeyField`
+
+PGP symmetric fields are:
+ - `EmailPGPSymmetricKeyField`
+ - `IntegerPGPSymmetricKeyField`
+ - `TextPGPSymmetricKeyField`
 
 
 ## Requirements
 
- - postgres with pgcrypto
+ - postgres with `pgcrypto`
 
 ## Installation
 
