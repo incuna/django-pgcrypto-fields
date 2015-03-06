@@ -1,8 +1,9 @@
 from django.conf import settings
 from django.db import models
+from django.db.models.sql.aggregates import Aggregate
 
 
-class PGPPublicKeySQL(models.sql.aggregates.Aggregate):
+class PGPPublicKeySQL(Aggregate):
     """Custom SQL aggregate to decrypt a field with public key.
 
     `PGPPublicKeySQL` provides a SQL template using pgcrypto to decrypt
@@ -25,7 +26,7 @@ class PGPPublicKeySQL(models.sql.aggregates.Aggregate):
     )
 
 
-class PGPSymmetricKeySQL(models.sql.aggregates.Aggregate):
+class PGPSymmetricKeySQL(Aggregate):
     """Custom SQL aggregate to decrypt a field with public key.
 
     `PGPSymmetricKeySQL` provides a SQL template using pgcrypto to decrypt

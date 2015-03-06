@@ -1,3 +1,7 @@
+## Upcoming
+
+* Fix buggy import to `Aggregate` (it affects Django 1.8 which is not supported yet)
+
 ## v0.6.4
 
 * Remove `MaxLengthValidator` from email fields.
