@@ -13,5 +13,6 @@ env:
     - DJANGO='django>=1.7,<1.8'
     - DJANGO='--upgrade --pre django'
 matrix:
+  fast_finish: true
   allow_failures:
     - env: DJANGO='--upgrade --pre django'
