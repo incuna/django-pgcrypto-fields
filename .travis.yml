@@ -7,3 +7,10 @@ notifications:
 install:
   - psql -c 'CREATE DATABASE pgcrypto_fields' -U postgres
   - pip install -r test_requirements.txt
+env:
+  matrix:
+    - DJANGO='django>=1.7,<1.8'
+    - DJANGO='--upgrade --pre django'
+matrix:
+  allow_failures:
+    - env: DJANGO='--upgrade --pre django'
