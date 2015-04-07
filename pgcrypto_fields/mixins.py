@@ -17,14 +17,14 @@ class HashMixin:
 
     `HashMixin` uses 'pgcrypto' to encrypt data in a postgres database.
     """
-    def get_placeholder(self, value=None, connection=None):
+    def get_placeholder(self, value=None, compiler=None, connection=None):
         """
         Tell postgres to encrypt this field with a hashing function.
 
         The `value` string is checked to determine if we need to hash or keep
         the current value.
 
-        `connection` is ignored here as we don't need custom operators.
+        `compiler` and `connection` is ignored here as we don't need custom operators.
         """
         if value is None or value.startswith('\\x'):
             return '%s'
@@ -60,11 +60,12 @@ class PGPMixin:
         """Value stored in the database is hexadecimal."""
         return 'bytea'
 
-    def get_placeholder(self, value=None, connection=None):
+    def get_placeholder(self, value=None, compiler=None, connection=None):
         """
         Tell postgres to encrypt this field using PGP.
 
-        `value` and `connection` are ignored here as we don't need custom operators.
+        `value`, `compiler`, and `connection` are ignored here as we don't need
+        custom operators.
         """
         return self.encrypt_sql
 

@@ -11,6 +11,7 @@ install:
 env:
   matrix:
     - DJANGO='django>=1.7,<1.8'
+    - DJANGO='django>=1.8,<1.9'
     - DJANGO='--upgrade --pre django'
 matrix:
   fast_finish: true
