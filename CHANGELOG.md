@@ -1,6 +1,9 @@
-## Upcoming
+## v0.7.0 (Upcoming)
 
-* Fix buggy import to `Aggregate` (it affects Django 1.8 which is not supported yet)
+* Make `get_placeholder` accepts a new argument `compiler`
+* Fix buggy import to `Aggregate`
+
+**Note: these changes have been done for django > 1.8.0.**
 
 ## v0.6.4
 
