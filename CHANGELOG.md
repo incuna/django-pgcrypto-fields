@@ -1,4 +1,4 @@
-## v0.7.0 (Upcoming)
+## v0.7.0
 
 * Make `get_placeholder` accepts a new argument `compiler`
 * Fix buggy import to `Aggregate`
