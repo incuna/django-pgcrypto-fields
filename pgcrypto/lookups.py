@@ -1,6 +1,6 @@
 from django.db.models.lookups import Lookup
 
-from pgcrypto_fields import DIGEST_SQL, HMAC_SQL
+from pgcrypto import DIGEST_SQL, HMAC_SQL
 
 
 class HashLookupBase(Lookup):

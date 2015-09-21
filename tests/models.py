@@ -1,6 +1,6 @@
 from django.db import models
 
-from pgcrypto_fields import fields
+from pgcrypto import fields
 
 
 class EncryptedModel(models.Model):

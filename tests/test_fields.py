@@ -1,7 +1,7 @@
 from django.test import TestCase
 
-from pgcrypto_fields import aggregates, proxy
-from pgcrypto_fields import fields
+from pgcrypto import aggregates, proxy
+from pgcrypto import fields
 
 from .factories import EncryptedModelFactory
 from .models import EncryptedModel
