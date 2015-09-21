@@ -1,4 +1,4 @@
-## v1.0.0 (Upcoming)
+## v1.0.0
 
 * Rename package from `pgcrypto_fields` to `pgcrypto`.
 
