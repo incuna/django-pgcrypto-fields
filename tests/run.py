@@ -22,7 +22,7 @@ settings.configure(
         ),
     },
     INSTALLED_APPS=(
-        'pgcrypto_fields',
+        'pgcrypto',
         'tests',
     ),
     MIDDLEWARE_CLASSES=(),

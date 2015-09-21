@@ -1,6 +1,6 @@
 from django.db import models
 
-from pgcrypto_fields import (
+from pgcrypto import (
     DIGEST_SQL,
     HMAC_SQL,
     INTEGER_PGP_PUB_ENCRYPT_SQL,
@@ -8,8 +8,8 @@ from pgcrypto_fields import (
     PGP_PUB_ENCRYPT_SQL,
     PGP_SYM_ENCRYPT_SQL,
 )
-from pgcrypto_fields.lookups import DigestLookup, HMACLookup
-from pgcrypto_fields.mixins import (
+from pgcrypto.lookups import DigestLookup, HMACLookup
+from pgcrypto.mixins import (
     EmailPGPPublicKeyFieldMixin,
     EmailPGPSymmetricKeyFieldMixin,
     HashMixin,

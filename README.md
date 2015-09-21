@@ -102,11 +102,11 @@ PRIVATE_PGP_KEY = open(PRIVATE_PGP_KEY_PATH).read()
 PGCRYPTO_KEY='ultrasecret'
 
 
-# And add 'pgcrypto_fields' to `INSTALLED_APPS` to create the extension for
+# And add 'pgcrypto' to `INSTALLED_APPS` to create the extension for
 # pgcrypto (in a migration).
 INSTALLED_APPS = (
     ...
-    'pgcrypto_fields',
+    'pgcrypto',
     ...
 )
 
@@ -119,7 +119,7 @@ INSTALLED_APPS = (
 ```python
 from django.db import models
 
-from pgcrypto_fields import fields
+from pgcrypto import fields
 
 class MyModel(models.Model):
     digest_field = fields.TextDigestField()
@@ -160,7 +160,7 @@ decrypt the values.
 
 Example when using a `PGPPublicKeyField`:
 ```python
->>> from pgcrypto_fields.aggregates import PGPPublicKeyAggregate
+>>> from pgcrypto.aggregates import PGPPublicKeyAggregate
 >>> my_models = MyModel.objects.annotate(PGPPublicKeyAggregate('pgp_pub_field'))
 [<MyModel: MyModel object>, <MyModel: MyModel object>]
 >>> my_models.filter(pgp_pub_field__decrypted='Value decrypted')
@@ -171,7 +171,7 @@ Example when using a `PGPPublicKeyField`:
 
 Example when using a `PGPSymmetricKeyField`:
 ```python
->>> from pgcrypto_fields.aggregates import PGPSymmetricKeyAggregate
+>>> from pgcrypto.aggregates import PGPSymmetricKeyAggregate
 >>> my_models = MyModel.objects.annotate(PGPSymmetricKeyAggregate('pgp_sym_field'))
 [<MyModel: MyModel object>, <MyModel: MyModel object>]
 >>> my_models.filter(pgp_pub_field__decrypted='Value decrypted')

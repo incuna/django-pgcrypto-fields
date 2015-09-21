@@ -1,3 +1,7 @@
+## v1.0.0 (Upcoming)
+
+* Rename package from `pgcrypto_fields` to `pgcrypto`.
+
 ## v0.7.0
 
 * Make `get_placeholder` accepts a new argument `compiler`

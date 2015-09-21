@@ -1,10 +1,7 @@
 from django.core.validators import MaxLengthValidator
 
-from pgcrypto_fields.aggregates import (
-    PGPPublicKeyAggregate,
-    PGPSymmetricKeyAggregate,
-)
-from pgcrypto_fields.proxy import EncryptedProxyField
+from pgcrypto.aggregates import PGPPublicKeyAggregate, PGPSymmetricKeyAggregate
+from pgcrypto.proxy import EncryptedProxyField
 
 
 def remove_validators(validators, validator_class):
