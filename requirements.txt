@@ -1,11 +1,11 @@
 -e .
 colour-runner==0.0.4
-coverage==3.7.1
-dj-database-url==0.3.0
+coverage==4.0.3
+dj-database-url==0.4.1
 django>=1.8,<1.9
-factory-boy==2.5.1
-flake8-docstrings==0.2.1.post1
-flake8-import-order==0.5.3
-flake8==2.4.0
-psycopg2==2.6
-pyflakes==0.8.1
+factory-boy==2.6.1
+flake8-docstrings==0.2.5
+flake8-import-order==0.7
+flake8==2.5.4
+psycopg2==2.6.1
+pyflakes==1.1.0
