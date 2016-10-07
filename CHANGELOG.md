@@ -1,3 +1,7 @@
+## v1.1.0 (Upcoming)
+
+* Exclude tests app from distributed package.
+
 ## v1.0.0
 
 * Rename package from `pgcrypto_fields` to `pgcrypto`.
