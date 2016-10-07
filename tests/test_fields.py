@@ -4,7 +4,6 @@ from django.test import TestCase
 
 from pgcrypto import aggregates, proxy
 from pgcrypto import fields
-
 from .factories import EncryptedModelFactory
 from .models import EncryptedModel
 
