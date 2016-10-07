@@ -10,8 +10,9 @@ install:
   - pip install $DJANGO
 env:
   matrix:
-    - DJANGO='django>=1.7,<1.8'
     - DJANGO='django>=1.8,<1.9'
+    - DJANGO='django>=1.9,<1.10'
+    - DJANGO='django>=1.10,<1.11'
     - DJANGO='--upgrade --pre django'
 matrix:
   fast_finish: true
