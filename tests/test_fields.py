@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock
 
 from django.test import TestCase
+from incuna_test_utils.utils import field_names
 
 from pgcrypto import aggregates, proxy
 from pgcrypto import fields
@@ -16,12 +17,6 @@ PGP_FIELDS = EMAIL_PGP_FIELDS + (
     fields.TextPGPPublicKeyField,
     fields.TextPGPSymmetricKeyField,
 )
-
-
-def field_names(model):
-    """"Return field names for `model`."""
-    fields = model._meta.get_fields()
-    return {field.name for field in fields}
 
 
 class TestTextFieldHash(TestCase):
