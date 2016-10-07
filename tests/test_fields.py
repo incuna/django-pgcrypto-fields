@@ -18,6 +18,12 @@ PGP_FIELDS = EMAIL_PGP_FIELDS + (
 )
 
 
+def field_names(model):
+    """"Return field names for `model`."""
+    fields = model._meta.get_fields()
+    return {field.name for field in fields}
+
+
 class TestTextFieldHash(TestCase):
     """Test hash fields behave properly."""
     def test_get_placeholder(self):
@@ -66,7 +72,7 @@ class TestEncryptedTextFieldModel(TestCase):
 
     def test_fields(self):
         """Assert fields are representing our model."""
-        fields = self.model._meta.get_all_field_names()
+        fields = field_names(self.model)
         expected = (
             'id',
             'digest_field',
@@ -289,7 +295,7 @@ class TestEncryptedTextFieldModel(TestCase):
     def test_null(self):
         """Assert `NULL` values are saved."""
         instance = EncryptedModel.objects.create()
-        fields = self.model._meta.get_all_field_names()
+        fields = field_names(self.model)
         fields.remove('id')
         for field in fields:
             with self.subTest(field=field):
