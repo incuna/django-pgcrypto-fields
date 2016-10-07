@@ -1,4 +1,4 @@
-## v1.1.0 (Upcoming)
+## v1.0.1 (Upcoming)
 
 * Exclude tests app from distributed package.
 
