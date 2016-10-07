@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock
+
 from django.test import TestCase
 
 from pgcrypto import aggregates, proxy
@@ -33,6 +35,7 @@ class TestPGPMixin(TestCase):
         """Assert `max_length` check does not return any error."""
         for field in PGP_FIELDS:
             with self.subTest(field=field):
+                field.model = MagicMock()
                 self.assertEqual(field(name='field').check(), [])
 
     def test_max_length(self):
