@@ -1,8 +1,10 @@
+from unittest.mock import MagicMock
+
 from django.test import TestCase
+from incuna_test_utils.utils import field_names
 
 from pgcrypto import aggregates, proxy
 from pgcrypto import fields
-
 from .factories import EncryptedModelFactory
 from .models import EncryptedModel
 
@@ -33,6 +35,7 @@ class TestPGPMixin(TestCase):
         """Assert `max_length` check does not return any error."""
         for field in PGP_FIELDS:
             with self.subTest(field=field):
+                field.model = MagicMock()
                 self.assertEqual(field(name='field').check(), [])
 
     def test_max_length(self):
@@ -64,7 +67,7 @@ class TestEncryptedTextFieldModel(TestCase):
 
     def test_fields(self):
         """Assert fields are representing our model."""
-        fields = self.model._meta.get_all_field_names()
+        fields = field_names(self.model)
         expected = (
             'id',
             'digest_field',
@@ -287,7 +290,7 @@ class TestEncryptedTextFieldModel(TestCase):
     def test_null(self):
         """Assert `NULL` values are saved."""
         instance = EncryptedModel.objects.create()
-        fields = self.model._meta.get_all_field_names()
+        fields = field_names(self.model)
         fields.remove('id')
         for field in fields:
             with self.subTest(field=field):

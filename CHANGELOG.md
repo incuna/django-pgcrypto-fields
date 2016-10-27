@@ -1,3 +1,9 @@
+## v2.0.0
+
+* Remove compatibility for `Django 1.7`.
+* Add compatibility for `Django 1.10`.
+* Add `Django 1.9` to the travis matrix.
+
 ## v1.0.1
 
 * Exclude tests app from distributed package.
