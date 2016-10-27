@@ -1,4 +1,4 @@
-## v2.0.0
+## 2.0.0
 
 * Remove compatibility for `Django 1.7`.
 * Add compatibility for `Django 1.10`.
