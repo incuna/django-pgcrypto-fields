@@ -36,12 +36,16 @@ from pgcrypto.mixins import (
 class TextDigestField(HashMixin, models.TextField):
     """Text digest field for postgres."""
     encrypt_sql = DIGEST_SQL
+
+
 TextDigestField.register_lookup(DigestLookup)
 
 
 class TextHMACField(HashMixin, models.TextField):
     """Text HMAC field for postgres."""
     encrypt_sql = HMAC_SQL
+
+
 TextHMACField.register_lookup(HMACLookup)
 
 
@@ -80,6 +84,7 @@ class DatePGPSymmetricKeyField(DatePGPSymmetricKeyFieldMixin, models.TextField):
     encrypt_sql = PGP_SYM_ENCRYPT_SQL
     cast_sql = 'cast(%s as DATE)'
 
+
 DatePGPSymmetricKeyField.register_lookup(DateEXACT)
 DatePGPSymmetricKeyField.register_lookup(DateGT)
 DatePGPSymmetricKeyField.register_lookup(DateGTE)
@@ -91,6 +96,7 @@ class DateTimePGPSymmetricKeyField(DateTimePGPSymmetricKeyFieldMixin, models.Tex
     """DateTime PGP symmetric key encrypted field for postgres."""
     encrypt_sql = PGP_SYM_ENCRYPT_SQL
     cast_sql = 'cast(%s as TIMESTAMP)'
+
 
 DateTimePGPSymmetricKeyField.register_lookup(DateTimeEXACT)
 DateTimePGPSymmetricKeyField.register_lookup(DateTimeGT)
