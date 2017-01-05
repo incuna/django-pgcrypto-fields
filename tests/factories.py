@@ -1,3 +1,5 @@
+from datetime import date
+
 import factory
 
 from .models import EncryptedModel
@@ -5,7 +7,7 @@ from .models import EncryptedModel
 
 class EncryptedModelFactory(factory.DjangoModelFactory):
     """Factory to generate hashed and encrypted data."""
-    class Meta:
+    class Meta:  # NOQA
         model = EncryptedModel
 
     digest_field = factory.Sequence('Text digest {}'.format)
@@ -18,3 +20,5 @@ class EncryptedModelFactory(factory.DjangoModelFactory):
     email_pgp_sym_field = factory.Sequence('email{}@symmetric.key'.format)
     integer_pgp_sym_field = 43
     pgp_sym_field = factory.Sequence('Text with symmetric key {}'.format)
+
+    date_pgp_sym_field = date.today()

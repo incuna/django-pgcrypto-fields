@@ -8,8 +8,23 @@ from pgcrypto import (
     PGP_PUB_ENCRYPT_SQL,
     PGP_SYM_ENCRYPT_SQL,
 )
-from pgcrypto.lookups import DigestLookup, HMACLookup
+from pgcrypto.lookups import (
+    DateEXACT,
+    DateGT,
+    DateGTE,
+    DateLT,
+    DateLTE,
+    DateTimeEXACT,
+    DateTimeGT,
+    DateTimeGTE,
+    DateTimeLT,
+    DateTimeLTE,
+    DigestLookup,
+    HMACLookup,
+)
 from pgcrypto.mixins import (
+    DatePGPSymmetricKeyFieldMixin,
+    DateTimePGPSymmetricKeyFieldMixin,
     EmailPGPPublicKeyFieldMixin,
     EmailPGPSymmetricKeyFieldMixin,
     HashMixin,
@@ -58,3 +73,27 @@ class IntegerPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.IntegerField
 class TextPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.TextField):
     """Text PGP symmetric key encrypted field for postgres."""
     encrypt_sql = PGP_SYM_ENCRYPT_SQL
+
+
+class DatePGPSymmetricKeyField(DatePGPSymmetricKeyFieldMixin, models.TextField):
+    """Date PGP symmetric key encrypted field for postgres."""
+    encrypt_sql = PGP_SYM_ENCRYPT_SQL
+    cast_sql = 'cast(%s as DATE)'
+
+DatePGPSymmetricKeyField.register_lookup(DateEXACT)
+DatePGPSymmetricKeyField.register_lookup(DateGT)
+DatePGPSymmetricKeyField.register_lookup(DateGTE)
+DatePGPSymmetricKeyField.register_lookup(DateLT)
+DatePGPSymmetricKeyField.register_lookup(DateLTE)
+
+
+class DateTimePGPSymmetricKeyField(DateTimePGPSymmetricKeyFieldMixin, models.TextField):
+    """DateTime PGP symmetric key encrypted field for postgres."""
+    encrypt_sql = PGP_SYM_ENCRYPT_SQL
+    cast_sql = 'cast(%s as TIMESTAMP)'
+
+DateTimePGPSymmetricKeyField.register_lookup(DateTimeEXACT)
+DateTimePGPSymmetricKeyField.register_lookup(DateTimeGT)
+DateTimePGPSymmetricKeyField.register_lookup(DateTimeGTE)
+DateTimePGPSymmetricKeyField.register_lookup(DateTimeLT)
+DateTimePGPSymmetricKeyField.register_lookup(DateTimeLTE)
