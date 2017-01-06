@@ -1,3 +1,4 @@
+from datetime import date, datetime
 from unittest.mock import MagicMock
 
 from django.test import TestCase
@@ -6,12 +7,15 @@ from incuna_test_utils.utils import field_names
 from pgcrypto import aggregates, proxy
 from pgcrypto import fields
 from .factories import EncryptedModelFactory
+from .forms import EncryptedForm
 from .models import EncryptedModel
 
 
 KEYED_FIELDS = (fields.TextDigestField, fields.TextHMACField)
 EMAIL_PGP_FIELDS = (fields.EmailPGPPublicKeyField, fields.EmailPGPSymmetricKeyField)
 PGP_FIELDS = EMAIL_PGP_FIELDS + (
+    fields.DatePGPSymmetricKeyField,
+    fields.DateTimePGPSymmetricKeyField,
     fields.IntegerPGPPublicKeyField,
     fields.IntegerPGPSymmetricKeyField,
     fields.TextPGPPublicKeyField,
@@ -78,6 +82,8 @@ class TestEncryptedTextFieldModel(TestCase):
             'email_pgp_sym_field',
             'integer_pgp_sym_field',
             'pgp_sym_field',
+            'date_pgp_sym_field',
+            'datetime_pgp_sym_field',
         )
         self.assertCountEqual(fields, expected)
 
@@ -286,6 +292,113 @@ class TestEncryptedTextFieldModel(TestCase):
         instance = EncryptedModelFactory.create(integer_pgp_sym_field=expected)
 
         self.assertEqual(instance.integer_pgp_sym_field, expected)
+
+    def test_pgp_symmetric_key_date(self):
+        """Assert date is save with an `DatePGPSymmetricKeyField` field."""
+        expected = date.today()
+        instance = EncryptedModelFactory.create(date_pgp_sym_field=expected)
+        instance.refresh_from_db()  # Ensure the PGSQL casting works right
+
+        self.assertEqual(instance.date_pgp_sym_field, expected)
+
+        instance = EncryptedModel.objects.get(pk=instance.id)
+
+        self.assertEqual(instance.date_pgp_sym_field, expected)
+
+    def test_pgp_symmetric_key_datetime_form(self):
+        """Assert form field and widget for `DateTimePGPSymmetricKeyField` field."""
+        expected = datetime.now()
+        instance = EncryptedModelFactory.create(date_pgp_sym_field=expected)
+
+        payload = {
+            'datetime_pgp_sym_field': '08/01/2016 14:00'
+        }
+
+        form = EncryptedForm(payload, instance=instance)
+        self.assertTrue(form.is_valid())
+
+        cleaned_data = form.cleaned_data
+
+        self.assertTrue(
+            cleaned_data['datetime_pgp_sym_field'],
+            datetime(2016, 8, 1, 14, 0, 0)
+        )
+
+    def test_pgp_symmetric_key_datetime_lookups(self):
+        """Assert lookups `DatePGPSymmetricKeyField` field."""
+        EncryptedModelFactory.create(datetime_pgp_sym_field=datetime(2016, 7, 1, 0, 0, 0))
+        EncryptedModelFactory.create(datetime_pgp_sym_field=datetime(2016, 8, 1, 0, 0, 0))
+        EncryptedModelFactory.create(datetime_pgp_sym_field=datetime(2016, 9, 1, 0, 0, 0))
+
+        # EXACT
+        self.assertEqual(
+            1,
+            EncryptedModel.objects.filter(
+                datetime_pgp_sym_field__exact=datetime(2016, 8, 1, 0, 0, 0)
+            ).count()
+        )
+        self.assertEqual(
+            0,
+            EncryptedModel.objects.filter(
+                datetime_pgp_sym_field__exact=datetime(2016, 8, 1, 0, 0, 1)
+            ).count()
+        )
+
+        # GT
+        self.assertEqual(
+            1,
+            EncryptedModel.objects.filter(
+                datetime_pgp_sym_field__gt=datetime(2016, 8, 1, 0, 0, 0)
+            ).count()
+        )
+        self.assertEqual(
+            0,
+            EncryptedModel.objects.filter(
+                datetime_pgp_sym_field__gt=datetime(2016, 10, 1, 0, 0, 0)
+            ).count()
+        )
+
+        # GTE
+        self.assertEqual(
+            2,
+            EncryptedModel.objects.filter(
+                datetime_pgp_sym_field__gte=datetime(2016, 8, 1, 0, 0, 0)
+            ).count()
+        )
+        self.assertEqual(
+            0,
+            EncryptedModel.objects.filter(
+                datetime_pgp_sym_field__gte=datetime(2016, 10, 1, 0, 0, 0)
+            ).count()
+        )
+
+        # LE
+        self.assertEqual(
+            1,
+            EncryptedModel.objects.filter(
+                datetime_pgp_sym_field__lt=datetime(2016, 8, 1, 0, 0, 0)
+            ).count()
+        )
+        self.assertEqual(
+            0,
+            EncryptedModel.objects.filter(
+                datetime_pgp_sym_field__lt=datetime(2016, 6, 1, 0, 0, 0)
+            ).count()
+        )
+
+        # LTE
+        self.assertEqual(
+            2,
+            EncryptedModel.objects.filter(
+                datetime_pgp_sym_field__lte=datetime(2016, 8, 1, 0, 0, 0)
+            ).count()
+        )
+        self.assertEqual(
+            0,
+            EncryptedModel.objects.filter(
+                datetime_pgp_sym_field__lte=datetime(2016, 6, 1, 0, 0, 0)
+            ).count()
+        )
 
     def test_null(self):
         """Assert `NULL` values are saved."""

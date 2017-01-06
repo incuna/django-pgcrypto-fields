@@ -81,3 +81,31 @@ class PGPSymmetricKeyAggregate(PGPSymmetricKeySQL, EncryptionBase):
     with a key.
     """
     name = 'decrypted'
+
+
+class DatePGPSymmetricKeyAggregate(EncryptionBase):
+    """PGP symmetric key based aggregation.
+
+    `pgp_sym_encrypt` is a pgcrypto functions, encrypts the field's value
+    with a key.
+    """
+    name = 'decrypted'
+    sql = PGPSymmetricKeySQL
+    function = 'pgp_sym_decrypt'
+    template = "cast(%(function)s(%(field)s, '{}') AS DATE)".format(
+        settings.PGCRYPTO_KEY,
+    )
+
+
+class DateTimePGPSymmetricKeyAggregate(EncryptionBase):
+    """PGP symmetric key based aggregation.
+
+    `pgp_sym_encrypt` is a pgcrypto functions, encrypts the field's value
+    with a key.
+    """
+    name = 'decrypted'
+    sql = PGPSymmetricKeySQL
+    function = 'pgp_sym_decrypt'
+    template = "cast(%(function)s(%(field)s, '{}') AS TIMESTAMP)".format(
+        settings.PGCRYPTO_KEY,
+    )

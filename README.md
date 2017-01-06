@@ -21,6 +21,8 @@ PGP symmetric fields are:
  - `EmailPGPSymmetricKeyField`
  - `IntegerPGPSymmetricKeyField`
  - `TextPGPSymmetricKeyField`
+ - `DatePGPSymmetricKeyField`
+ - `DateTimePGPSymmetricKeyField`
 
 
 ## Requirements
@@ -49,7 +51,18 @@ saved with the `hmac` pgcrypto function using a key and the `sha512` algorithm.
 
 `key` is set in `settings.PGCRYPTO_KEY`.
 
-#### EmailPGPPublicKeyField, IntegerPGPPublicKeyField and TextPGPPublicKeyField
+
+N.B. `DatePGPSymmetricKeyField` and `DateTimePGPSymmetricKeyField` only support the following lookups:
+
+- `__exact`
+- `__gt`
+- `__gte`
+- `__lt`
+- `__lte`
+
+There is not support for `__range` yet (SQL `BETWEEN`).
+
+#### EmailPGPPublicKeyField, IntegerPGPPublicKeyField, DatePGPSymmetricKeyField, DateTimePGPSymmetricKeyField and TextPGPPublicKeyField
 
 Public key encryption. It generates a token generated with a public key to
 encrypt the data and a private key to decrypt it.
@@ -129,6 +142,8 @@ class MyModel(models.Model):
     pgp_pub_field = fields.TextPGPPublicKeyField()
     integer_pgp_sym_field = fields.IntegerPGPSymmetricKeyField()
     pgp_sym_field = fields.TextPGPSymmetricKeyField()
+    date_pgp_sym_field = fields.DatePGPSymmetricKeyField()
+    datetime_pgp_sym_field = fields.DateTimePGPSymmetricKeyField()
 ```
 
 #### Encrypting

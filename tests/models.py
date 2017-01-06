@@ -15,3 +15,8 @@ class EncryptedModel(models.Model):
     email_pgp_sym_field = fields.EmailPGPSymmetricKeyField(blank=True, null=True)
     integer_pgp_sym_field = fields.IntegerPGPSymmetricKeyField(blank=True, null=True)
     pgp_sym_field = fields.TextPGPSymmetricKeyField(blank=True, null=True)
+    date_pgp_sym_field = fields.DatePGPSymmetricKeyField(blank=True, null=True)
+    datetime_pgp_sym_field = fields.DateTimePGPSymmetricKeyField(blank=True, null=True)
+
+    class Meta:
+        app_label = 'tests'

@@ -1,6 +1,12 @@
 from django.core.validators import MaxLengthValidator
 
-from pgcrypto.aggregates import PGPPublicKeyAggregate, PGPSymmetricKeyAggregate
+from pgcrypto.aggregates import (
+    DatePGPSymmetricKeyAggregate,
+    DateTimePGPSymmetricKeyAggregate,
+    PGPPublicKeyAggregate,
+    PGPSymmetricKeyAggregate,
+)
+from pgcrypto.forms import DateField, DateTimeField
 from pgcrypto.proxy import EncryptedProxyField
 
 
@@ -96,3 +102,25 @@ class EmailPGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin, RemoveMaxLengthValidat
 class EmailPGPSymmetricKeyFieldMixin(
         PGPSymmetricKeyFieldMixin, RemoveMaxLengthValidatorMixin):
     """Email mixin for PGP symmetric key fields."""
+
+
+class DatePGPSymmetricKeyFieldMixin(PGPSymmetricKeyFieldMixin):
+    """Date mixin for PGP symmetric key fields."""
+    aggregate = DatePGPSymmetricKeyAggregate
+
+    def formfield(self, **kwargs):
+        """Override the form field with custom PCP DateField."""
+        defaults = {'form_class': DateField}
+        defaults.update(kwargs)
+        return super().formfield(**defaults)
+
+
+class DateTimePGPSymmetricKeyFieldMixin(PGPSymmetricKeyFieldMixin):
+    """DateTime mixin for PGP symmetric key fields."""
+    aggregate = DateTimePGPSymmetricKeyAggregate
+
+    def formfield(self, **kwargs):
+        """Override the form field with custom PCP DateTimeField."""
+        defaults = {'form_class': DateTimeField}
+        defaults.update(kwargs)
+        return super().formfield(**defaults)
