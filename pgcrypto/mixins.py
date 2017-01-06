@@ -83,7 +83,7 @@ class PGPPublicKeyFieldMixin(PGPMixin):
 
 
 class PGPSymmetricKeyFieldMixin(PGPMixin):
-    """PGP symmetric key encrypted field mixin for postgred."""
+    """PGP symmetric key encrypted field mixin for postgres."""
     aggregate = PGPSymmetricKeyAggregate
 
 
