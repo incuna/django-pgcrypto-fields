@@ -127,12 +127,16 @@ INSTALLED_APPS = (
 
 ### Usage
 
-#### Model definition
+#### Model / Manager definition
 
 ```python
 from django.db import models
 
-from pgcrypto import fields
+from pgcrypto import fields, managers
+
+class MyModelManager(managers.PGPManager):
+    pass
+
 
 class MyModel(models.Model):
     digest_field = fields.TextDigestField()
@@ -144,6 +148,8 @@ class MyModel(models.Model):
     pgp_sym_field = fields.TextPGPSymmetricKeyField()
     date_pgp_sym_field = fields.DatePGPSymmetricKeyField()
     datetime_pgp_sym_field = fields.DateTimePGPSymmetricKeyField()
+    
+    objects = MyModelManager()
 ```
 
 #### Encrypting
@@ -155,7 +161,36 @@ Example:
 >>> MyModel.objects.create(value='Value to be encrypted...')
 ```
 
-#### Decrypting
+#### Decryption using custom model managers
+
+If you use the bundled `PGPManager` with your custom model manager, all encrypted 
+fields will automatically decrypted for you (except for hash fields which are one 
+way).
+
+N.B. The bundled manager does not support decryption of fields from FK joins. For 
+example if the `MyModel` class had a FK to to `AnotherModel` class, no encrypted 
+fields be decrypted in the joined `AnotherModel`.
+
+It is recommended that you use the bundled `PGPAdmin` class if using the custom 
+model manager and the Django Admin. The Djano Admin performance suffers when 
+using the bundled custom manager. The `PGPAdmin` disables automatic decryption 
+for all ORM calls for that admin class.
+
+```python
+from django.contrib import admin
+
+from pgcrypto.admin import PGPAdmin
+
+
+class MyModelAdmin(admin.ModelAdmin, PGPAdmin):
+    # Your admin code here
+```
+
+
+#### Decrypting using aggregates
+
+This is useful if you are not using the custom manager or need to decrypt fields 
+coming from joined FK fields.
 
 ##### PGP fields
 

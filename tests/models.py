@@ -1,6 +1,10 @@
 from django.db import models
 
-from pgcrypto import fields
+from pgcrypto import fields, managers
+
+
+class EncryptedModelManager(managers.PGPManager):
+    pass
 
 
 class EncryptedModel(models.Model):
@@ -20,3 +24,11 @@ class EncryptedModel(models.Model):
 
     class Meta:
         app_label = 'tests'
+
+
+class EncryptedModelWithManager(EncryptedModel):
+
+    objects = EncryptedModelManager()
+
+    class Meta:
+        proxy = True
