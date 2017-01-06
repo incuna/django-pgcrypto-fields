@@ -112,7 +112,7 @@ class DatePGPSymmetricKeyFieldMixin(PGPSymmetricKeyFieldMixin):
         """Override the form field with custom PCP DateField."""
         defaults = {'form_class': DateField}
         defaults.update(kwargs)
-        return super(DatePGPSymmetricKeyFieldMixin, self).formfield(**defaults)
+        return super().formfield(**defaults)
 
 
 class DateTimePGPSymmetricKeyFieldMixin(PGPSymmetricKeyFieldMixin):
@@ -123,4 +123,4 @@ class DateTimePGPSymmetricKeyFieldMixin(PGPSymmetricKeyFieldMixin):
         """Override the form field with custom PCP DateTimeField."""
         defaults = {'form_class': DateTimeField}
         defaults.update(kwargs)
-        return super(DateTimePGPSymmetricKeyFieldMixin, self).formfield(**defaults)
+        return super().formfield(**defaults)

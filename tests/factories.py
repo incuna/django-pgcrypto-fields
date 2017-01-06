@@ -7,7 +7,7 @@ from .models import EncryptedModel
 
 class EncryptedModelFactory(factory.DjangoModelFactory):
     """Factory to generate hashed and encrypted data."""
-    class Meta:  # NOQA
+    class Meta:
         model = EncryptedModel
 
     digest_field = factory.Sequence('Text digest {}'.format)

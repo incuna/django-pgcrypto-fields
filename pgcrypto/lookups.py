@@ -100,10 +100,6 @@ class DateTimeLookupBase(Lookup):
     lookup_name = None  # Set in subclasses
     operator = None  # Set in subclasses
 
-    def __init__(self, lhs, rhs):
-        """Implementing an abstract class."""
-        super(DateTimeLookupBase, self).__init__(lhs, rhs)  # pragma: no cover
-
     def as_sql(self, qn, connection):
         """Build SQL with decryption and casting."""
         lhs, lhs_params = self.process_lhs(qn, connection)

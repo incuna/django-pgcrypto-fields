@@ -11,7 +11,7 @@ class DateField(forms.DateField):
     def __init__(self, input_formats=None, *args, **kwargs):
         """Init that pops off the max_length attribute."""
         kwargs.pop('max_length', None)
-        super(DateField, self).__init__(input_formats, *args, **kwargs)
+        super().__init__(input_formats, *args, **kwargs)
 
 
 class DateTimeField(forms.DateTimeField):
@@ -24,4 +24,4 @@ class DateTimeField(forms.DateTimeField):
     def __init__(self, input_formats=None, *args, **kwargs):
         """Init that pops off the max_length attribute."""
         kwargs.pop('max_length', None)
-        super(DateTimeField, self).__init__(input_formats, *args, **kwargs)
+        super().__init__(input_formats, *args, **kwargs)

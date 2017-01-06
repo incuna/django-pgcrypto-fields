@@ -18,5 +18,5 @@ class EncryptedModel(models.Model):
     date_pgp_sym_field = fields.DatePGPSymmetricKeyField(blank=True, null=True)
     datetime_pgp_sym_field = fields.DateTimePGPSymmetricKeyField(blank=True, null=True)
 
-    class Meta:  # NOQA
+    class Meta:
         app_label = 'tests'
