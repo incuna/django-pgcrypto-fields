@@ -172,7 +172,7 @@ example if the `MyModel` class had a FK to to `AnotherModel` class, no encrypted
 fields be decrypted in the joined `AnotherModel`.
 
 It is recommended that you use the bundled `PGPAdmin` class if using the custom 
-model manager and the Django Admin. The Djano Admin performance suffers when 
+model manager and the Django Admin. The Django Admin performance suffers when 
 using the bundled custom manager. The `PGPAdmin` disables automatic decryption 
 for all ORM calls for that admin class.
 
