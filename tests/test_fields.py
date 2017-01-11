@@ -4,12 +4,10 @@ from unittest.mock import MagicMock
 from django.test import TestCase
 from incuna_test_utils.utils import field_names
 
-from pgcrypto import aggregates, proxy
-from pgcrypto import fields
+from pgcrypto import aggregates, fields, proxy
 from .factories import EncryptedModelFactory
 from .forms import EncryptedForm
-from .models import EncryptedModel
-
+from .models import EncryptedModel, EncryptedModelWithManager
 
 KEYED_FIELDS = (fields.TextDigestField, fields.TextHMACField)
 EMAIL_PGP_FIELDS = (fields.EmailPGPPublicKeyField, fields.EmailPGPSymmetricKeyField)
@@ -408,3 +406,44 @@ class TestEncryptedTextFieldModel(TestCase):
         for field in fields:
             with self.subTest(field=field):
                 self.assertEqual(getattr(instance, field), None)
+
+
+class TestPGPManager(TestCase):
+    """Test `PGPManager` can be integrated in a `Django` model."""
+    model = EncryptedModelWithManager
+
+    def test_auto_decryption(self):
+        """Assert auto decryption via manager."""
+        expected_string = 'bonjour'
+        expected_date = date(2016, 9, 1)
+        expected_datetime = datetime(2016, 9, 1, 0, 0, 0)
+
+        EncryptedModelFactory.create(
+            digest_field=expected_string,
+            hmac_field=expected_string,
+            pgp_pub_field=expected_string,
+            pgp_sym_field=expected_string,
+            date_pgp_sym_field=expected_date,  # Tests cast sql
+            datetime_pgp_sym_field=expected_datetime,  # Tests cast sql
+        )
+
+        instance = self.model.objects.get()
+
+        # Using `__dict__` bypasses "on the fly" decryption that normally occurs
+        # if accessing a field that is not yet decrypted.
+        # If decryption is not working, we get references to <In_Memory> classes
+        self.assertEqual(instance.__dict__['pgp_pub_field'], expected_string)
+        self.assertEqual(instance.__dict__['pgp_sym_field'], expected_string)
+        self.assertEqual(instance.__dict__['date_pgp_sym_field'], expected_date)
+        self.assertEqual(instance.__dict__['datetime_pgp_sym_field'], expected_datetime)
+
+        # Ensure digest / hmac fields are unaffected
+        count = self.model.objects.filter(
+            digest_field__hash_of=expected_string
+        ).count()
+        self.assertEqual(count, 1)
+
+        count = self.model.objects.filter(
+            hmac_field__hash_of=expected_string
+        ).count()
+        self.assertEqual(count, 1)
