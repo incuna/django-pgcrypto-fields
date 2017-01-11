@@ -429,7 +429,8 @@ class TestPGPManager(TestCase):
 
         instance = self.model.objects.get()
 
-        # Using `__dict__` bypasses the only the fly decryption for each field
+        # Using `__dict__` bypasses "on the fly" decryption that normally occurs
+        # if accessing a field that is not yet decrypted.
         # If decryption is not working, we get references to <In_Memory> classes
         self.assertEqual(instance.__dict__['pgp_pub_field'], expected_string)
         self.assertEqual(instance.__dict__['pgp_sym_field'], expected_string)
