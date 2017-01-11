@@ -1,3 +1,11 @@
+## 2.1.0
+
+Thanks to @peterfarrell:
+* Add support for `DatePGPSymmetricKeyField` and `DateTimePGPSymmetricKeyField`
+including support for serializing / deserializing django form fields.
+* Add support for auto decryption of symmetric key and public key fields via
+the PGPManager (and support for disabling it in the Django Admin via the PGPAdmin)
+
 ## 2.0.0
 
 * Remove compatibility for `Django 1.7`.
