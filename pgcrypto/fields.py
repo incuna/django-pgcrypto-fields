@@ -1,3 +1,9 @@
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
 from django.db import models
 
 from pgcrypto import (
@@ -103,3 +109,7 @@ DateTimePGPSymmetricKeyField.register_lookup(DateTimeGT)
 DateTimePGPSymmetricKeyField.register_lookup(DateTimeGTE)
 DateTimePGPSymmetricKeyField.register_lookup(DateTimeLT)
 DateTimePGPSymmetricKeyField.register_lookup(DateTimeLTE)
+
+
+class PGPNullBooleanSymetricKeyField(PGPSymmetricKeyFieldMixin, models.NullBooleanField):
+    encrypt_sql = PGP_SYM_ENCRYPT_SQL

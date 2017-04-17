@@ -1,3 +1,13 @@
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+# from __future__ import (absolute_import, division,
+#                         print_function, unicode_literals)
+from builtins import *
+
 from django.core.validators import MaxLengthValidator
 
 from pgcrypto.aggregates import (
@@ -15,7 +25,7 @@ def remove_validators(validators, validator_class):
     return [v for v in validators if not isinstance(v, validator_class)]
 
 
-class HashMixin:
+class HashMixin(object):
     """Keyed hash mixin.
 
     `HashMixin` uses 'pgcrypto' to encrypt data in a postgres database.
@@ -34,7 +44,7 @@ class HashMixin:
         return self.encrypt_sql
 
 
-class PGPMixin:
+class PGPMixin(object):
     """PGP encryption for field's value.
 
     `PGPMixin` uses 'pgcrypto' to encrypt data in a postgres database.
@@ -44,7 +54,7 @@ class PGPMixin:
     def __init__(self, *args, **kwargs):
         """`max_length` should be set to None as encrypted text size is variable."""
         kwargs['max_length'] = None
-        super().__init__(*args, **kwargs)
+        super(PGPMixin, self).__init__(*args, **kwargs)
 
     def contribute_to_class(self, cls, name, **kwargs):
         """
@@ -56,7 +66,7 @@ class PGPMixin:
         The decrypted value can be accessed using the field's name attribute on
         the model instance.
         """
-        super().contribute_to_class(cls, name, **kwargs)
+        super(PGPMixin, self).contribute_to_class(cls, name, **kwargs)
         setattr(cls, self.name, self.descriptor_class(field=self))
 
     def db_type(self, connection=None):
@@ -87,11 +97,11 @@ class PGPSymmetricKeyFieldMixin(PGPMixin):
     aggregate = PGPSymmetricKeyAggregate
 
 
-class RemoveMaxLengthValidatorMixin:
+class RemoveMaxLengthValidatorMixin(object):
     """Exclude `MaxLengthValidator` from field validators."""
     def __init__(self, *args, **kwargs):
         """Remove `MaxLengthValidator` in parent's `.__init__`."""
-        super().__init__(*args, **kwargs)
+        super(RemoveMaxLengthValidatorMixin, self).__init__(*args, **kwargs)
         self.validators = remove_validators(self.validators, MaxLengthValidator)
 
 
@@ -112,7 +122,7 @@ class DatePGPSymmetricKeyFieldMixin(PGPSymmetricKeyFieldMixin):
         """Override the form field with custom PCP DateField."""
         defaults = {'form_class': DateField}
         defaults.update(kwargs)
-        return super().formfield(**defaults)
+        return super(DatePGPSymmetricKeyFieldMixin, self).formfield(**defaults)
 
 
 class DateTimePGPSymmetricKeyFieldMixin(PGPSymmetricKeyFieldMixin):
@@ -123,4 +133,4 @@ class DateTimePGPSymmetricKeyFieldMixin(PGPSymmetricKeyFieldMixin):
         """Override the form field with custom PCP DateTimeField."""
         defaults = {'form_class': DateTimeField}
         defaults.update(kwargs)
-        return super().formfield(**defaults)
+        return super(DateTimePGPSymmetricKeyFieldMixin).formfield(**defaults)

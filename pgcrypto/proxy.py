@@ -1,4 +1,13 @@
-class EncryptedProxyField:
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
+
+
+class EncryptedProxyField(object):
     """Descriptor for encrypted values.
 
     Decrypted values will query the database through the field's model.
