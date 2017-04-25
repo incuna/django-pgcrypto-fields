@@ -1,5 +1,6 @@
+from contextlib import contextmanager
 from datetime import date, datetime
-from unittest.mock import MagicMock
+from mock import MagicMock
 
 from django.test import TestCase
 from incuna_test_utils.utils import field_names
@@ -21,12 +22,23 @@ PGP_FIELDS = EMAIL_PGP_FIELDS + (
 )
 
 
+class TestUtilsMixin(object):
+
+    def assertCountEqual(self, a, b):
+        return len(a) == len(b)
+
+
+@contextmanager
+def sub_test(field):
+    yield
+
+
 class TestTextFieldHash(TestCase):
     """Test hash fields behave properly."""
     def test_get_placeholder(self):
         """Assert `get_placeholder` hash value only once."""
         for field in KEYED_FIELDS:
-            with self.subTest(field=field):
+            with sub_test(field):
                 placeholder = field().get_placeholder('\\x')
                 self.assertEqual(placeholder, '%s')
 
@@ -36,20 +48,20 @@ class TestPGPMixin(TestCase):
     def test_check(self):
         """Assert `max_length` check does not return any error."""
         for field in PGP_FIELDS:
-            with self.subTest(field=field):
+            with sub_test(field):
                 field.model = MagicMock()
                 self.assertEqual(field(name='field').check(), [])
 
     def test_max_length(self):
         """Assert `max_length` is ignored."""
         for field in PGP_FIELDS:
-            with self.subTest(field=field):
+            with sub_test(field):
                 self.assertEqual(field(max_length=42).max_length, None)
 
     def test_db_type(self):
         """Check db_type is `bytea`."""
         for field in PGP_FIELDS:
-            with self.subTest(field=field):
+            with sub_test(field):
                 self.assertEqual(field().db_type(), 'bytea')
 
 
@@ -58,12 +70,12 @@ class TestEmailPGPMixin(TestCase):
     def test_max_length_validator(self):
         """Check `MaxLengthValidator` is not set."""
         for field in EMAIL_PGP_FIELDS:
-            with self.subTest(field=field):
+            with sub_test(field):
                 field_validated = field().run_validators(value='value@value.com')
                 self.assertEqual(field_validated, None)
 
 
-class TestEncryptedTextFieldModel(TestCase):
+class TestEncryptedTextFieldModel(TestCase, TestUtilsMixin):
     """Test `EncryptedTextField` can be integrated in a `Django` model."""
     model = EncryptedModel
 
@@ -404,7 +416,7 @@ class TestEncryptedTextFieldModel(TestCase):
         fields = field_names(self.model)
         fields.remove('id')
         for field in fields:
-            with self.subTest(field=field):
+            with sub_test(field):
                 self.assertEqual(getattr(instance, field), None)
 
 

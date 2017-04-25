@@ -1,5 +1,9 @@
 # django-pgcrypto-fields [![Build Status](https://travis-ci.org/incuna/django-pgcrypto-fields.svg?branch=master)](https://travis-ci.org/incuna/django-pgcrypto-fields?branch=master) [![Requirements Status](https://requires.io/github/incuna/django-pgcrypto-fields/requirements.svg?branch=master)](https://requires.io/github/incuna/django-pgcrypto-fields/requirements/?branch=master)
 
+**THIS VERSION IS A FUTURES UPDATE TO MAKE PYTHON 2.7 COMPATIBLE. PLEASE VISIT THE LINK ABOVE FOR THE OFFICIAL PACKAGE.**
+* Adds Python 2.7 compatibility
+* Adds `NullBooleanPGPSymetricKeyField`
+
 `django-pgcrypto-fields` is a `Django` extension which relies upon `pgcrypto` to
 encrypt and decrypt data for fields.
 
