@@ -1,9 +1,9 @@
 from contextlib import contextmanager
 from datetime import date, datetime
-from mock import MagicMock
 
 from django.test import TestCase
 from incuna_test_utils.utils import field_names
+from mock import MagicMock
 
 from pgcrypto import aggregates, fields, proxy
 from .factories import EncryptedModelFactory
@@ -23,13 +23,14 @@ PGP_FIELDS = EMAIL_PGP_FIELDS + (
 
 
 class TestUtilsMixin(object):
-
     def assertCountEqual(self, a, b):
+        """Assert a and b are equal in length."""
         return len(a) == len(b)
 
 
 @contextmanager
 def sub_test(field):
+    """Implement sub_test."""
     yield
 
 

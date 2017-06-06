@@ -1,14 +1,13 @@
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
 from __future__ import absolute_import
-from future import standard_library
-standard_library.install_aliases()
-# from __future__ import (absolute_import, division,
-#                         print_function, unicode_literals)
-from builtins import *
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+
+from builtins import object
+from builtins import super
 
 from django.core.validators import MaxLengthValidator
+from future import standard_library
 
 from pgcrypto.aggregates import (
     DatePGPSymmetricKeyAggregate,
@@ -18,6 +17,9 @@ from pgcrypto.aggregates import (
 )
 from pgcrypto.forms import DateField, DateTimeField
 from pgcrypto.proxy import EncryptedProxyField
+
+
+standard_library.install_aliases()
 
 
 def remove_validators(validators, validator_class):
