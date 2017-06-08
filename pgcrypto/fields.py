@@ -1,10 +1,10 @@
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
 from __future__ import absolute_import
-from future import standard_library
-standard_library.install_aliases()
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+
 from django.db import models
+from future import standard_library
 
 from pgcrypto import (
     DIGEST_SQL,
@@ -37,6 +37,9 @@ from pgcrypto.mixins import (
     PGPPublicKeyFieldMixin,
     PGPSymmetricKeyFieldMixin,
 )
+
+
+standard_library.install_aliases()
 
 
 class TextDigestField(HashMixin, models.TextField):

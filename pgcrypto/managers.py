@@ -1,12 +1,16 @@
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
 from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+
 from builtins import super
-from future import standard_library
-standard_library.install_aliases()
+
 from django.conf import settings
 from django.db import models
+from future import standard_library
+
+
+standard_library.install_aliases()
 
 
 class PGPManager(models.Manager):
