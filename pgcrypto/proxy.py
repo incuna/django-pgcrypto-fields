@@ -7,9 +7,13 @@ from builtins import object
 from builtins import str
 
 from future import standard_library
+from six import PY3
 
 
 standard_library.install_aliases()
+
+if PY3:
+    buffer = memoryview
 
 
 class EncryptedProxyField(object):
@@ -48,7 +52,7 @@ class EncryptedProxyField(object):
         if isinstance(value, str):
             return value
 
-        if isinstance(value, memoryview):
+        if isinstance(value, buffer):
             kwargs = {self.field.name: self.aggregate(self.field.name)}
             kw_value = self.model.objects.filter(pk=instance.pk).aggregate(**kwargs)
             instance.__dict__[self.field.name] = kw_value[self.field.name]
