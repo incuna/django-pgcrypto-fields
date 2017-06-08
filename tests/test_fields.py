@@ -4,6 +4,7 @@ from datetime import date, datetime
 from django.test import TestCase
 from incuna_test_utils.utils import field_names
 from mock import MagicMock
+from six import PY3
 
 from pgcrypto import aggregates, fields, proxy
 from .factories import EncryptedModelFactory
@@ -20,6 +21,10 @@ PGP_FIELDS = EMAIL_PGP_FIELDS + (
     fields.TextPGPPublicKeyField,
     fields.TextPGPSymmetricKeyField,
 )
+
+
+if PY3:
+    unicode = str
 
 
 class TestUtilsMixin(object):
@@ -103,16 +108,16 @@ class TestEncryptedTextFieldModel(TestCase, TestUtilsMixin):
         EncryptedModelFactory.create()
 
         instance = self.model.objects.get()
-        self.assertIsInstance(instance.digest_field, str)
-        self.assertIsInstance(instance.hmac_field, str)
+        self.assertIsInstance(instance.digest_field, unicode)
+        self.assertIsInstance(instance.hmac_field, unicode)
 
-        self.assertIsInstance(instance.email_pgp_pub_field, str)
+        self.assertIsInstance(instance.email_pgp_pub_field, unicode)
         self.assertIsInstance(instance.integer_pgp_pub_field, int)
-        self.assertIsInstance(instance.pgp_pub_field, str)
+        self.assertIsInstance(instance.pgp_pub_field, unicode)
 
-        self.assertIsInstance(instance.email_pgp_sym_field, str)
+        self.assertIsInstance(instance.email_pgp_sym_field, unicode)
         self.assertIsInstance(instance.integer_pgp_sym_field, int)
-        self.assertIsInstance(instance.pgp_sym_field, str)
+        self.assertIsInstance(instance.pgp_sym_field, unicode)
 
     def test_fields_descriptor_is_not_instance(self):
         """`EncryptedProxyField` instance returns itself when accessed from the model."""
