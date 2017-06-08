@@ -25,4 +25,5 @@ setup(
     author='Incuna Ltd',
     author_email='admin@incuna.com',
     url='https://github.com/incuna/django-pgcrypto-fields',
+    install_requires=['future==0.16.0']
 )
