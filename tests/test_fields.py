@@ -73,7 +73,9 @@ class TestEncryptedTextFieldModel(TestCase):
         expected = (
             'id',
             'digest_field',
+            'digest_with_original_field',
             'hmac_field',
+            'hmac_with_original_field',
             'email_pgp_pub_field',
             'integer_pgp_pub_field',
             'pgp_pub_field',
@@ -199,6 +201,15 @@ class TestEncryptedTextFieldModel(TestCase):
 
         self.assertCountEqual(queryset, [expected])
 
+    def test_digest_with_original_lookup(self):
+        """Assert we can filter a digest value."""
+        value = 'bonjour'
+        expected = EncryptedModelFactory.create(pgp_sym_field=value)
+        EncryptedModelFactory.create()
+
+        queryset = EncryptedModel.objects.filter(digest_with_original_field__hash_of=value)
+        self.assertCountEqual(queryset, [expected])
+
     def test_hmac_lookup(self):
         """Assert we can filter a digest value."""
         value = 'bonjour'
@@ -206,6 +217,15 @@ class TestEncryptedTextFieldModel(TestCase):
         EncryptedModelFactory.create()
 
         queryset = EncryptedModel.objects.filter(hmac_field__hash_of=value)
+        self.assertCountEqual(queryset, [expected])
+
+    def test_hmac_with_original_lookup(self):
+        """Assert we can filter a digest value."""
+        value = 'bonjour'
+        expected = EncryptedModelFactory.create(pgp_sym_field=value)
+        EncryptedModelFactory.create()
+
+        queryset = EncryptedModel.objects.filter(hmac_with_original_field__hash_of=value)
         self.assertCountEqual(queryset, [expected])
 
     def test_default_lookup(self):
