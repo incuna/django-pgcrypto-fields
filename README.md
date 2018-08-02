@@ -140,7 +140,9 @@ class MyModelManager(managers.PGPManager):
 
 class MyModel(models.Model):
     digest_field = fields.TextDigestField()
+    digest_with_original_field = fields.TextDigestField(original='pgp_sym_field')
     hmac_field = fields.TextHMACField()
+    hmac_with_original_field = fields.TextHMACField(original='pgp_sym_field')
 
     integer_pgp_pub_field = fields.IntegerPGPPublicKeyField()
     pgp_pub_field = fields.TextPGPPublicKeyField()
@@ -160,6 +162,21 @@ Example:
 ```python
 >>> MyModel.objects.create(value='Value to be encrypted...')
 ```
+
+Hash fields can have hashes auto updated if you use the `original` attribute. This
+attribute allows you to indicate another field name to base the hash value on.
+
+```python
+
+class User(models.Models):
+    first_name = fields.TextPGPSymmetricKeyField(max_length=20, verbose_name='First Name')
+    first_name_hashed = fields.TextHMACField(original='first_name') 
+```
+
+In the above example, if you specify the optional original attribute it would 
+take the unencrypted value from the first_name model field as the input value 
+to create the hash. If you did not specify an original attribute, the field 
+would work as it does now and would remain backwards compatible.
 
 #### Decryption using custom model managers
 

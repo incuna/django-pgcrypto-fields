@@ -20,6 +20,18 @@ class HashMixin:
 
     `HashMixin` uses 'pgcrypto' to encrypt data in a postgres database.
     """
+    def __init__(self, original=None, *args, **kwargs):
+        self.original = original
+
+        super(HashMixin, self).__init__(*args, **kwargs)
+
+    def pre_save(self, model_instance, add):
+        if self.original:
+            original_value = getattr(model_instance, self.original)
+            setattr(model_instance, self.attname, original_value)
+
+        return super(HashMixin, self).pre_save(model_instance, add)
+
     def get_placeholder(self, value=None, compiler=None, connection=None):
         """
         Tell postgres to encrypt this field with a hashing function.
