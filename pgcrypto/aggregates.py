@@ -1,8 +1,19 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+
+from builtins import object
+
 from django.conf import settings
 from django.db.models import Aggregate
+from future import standard_library
 
 
-class PGPPublicKeySQL:
+standard_library.install_aliases()
+
+
+class PGPPublicKeySQL(object):
     """Custom SQL aggregate to decrypt a field with public key.
 
     `PGPPublicKeySQL` provides a SQL template using pgcrypto to decrypt
@@ -25,7 +36,7 @@ class PGPPublicKeySQL:
     )
 
 
-class PGPSymmetricKeySQL:
+class PGPSymmetricKeySQL(object):
     """Custom SQL aggregate to decrypt a field with public key.
 
     `PGPSymmetricKeySQL` provides a SQL template using pgcrypto to decrypt

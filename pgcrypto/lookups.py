@@ -1,8 +1,18 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+
+from builtins import super
+
 from django.conf import settings
 from django.db.models.lookups import Lookup
+from future import standard_library
 
 from pgcrypto import DIGEST_SQL, HMAC_SQL
 
+
+standard_library.install_aliases()
 PGCRYPTO_KEY = settings.PGCRYPTO_KEY
 
 
@@ -52,7 +62,7 @@ class DateLookupBase(Lookup):
     operator = None  # Set in subclasses
 
     def __init__(self, lhs, rhs):
-        """Implementing an abstract class."""
+        """Implement class from abstract parent."""
         super(DateLookupBase, self).__init__(lhs, rhs)  # pragma: no cover
 
     def as_sql(self, qn, connection):

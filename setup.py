@@ -17,6 +17,7 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
+        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.4',
         'Topic :: Database',
         'Topic :: Security :: Cryptography',
@@ -24,4 +25,5 @@ setup(
     author='Incuna Ltd',
     author_email='admin@incuna.com',
     url='https://github.com/incuna/django-pgcrypto-fields',
+    install_requires=['future==0.16.0']
 )

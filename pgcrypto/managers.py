@@ -1,5 +1,16 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+
+from builtins import super
+
 from django.conf import settings
 from django.db import models
+from future import standard_library
+
+
+standard_library.install_aliases()
 
 
 class PGPManager(models.Manager):
@@ -40,7 +51,7 @@ class PGPManager(models.Manager):
 
         skip_decrypt = kwargs.pop('skip_decrypt', None)
 
-        qs = super().get_queryset(*args, **kwargs)
+        qs = super(PGPManager, self).get_queryset(*args, **kwargs)
 
         # The Django admin skips this process because it's extremely slow
         if not skip_decrypt:
