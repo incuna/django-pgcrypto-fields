@@ -10,3 +10,4 @@ flake8==3.5.0
 incuna-test-utils==6.6.0
 psycopg2-binary==2.7.5
 pyflakes==1.6.0
+pycodestyle==2.3.1
