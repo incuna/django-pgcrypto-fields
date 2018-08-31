@@ -1,3 +1,7 @@
+## 2.1.1
+
+* Added support for Django 2.0+
+
 ## 2.1.0
 
 Thanks to @peterfarrell:
