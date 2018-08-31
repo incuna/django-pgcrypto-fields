@@ -10,9 +10,11 @@ class EncryptedModelManager(managers.PGPManager):
 class EncryptedModel(models.Model):
     """Dummy model used for tests to check the fields."""
     digest_field = fields.TextDigestField(blank=True, null=True)
-    digest_with_original_field = fields.TextDigestField(blank=True, null=True, original='pgp_sym_field')
+    digest_with_original_field = fields.TextDigestField(blank=True, null=True,
+                                                        original='pgp_sym_field')
     hmac_field = fields.TextHMACField(blank=True, null=True)
-    hmac_with_original_field = fields.TextHMACField(blank=True, null=True, original='pgp_sym_field')
+    hmac_with_original_field = fields.TextHMACField(blank=True, null=True,
+                                                    original='pgp_sym_field')
 
     email_pgp_pub_field = fields.EmailPGPPublicKeyField(blank=True, null=True)
     integer_pgp_pub_field = fields.IntegerPGPPublicKeyField(blank=True, null=True)
@@ -25,6 +27,7 @@ class EncryptedModel(models.Model):
     datetime_pgp_sym_field = fields.DateTimePGPSymmetricKeyField(blank=True, null=True)
 
     class Meta:
+        """Sets up the meta for the test model."""
         app_label = 'tests'
 
 
@@ -33,4 +36,5 @@ class EncryptedModelWithManager(EncryptedModel):
     objects = EncryptedModelManager()
 
     class Meta:
+        """Sets up the meta for the test manager."""
         proxy = True

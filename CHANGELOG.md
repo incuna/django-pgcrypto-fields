@@ -1,3 +1,9 @@
+## 2.1.1
+
+* Added support for Django 2.x+
+* Updated requirements for testing
+* Updated travis config with Python 3.6 and additional environments
+
 ## 2.1.0
 
 Thanks to @peterfarrell:

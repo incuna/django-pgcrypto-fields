@@ -52,7 +52,7 @@ class DateLookupBase(Lookup):
     operator = None  # Set in subclasses
 
     def __init__(self, lhs, rhs):
-        """Implementing an abstract class."""
+        """Implement an abstract class."""
         super(DateLookupBase, self).__init__(lhs, rhs)  # pragma: no cover
 
     def as_sql(self, qn, connection):

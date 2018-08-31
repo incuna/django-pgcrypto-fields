@@ -28,6 +28,9 @@ PGP symmetric fields are:
 ## Requirements
 
  - postgres with `pgcrypto`
+ - Supports Django 1.8 to 2.1
+ - Compatible with Python 3 only
+ 
 
 ## Installation
 

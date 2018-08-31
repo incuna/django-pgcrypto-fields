@@ -21,11 +21,13 @@ class HashMixin:
     `HashMixin` uses 'pgcrypto' to encrypt data in a postgres database.
     """
     def __init__(self, original=None, *args, **kwargs):
+        """Tells the init the original attr."""
         self.original = original
 
         super(HashMixin, self).__init__(*args, **kwargs)
 
     def pre_save(self, model_instance, add):
+        """Save the original_value."""
         if self.original:
             original_value = getattr(model_instance, self.original)
             setattr(model_instance, self.attname, original_value)

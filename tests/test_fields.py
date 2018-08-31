@@ -207,7 +207,9 @@ class TestEncryptedTextFieldModel(TestCase):
         expected = EncryptedModelFactory.create(pgp_sym_field=value)
         EncryptedModelFactory.create()
 
-        queryset = EncryptedModel.objects.filter(digest_with_original_field__hash_of=value)
+        queryset = EncryptedModel.objects.filter(
+            digest_with_original_field__hash_of=value
+        )
         self.assertCountEqual(queryset, [expected])
 
     def test_hmac_lookup(self):

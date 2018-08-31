@@ -7,8 +7,6 @@ from .models import EncryptedModel
 
 class EncryptedModelFactory(factory.DjangoModelFactory):
     """Factory to generate hashed and encrypted data."""
-    class Meta:
-        model = EncryptedModel
 
     digest_field = factory.Sequence('Text digest {}'.format)
     hmac_field = factory.Sequence('Text hmac {}'.format)
@@ -22,3 +20,7 @@ class EncryptedModelFactory(factory.DjangoModelFactory):
     pgp_sym_field = factory.Sequence('Text with symmetric key {}'.format)
 
     date_pgp_sym_field = date.today()
+
+    class Meta:
+        """Sets up meta for test factory."""
+        model = EncryptedModel
