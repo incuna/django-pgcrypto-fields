@@ -10,5 +10,5 @@ release:
 
 test:
 	@coverage run ./tests/run.py
-	@coverage report --show-missing
+	@coverage report
 	@flake8 .
