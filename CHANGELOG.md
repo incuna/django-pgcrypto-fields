@@ -1,3 +1,8 @@
+## 2.1.2
+
+* Merge .coveragerc into setup.cfg
+* Added .gitignore file
+
 ## 2.1.1
 
 * Added support for Django 2.x+
