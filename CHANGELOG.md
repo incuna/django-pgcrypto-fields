@@ -2,6 +2,8 @@
 
 * Merge .coveragerc into setup.cfg
 * Added .gitignore file
+* Updated out-dated requirements (latest versions of Flake8 and pycodestyle 
+are incompatible with each other)
 
 ## 2.1.1
 
