@@ -3,28 +3,6 @@
 `django-pgcrypto-fields` is a `Django` extension which relies upon `pgcrypto` to
 encrypt and decrypt data for fields.
 
-`django-pgcrypto-fields` has 3 kinds of fields:
-  - hash based fields
-  - PGP fields
-  - Symmetric fields
-
-Hash based fields are:
- - `TextDigestField`
- - `TextHMACField`
-
-PGP key fields are:
- - `EmailPGPPublicKeyField`
- - `IntegerPGPPublicKeyField`
- - `TextPGPPublicKeyField`
-
-PGP symmetric fields are:
- - `EmailPGPSymmetricKeyField`
- - `IntegerPGPSymmetricKeyField`
- - `TextPGPSymmetricKeyField`
- - `DatePGPSymmetricKeyField`
- - `DateTimePGPSymmetricKeyField`
-
-
 ## Requirements
 
  - postgres with `pgcrypto`
@@ -34,40 +12,39 @@ PGP symmetric fields are:
 
 ## Installation
 
-### pip
-
 ```bash
 pip install django-pgcrypto-fields
 ```
 
-### Fields
+## Fields
 
-#### TextDigestField
+`django-pgcrypto-fields` has 3 kinds of fields:
+  - Hash based fields
+  - Public Key (PGP) fields
+  - Symmetric fields
 
-`TextDigestField` is a hash based field. The value is hashed in the database when
-saved with the `digest` pgcrypto function using the `sha512` algorithm.
+#### Hash Based Fields
 
-#### TextHMACField
+Supported hash based fields are:
+ - `TextDigestField`
+ - `TextHMACField`
 
-`TextHMACField` is a hash based field. The value is hashed in the database when
-saved with the `hmac` pgcrypto function using a key and the `sha512` algorithm.
+`TextDigestField` is hashed in the database using the `digest` pgcrypto function 
+using the `sha512` algorithm.
 
-`key` is set in `settings.PGCRYPTO_KEY`.
+`TextHMACField` is hashed in the database using the `hmac` pgcrypto function 
+using a key and the `sha512` algorithm. This is similar to the digest version however
+the hash can only be recalculated knowing the key. This prevents someone from altering 
+the data and also changing the hash to match.
 
+#### Public Key Encryption Fields
 
-N.B. `DatePGPSymmetricKeyField` and `DateTimePGPSymmetricKeyField` only support the following lookups:
+Supported PGP public key fields are:
+ - `EmailPGPPublicKeyField`
+ - `IntegerPGPPublicKeyField`
+ - `TextPGPPublicKeyField`
 
-- `__exact`
-- `__gt`
-- `__gte`
-- `__lt`
-- `__lte`
-
-There is not support for `__range` yet (SQL `BETWEEN`).
-
-#### EmailPGPPublicKeyField, IntegerPGPPublicKeyField, DatePGPSymmetricKeyField, DateTimePGPSymmetricKeyField and TextPGPPublicKeyField
-
-Public key encryption. It generates a token generated with a public key to
+Public key encryption creates a token generated with a public key to
 encrypt the data and a private key to decrypt it.
 
 Public and private keys can be set in settings with `PUBLIC_PGP_KEY` and
@@ -97,9 +74,26 @@ $ gpg -a --export 42 > public.key
 $ gpg -a --export-secret-keys 21 > private.key
 ```
 
-#### EmailPGPSymmetricKeyField, IntegerPGPSymmetricKeyField and TextPGPSymmetricKeyField
+#### Symmetric Key Encryption Fields
 
-Symmetric key encryption. Encrypt and decrypt the data with `settings.PGCRYPTO_KEY`.
+Supported PGP symmetric key fields are:
+ - `EmailPGPSymmetricKeyField`
+ - `IntegerPGPSymmetricKeyField`
+ - `TextPGPSymmetricKeyField`
+ - `DatePGPSymmetricKeyField`
+ - `DateTimePGPSymmetricKeyField`
+
+Encrypt and decrypt the data with `settings.PGCRYPTO_KEY` which acts like a password.
+
+N.B. `DatePGPSymmetricKeyField` and `DateTimePGPSymmetricKeyField` only support the following lookups:
+
+- `__exact`
+- `__gt`
+- `__gte`
+- `__lt`
+- `__lte`
+
+There is no support for `__range` yet (SQL `BETWEEN`).
 
 ### Django settings
 
@@ -206,7 +200,6 @@ class MyModelAdmin(admin.ModelAdmin, PGPAdmin):
     # Your admin code here
 ```
 
-
 #### Decrypting using aggregates
 
 This is useful if you are not using the custom manager or need to decrypt fields 
@@ -263,3 +256,21 @@ Example:
 [<MyModel: MyModel object>]
 
 ```
+
+## Security Limitations
+
+Taken direction from the PostgreSQL documentation:
+
+https://www.postgresql.org/docs/9.6/static/pgcrypto.html#AEN187024
+
+All pgcrypto functions run inside the database server. That means that all the 
+data and passwords move between pgcrypto and client applications in clear text. Thus you must:
+
+1. Connect locally or use SSL connections.
+1. Trust both system and database administrator.
+
+If you cannot, then better do crypto inside client application.
+
+The implementation does not resist side-channel attacks. For example, the time 
+required for a pgcrypto decryption function to complete varies among ciphertexts of 
+a given size.
