@@ -50,7 +50,7 @@ class EncryptionBase(Aggregate):
     """Base class to add a custom aggregate method to a query."""
 
     def add_to_query(self, query, alias, col, source, is_summary):
-        """Add the aggregate to the query.
+        """Add the aggregate to the query. This method will be removed in Django 1.10.
 
         `alias` is `{self.lookup}__decrypt` where 'decrypt' is `self.name.lower()`.
 
@@ -83,6 +83,20 @@ class PGPSymmetricKeyAggregate(PGPSymmetricKeySQL, EncryptionBase):
     name = 'decrypted'
 
 
+class DatePGPPublicKeyAggregate(EncryptionBase):
+    """PGP public key based aggregation.
+
+    `pgp_sym_encrypt` is a pgcrypto functions, encrypts the field's value
+    with a key.
+    """
+    name = 'decrypted'
+    sql = PGPPublicKeySQL
+    function = 'pgp_pub_decrypt'
+    template = "cast(%(function)s(%(field)s, dearmor('{}')) AS DATE)".format(
+        settings.PRIVATE_PGP_KEY,
+    )
+
+
 class DatePGPSymmetricKeyAggregate(EncryptionBase):
     """PGP symmetric key based aggregation.
 
@@ -94,6 +108,20 @@ class DatePGPSymmetricKeyAggregate(EncryptionBase):
     function = 'pgp_sym_decrypt'
     template = "cast(%(function)s(%(field)s, '{}') AS DATE)".format(
         settings.PGCRYPTO_KEY,
+    )
+
+
+class DateTimePGPPublicKeyAggregate(EncryptionBase):
+    """PGP public key based aggregation.
+
+    `pgp_sym_encrypt` is a pgcrypto functions, encrypts the field's value
+    with a key.
+    """
+    name = 'decrypted'
+    sql = PGPPublicKeySQL
+    function = 'pgp_pub_decrypt'
+    template = "cast(%(function)s(%(field)s, dearmor('{}')) AS TIMESTAMP)".format(
+        settings.PRIVATE_PGP_KEY,
     )
 
 

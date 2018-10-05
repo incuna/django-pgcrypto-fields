@@ -43,12 +43,24 @@ Supported PGP public key fields are:
  - `EmailPGPPublicKeyField`
  - `IntegerPGPPublicKeyField`
  - `TextPGPPublicKeyField`
+ - `DatePGPPublicKeyField`
+ - `DateTimePGPPublicKeyField`
 
 Public key encryption creates a token generated with a public key to
 encrypt the data and a private key to decrypt it.
 
 Public and private keys can be set in settings with `PUBLIC_PGP_KEY` and
 `PRIVATE_PGP_KEY`.
+
+N.B. `DatePGPPublicKeyField` and `DateTimePGPPublicKeyField` only support the following lookups:
+
+- `__exact`
+- `__gt`
+- `__gte`
+- `__lt`
+- `__lte`
+
+There is no support for `__range` yet (SQL `BETWEEN`). Pull requests are welcome.
 
 ##### Generate GPG keys.
 
@@ -93,7 +105,7 @@ N.B. `DatePGPSymmetricKeyField` and `DateTimePGPSymmetricKeyField` only support 
 - `__lt`
 - `__lte`
 
-There is no support for `__range` yet (SQL `BETWEEN`).
+There is no support for `__range` yet (SQL `BETWEEN`). Pull requests are welcome.
 
 ### Django settings
 
@@ -141,8 +153,13 @@ class MyModel(models.Model):
     hmac_field = fields.TextHMACField()
     hmac_with_original_field = fields.TextHMACField(original='pgp_sym_field')
 
+    email_pgp_pub_field = fields.EmailPGPPublicKeyField()
     integer_pgp_pub_field = fields.IntegerPGPPublicKeyField()
     pgp_pub_field = fields.TextPGPPublicKeyField()
+    date_pgp_pub_field = fields.DatePGPPublicKeyField()
+    datetime_pgp_pub_field = fields.DateTimePGPPublicKeyField()
+    
+    email_pgp_sym_field = fields.EmailPGPSymmetricKeyField()
     integer_pgp_sym_field = fields.IntegerPGPSymmetricKeyField()
     pgp_sym_field = fields.TextPGPSymmetricKeyField()
     date_pgp_sym_field = fields.DatePGPSymmetricKeyField()

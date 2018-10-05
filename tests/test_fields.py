@@ -84,6 +84,8 @@ class TestEncryptedTextFieldModel(TestCase):
             'pgp_sym_field',
             'date_pgp_sym_field',
             'datetime_pgp_sym_field',
+            'date_pgp_pub_field',
+            'datetime_pgp_pub_field',
         )
         self.assertCountEqual(fields, expected)
 
@@ -98,10 +100,14 @@ class TestEncryptedTextFieldModel(TestCase):
         self.assertIsInstance(instance.email_pgp_pub_field, str)
         self.assertIsInstance(instance.integer_pgp_pub_field, int)
         self.assertIsInstance(instance.pgp_pub_field, str)
+        self.assertIsInstance(instance.date_pgp_pub_field, date)
+        self.assertIsInstance(instance.datetime_pgp_pub_field, datetime)
 
         self.assertIsInstance(instance.email_pgp_sym_field, str)
         self.assertIsInstance(instance.integer_pgp_sym_field, int)
         self.assertIsInstance(instance.pgp_sym_field, str)
+        self.assertIsInstance(instance.date_pgp_sym_field, date)
+        self.assertIsInstance(instance.datetime_pgp_sym_field, datetime)
 
     def test_fields_descriptor_is_not_instance(self):
         """`EncryptedProxyField` instance returns itself when accessed from the model."""
@@ -134,7 +140,7 @@ class TestEncryptedTextFieldModel(TestCase):
 
         self.assertEqual(value, expected)
 
-    def test_value_pgp_pub_multipe(self):
+    def test_value_pgp_pub_multiple(self):
         """Assert we get back the correct value when the table contains data."""
         expected = 'bonjour'
         EncryptedModelFactory.create(pgp_pub_field='au revoir')
@@ -325,10 +331,41 @@ class TestEncryptedTextFieldModel(TestCase):
 
         self.assertEqual(instance.date_pgp_sym_field, expected)
 
+    def test_pgp_pub_key_date(self):
+        """Assert date is save with an `DatePGPPublicKeyField` field."""
+        expected = date.today()
+        instance = EncryptedModelFactory.create(date_pgp_pub_field=expected)
+        instance.refresh_from_db()  # Ensure the PGSQL casting works right
+
+        self.assertEqual(instance.date_pgp_pub_field, expected)
+
+        instance = EncryptedModel.objects.get(pk=instance.id)
+
+        self.assertEqual(instance.date_pgp_pub_field, expected)
+
+    def test_pgp_symmetric_key_date_form(self):
+        """Assert form field and widget for `DateTimePGPSymmetricKeyField` field."""
+        expected = date.today()
+        instance = EncryptedModelFactory.create(date_pgp_sym_field=expected)
+
+        payload = {
+            'date_pgp_sym_field': '08/01/2016'
+        }
+
+        form = EncryptedForm(payload, instance=instance)
+        self.assertTrue(form.is_valid())
+
+        cleaned_data = form.cleaned_data
+
+        self.assertTrue(
+            cleaned_data['date_pgp_sym_field'],
+            date(2016, 8, 1)
+        )
+
     def test_pgp_symmetric_key_datetime_form(self):
         """Assert form field and widget for `DateTimePGPSymmetricKeyField` field."""
         expected = datetime.now()
-        instance = EncryptedModelFactory.create(date_pgp_sym_field=expected)
+        instance = EncryptedModelFactory.create(datetime_pgp_sym_field=expected)
 
         payload = {
             'datetime_pgp_sym_field': '08/01/2016 14:00'
@@ -344,8 +381,160 @@ class TestEncryptedTextFieldModel(TestCase):
             datetime(2016, 8, 1, 14, 0, 0)
         )
 
-    def test_pgp_symmetric_key_datetime_lookups(self):
+    def test_pgp_symmetric_key_date_lookups(self):
         """Assert lookups `DatePGPSymmetricKeyField` field."""
+        EncryptedModelFactory.create(date_pgp_sym_field=date(2016, 7, 1))
+        EncryptedModelFactory.create(date_pgp_sym_field=date(2016, 8, 1))
+        EncryptedModelFactory.create(date_pgp_sym_field=date(2016, 9, 1))
+
+        # EXACT
+        self.assertEqual(
+            1,
+            EncryptedModel.objects.filter(
+                date_pgp_sym_field__exact=date(2016, 8, 1)
+            ).count()
+        )
+        self.assertEqual(
+            0,
+            EncryptedModel.objects.filter(
+                date_pgp_sym_field__exact=date(2016, 8, 2)
+            ).count()
+        )
+
+        # GT
+        self.assertEqual(
+            1,
+            EncryptedModel.objects.filter(
+                date_pgp_sym_field__gt=date(2016, 8, 1)
+            ).count()
+        )
+        self.assertEqual(
+            0,
+            EncryptedModel.objects.filter(
+                date_pgp_sym_field__gt=date(2016, 10, 1)
+            ).count()
+        )
+
+        # GTE
+        self.assertEqual(
+            2,
+            EncryptedModel.objects.filter(
+                date_pgp_sym_field__gte=date(2016, 8, 1)
+            ).count()
+        )
+        self.assertEqual(
+            0,
+            EncryptedModel.objects.filter(
+                date_pgp_sym_field__gte=date(2016, 10, 1)
+            ).count()
+        )
+
+        # LE
+        self.assertEqual(
+            1,
+            EncryptedModel.objects.filter(
+                date_pgp_sym_field__lt=date(2016, 8, 1)
+            ).count()
+        )
+        self.assertEqual(
+            0,
+            EncryptedModel.objects.filter(
+                date_pgp_sym_field__lt=date(2016, 6, 1)
+            ).count()
+        )
+
+        # LTE
+        self.assertEqual(
+            2,
+            EncryptedModel.objects.filter(
+                date_pgp_sym_field__lte=date(2016, 8, 1)
+            ).count()
+        )
+        self.assertEqual(
+            0,
+            EncryptedModel.objects.filter(
+                date_pgp_sym_field__lte=date(2016, 6, 1)
+            ).count()
+        )
+
+    def test_pgp_pub_key_date_lookups(self):
+        """Assert lookups `DatePGPPublicKeyField` field."""
+        EncryptedModelFactory.create(date_pgp_pub_field=date(2016, 7, 1))
+        EncryptedModelFactory.create(date_pgp_pub_field=date(2016, 8, 1))
+        EncryptedModelFactory.create(date_pgp_pub_field=date(2016, 9, 1))
+
+        # EXACT
+        self.assertEqual(
+            1,
+            EncryptedModel.objects.filter(
+                date_pgp_pub_field__exact=date(2016, 8, 1)
+            ).count()
+        )
+        self.assertEqual(
+            0,
+            EncryptedModel.objects.filter(
+                date_pgp_pub_field__exact=date(2016, 8, 2)
+            ).count()
+        )
+
+        # GT
+        self.assertEqual(
+            1,
+            EncryptedModel.objects.filter(
+                date_pgp_pub_field__gt=date(2016, 8, 1)
+            ).count()
+        )
+        self.assertEqual(
+            0,
+            EncryptedModel.objects.filter(
+                date_pgp_pub_field__gt=date(2016, 10, 1)
+            ).count()
+        )
+
+        # GTE
+        self.assertEqual(
+            2,
+            EncryptedModel.objects.filter(
+                date_pgp_pub_field__gte=date(2016, 8, 1)
+            ).count()
+        )
+        self.assertEqual(
+            0,
+            EncryptedModel.objects.filter(
+                date_pgp_pub_field__gte=date(2016, 10, 1)
+            ).count()
+        )
+
+        # LE
+        self.assertEqual(
+            1,
+            EncryptedModel.objects.filter(
+                date_pgp_pub_field__lt=date(2016, 8, 1)
+            ).count()
+        )
+        self.assertEqual(
+            0,
+            EncryptedModel.objects.filter(
+                date_pgp_pub_field__lt=date(2016, 6, 1)
+            ).count()
+        )
+
+        # LTE
+        self.assertEqual(
+            2,
+            EncryptedModel.objects.filter(
+                date_pgp_pub_field__lte=date(2016, 8, 1)
+            ).count()
+        )
+        self.assertEqual(
+            0,
+            EncryptedModel.objects.filter(
+                date_pgp_pub_field__lte=date(2016, 6, 1)
+            ).count()
+        )
+
+    def test_pgp_symmetric_key_datetime_lookups(self):
+        """Assert lookups `DateTimePGPSymmetricKeyField` field."""
         EncryptedModelFactory.create(datetime_pgp_sym_field=datetime(2016, 7, 1, 0, 0, 0))
         EncryptedModelFactory.create(datetime_pgp_sym_field=datetime(2016, 8, 1, 0, 0, 0))
         EncryptedModelFactory.create(datetime_pgp_sym_field=datetime(2016, 9, 1, 0, 0, 0))
@@ -417,6 +606,82 @@ class TestEncryptedTextFieldModel(TestCase):
             0,
             EncryptedModel.objects.filter(
                 datetime_pgp_sym_field__lte=datetime(2016, 6, 1, 0, 0, 0)
+            ).count()
+        )
+
+    def test_pgp_public_key_datetime_lookups(self):
+        """Assert lookups `DateTimePGPPublicKeyField` field."""
+        EncryptedModelFactory.create(datetime_pgp_pub_field=datetime(2016, 7, 1, 0, 0, 0))
+        EncryptedModelFactory.create(datetime_pgp_pub_field=datetime(2016, 8, 1, 0, 0, 0))
+        EncryptedModelFactory.create(datetime_pgp_pub_field=datetime(2016, 9, 1, 0, 0, 0))
+
+        # EXACT
+        self.assertEqual(
+            1,
+            EncryptedModel.objects.filter(
+                datetime_pgp_pub_field__exact=datetime(2016, 8, 1, 0, 0, 0)
+            ).count()
+        )
+        self.assertEqual(
+            0,
+            EncryptedModel.objects.filter(
+                datetime_pgp_pub_field__exact=datetime(2016, 8, 1, 0, 0, 1)
+            ).count()
+        )
+
+        # GT
+        self.assertEqual(
+            1,
+            EncryptedModel.objects.filter(
+                datetime_pgp_pub_field__gt=datetime(2016, 8, 1, 0, 0, 0)
+            ).count()
+        )
+        self.assertEqual(
+            0,
+            EncryptedModel.objects.filter(
+                datetime_pgp_pub_field__gt=datetime(2016, 10, 1, 0, 0, 0)
+            ).count()
+        )
+
+        # GTE
+        self.assertEqual(
+            2,
+            EncryptedModel.objects.filter(
+                datetime_pgp_pub_field__gte=datetime(2016, 8, 1, 0, 0, 0)
+            ).count()
+        )
+        self.assertEqual(
+            0,
+            EncryptedModel.objects.filter(
+                datetime_pgp_pub_field__gte=datetime(2016, 10, 1, 0, 0, 0)
+            ).count()
+        )
+
+        # LE
+        self.assertEqual(
+            1,
+            EncryptedModel.objects.filter(
+                datetime_pgp_pub_field__lt=datetime(2016, 8, 1, 0, 0, 0)
+            ).count()
+        )
+        self.assertEqual(
+            0,
+            EncryptedModel.objects.filter(
+                datetime_pgp_pub_field__lt=datetime(2016, 6, 1, 0, 0, 0)
+            ).count()
+        )
+
+        # LTE
+        self.assertEqual(
+            2,
+            EncryptedModel.objects.filter(
+                datetime_pgp_pub_field__lte=datetime(2016, 8, 1, 0, 0, 0)
+            ).count()
+        )
+        self.assertEqual(
+            0,
+            EncryptedModel.objects.filter(
+                datetime_pgp_pub_field__lte=datetime(2016, 6, 1, 0, 0, 0)
             ).count()
         )
 
