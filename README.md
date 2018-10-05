@@ -1,4 +1,4 @@
-# django-pgcrypto-fields [![Build Status](https://travis-ci.org/incuna/django-pgcrypto-fields.svg?branch=master)](https://travis-ci.org/incuna/django-pgcrypto-fields?branch=master) [![Requirements Status](https://requires.io/github/incuna/django-pgcrypto-fields/requirements.svg?branch=master)](https://requires.io/github/incuna/django-pgcrypto-fields/requirements/?branch=master)
+# django-pgcrypto-fields [![Latest Release](https://img.shields.io/pypi/v/django-pgcrypto-fields.svg)](https://pypi.org/pypi/name/) [![Python Versions](https://img.shields.io/pypi/pyversions/django-pgcrypto-fields.svg)](https://pypi.org/pypi/name/) [![Build Status](https://travis-ci.org/incuna/django-pgcrypto-fields.svg?branch=master)](https://travis-ci.org/incuna/django-pgcrypto-fields?branch=master) [![Requirements Status](https://requires.io/github/incuna/django-pgcrypto-fields/requirements.svg?branch=master)](https://requires.io/github/incuna/django-pgcrypto-fields/requirements/?branch=master)
 
 `django-pgcrypto-fields` is a `Django` extension which relies upon `pgcrypto` to
 encrypt and decrypt data for fields.

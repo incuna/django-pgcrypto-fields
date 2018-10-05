@@ -1,10 +1,19 @@
+### 2.2.1
+
+* Improved `setup.py`:
+    * check for Python 3.5+
+    * updated classifiers
+* Improved `make` file for release to use `twine`
+* Added additional shields to `README`
+* Updated Travis config to include Python 3.5 and 3.6
+
 ## 2.2.0
 
-* Merge .coveragerc into setup.cfg
-* Added .gitignore file
-* Updated out-dated requirements (latest versions of Flake8 and pycodestyle 
+* Merge `.coveragerc` into `setup.cfg`
+* Added `.gitignore` file
+* Updated out-dated requirements (latest versions of `Flake8` and `pycodestyle` 
 are incompatible with each other)
-* Updated README with better explanations of the fields
+* Updated `README` with better explanations of the fields
 * Implemented DatePGPPublicKeyField and DateTimePGPPublicKeyField
 
 ## 2.1.1
