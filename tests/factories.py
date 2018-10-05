@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 import factory
 
@@ -15,11 +15,15 @@ class EncryptedModelFactory(factory.DjangoModelFactory):
     integer_pgp_pub_field = 42
     pgp_pub_field = factory.Sequence('Text with public key {}'.format)
 
+    date_pgp_pub_field = date.today()
+    datetime_pgp_pub_field = datetime.now()
+
     email_pgp_sym_field = factory.Sequence('email{}@symmetric.key'.format)
     integer_pgp_sym_field = 43
     pgp_sym_field = factory.Sequence('Text with symmetric key {}'.format)
 
     date_pgp_sym_field = date.today()
+    datetime_pgp_sym_field = datetime.now()
 
     class Meta:
         """Sets up meta for test factory."""

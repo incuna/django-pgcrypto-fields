@@ -12,4 +12,6 @@ class EncryptedForm(forms.ModelForm):
         widgets = {
             'date_pgp_sym_field': forms.DateInput(format='%m/%d/%Y'),
             'datetime_pgp_sym_field': forms.DateTimeInput(format='%m/%d/%Y %I:%M'),
+            'date_pgp_pub_field': forms.DateInput(format='%m/%d/%Y'),
+            'datetime_pgp_pub_field': forms.DateTimeInput(format='%m/%d/%Y %I:%M'),
         }

@@ -1,4 +1,4 @@
-class PGPAdmin(object):
+class PGPAdmin(object):  # pragma: no cover
 
     def get_queryset(self, request):
         """Skip any auto decryption when ORM calls are from the admin."""
