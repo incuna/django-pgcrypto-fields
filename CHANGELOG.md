@@ -1,4 +1,4 @@
-## 2.1.2
+## 2.2.0
 
 * Merge .coveragerc into setup.cfg
 * Added .gitignore file
