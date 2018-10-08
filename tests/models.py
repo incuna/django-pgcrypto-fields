@@ -23,6 +23,10 @@ class EncryptedModelManager(models.Manager):
     use_for_related_fields = True
     use_in_migrations = True
 
+    def get_by_natural_key(self, email_pgp_pub_field):
+        """Get by natual key of email pub field."""
+        return self.get(email_pgp_pub_field=email_pgp_pub_field)
+
 
 class EncryptedModel(models.Model):
     """Dummy model used for tests to check the fields."""
@@ -33,7 +37,8 @@ class EncryptedModel(models.Model):
     hmac_with_original_field = fields.TextHMACField(blank=True, null=True,
                                                     original='pgp_sym_field')
 
-    email_pgp_pub_field = fields.EmailPGPPublicKeyField(blank=True, null=True)
+    email_pgp_pub_field = fields.EmailPGPPublicKeyField(blank=True, null=True,
+                                                        unique=True)
     integer_pgp_pub_field = fields.IntegerPGPPublicKeyField(blank=True, null=True)
     pgp_pub_field = fields.TextPGPPublicKeyField(blank=True, null=True)
     date_pgp_pub_field = fields.DatePGPPublicKeyField(blank=True, null=True)

@@ -852,3 +852,12 @@ class TestEncryptedTextFieldModel(TestCase):
             temp = instance.fk_model.fk_pgp_sym_field
 
         self.assertEqual(temp, expected)
+
+    def test_get_by_natural_key(self):
+        """Test get_by_natual_key support."""
+        expected = 'peter@test.com'
+        EncryptedModelFactory.create(email_pgp_pub_field=expected)
+
+        instance = self.model.objects.get_by_natural_key(expected)
+
+        self.assertEqual(instance.email_pgp_pub_field, expected)
