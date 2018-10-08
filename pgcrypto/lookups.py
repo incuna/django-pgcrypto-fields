@@ -33,14 +33,12 @@ class DateTimeLookupBase(Lookup):
         lhs, params = self.process_lhs(qn, connection)
         rhs, rhs_params = self.process_rhs(qn, connection)
         params.extend(rhs_params)
-        lhs = self.lhs.field.decrypt_sql % lhs
-        lhs = self.lhs.field.cast_sql % lhs
         rhs = self.get_rhs_op(connection, rhs)
         return "%s %s" % (lhs, rhs), params
 
     def get_rhs_op(self, connection, rhs):
         """Build right hand SQL with operator."""
-        return '%s %s' % (self.operator, rhs)
+        return "%s %s" % (self.operator, rhs)
 
 
 class DateTimeGtLookup(DateTimeLookupBase):

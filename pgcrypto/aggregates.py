@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.db.models import Aggregate
 
 
@@ -20,9 +19,7 @@ class PGPPublicKeySQL:
     `dearmor` is used to unwrap the key from the PGP key.
     """
     function = 'pgp_pub_decrypt'
-    template = "%(function)s(%(field)s, dearmor('{}'))".format(
-        settings.PRIVATE_PGP_KEY,
-    )
+    template = "%(field)s"
 
 
 class PGPSymmetricKeySQL:
@@ -41,9 +38,7 @@ class PGPSymmetricKeySQL:
     `%(field)s` is replaced with the field's name.
     """
     function = 'pgp_sym_decrypt'
-    template = "%(function)s(%(field)s, '{}')".format(
-        settings.PGCRYPTO_KEY,
-    )
+    template = "%(field)s"
 
 
 class PGPPublicKeyAggregate(PGPPublicKeySQL, Aggregate):
@@ -73,9 +68,7 @@ class DatePGPPublicKeyAggregate(Aggregate):
     name = 'decrypted'
     sql = PGPPublicKeySQL
     function = 'pgp_pub_decrypt'
-    template = "cast(%(function)s(%(field)s, dearmor('{}')) AS DATE)".format(
-        settings.PRIVATE_PGP_KEY,
-    )
+    template = "%(field)s"
 
 
 class DatePGPSymmetricKeyAggregate(Aggregate):
@@ -87,9 +80,7 @@ class DatePGPSymmetricKeyAggregate(Aggregate):
     name = 'decrypted'
     sql = PGPSymmetricKeySQL
     function = 'pgp_sym_decrypt'
-    template = "cast(%(function)s(%(field)s, '{}') AS DATE)".format(
-        settings.PGCRYPTO_KEY,
-    )
+    template = "%(field)s"
 
 
 class DateTimePGPPublicKeyAggregate(Aggregate):
@@ -101,9 +92,7 @@ class DateTimePGPPublicKeyAggregate(Aggregate):
     name = 'decrypted'
     sql = PGPPublicKeySQL
     function = 'pgp_pub_decrypt'
-    template = "cast(%(function)s(%(field)s, dearmor('{}')) AS TIMESTAMP)".format(
-        settings.PRIVATE_PGP_KEY,
-    )
+    template = "%(field)s"
 
 
 class DateTimePGPSymmetricKeyAggregate(Aggregate):
@@ -115,6 +104,4 @@ class DateTimePGPSymmetricKeyAggregate(Aggregate):
     name = 'decrypted'
     sql = PGPSymmetricKeySQL
     function = 'pgp_sym_decrypt'
-    template = "cast(%(function)s(%(field)s, '{}') AS TIMESTAMP)".format(
-        settings.PGCRYPTO_KEY,
-    )
+    template = "%(field)s"

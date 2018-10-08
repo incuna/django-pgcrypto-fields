@@ -4,10 +4,10 @@ from unittest.mock import MagicMock
 from django.test import TestCase
 from incuna_test_utils.utils import field_names
 
-from pgcrypto import aggregates, fields, proxy
+from pgcrypto import aggregates, fields
 from .factories import EncryptedModelFactory
 from .forms import EncryptedForm
-from .models import EncryptedModel, EncryptedModelWithManager
+from .models import EncryptedModel
 
 KEYED_FIELDS = (fields.TextDigestField, fields.TextHMACField)
 EMAIL_PGP_FIELDS = (fields.EmailPGPPublicKeyField, fields.EmailPGPSymmetricKeyField)
@@ -109,26 +109,18 @@ class TestEncryptedTextFieldModel(TestCase):
         self.assertIsInstance(instance.date_pgp_sym_field, date)
         self.assertIsInstance(instance.datetime_pgp_sym_field, datetime)
 
-    def test_fields_descriptor_is_not_instance(self):
-        """`EncryptedProxyField` instance returns itself when accessed from the model."""
-        self.assertIsInstance(
-            self.model.pgp_pub_field,
-            proxy.EncryptedProxyField,
-        )
-        self.assertIsInstance(
-            self.model.pgp_sym_field,
-            proxy.EncryptedProxyField,
-        )
-
     def test_value_query(self):
-        """Assert querying the field's value is making one query."""
+        """Assert querying the field's value is making zero queries."""
         expected = 'bonjour'
+        temp = None
         EncryptedModelFactory.create(pgp_pub_field=expected)
 
         instance = self.model.objects.get()
 
-        with self.assertNumQueries(1):
-            instance.pgp_pub_field
+        with self.assertNumQueries(0):
+            temp = instance.pgp_pub_field
+
+        self.assertEqual(expected, temp)
 
     def test_value_pgp_pub(self):
         """Assert we can get back the decrypted value."""
@@ -177,12 +169,12 @@ class TestEncryptedTextFieldModel(TestCase):
         )
 
         queryset = self.model.objects.annotate(
-            aggregates.PGPPublicKeyAggregate('pgp_pub_field'),
-            aggregates.PGPSymmetricKeyAggregate('pgp_sym_field'),
+            copy_pgp_pub_field=aggregates.PGPPublicKeyAggregate('pgp_pub_field'),
+            copy_pgp_sym_field=aggregates.PGPSymmetricKeyAggregate('pgp_sym_field'),
         )
         instance = queryset.get()
-        self.assertEqual(instance.pgp_pub_field__decrypted, expected)
-        self.assertEqual(instance.pgp_sym_field__decrypted, expected)
+        self.assertEqual(instance.copy_pgp_pub_field, expected)
+        self.assertEqual(instance.copy_pgp_sym_field, expected)
 
     def test_decrypt_filter(self):
         """Assert we can get filter the decrypted value."""
@@ -192,10 +184,34 @@ class TestEncryptedTextFieldModel(TestCase):
         )
 
         queryset = self.model.objects.annotate(
-            aggregates.PGPPublicKeyAggregate('pgp_pub_field'),
+            copy_pgp_pub_field=aggregates.PGPPublicKeyAggregate('pgp_pub_field'),
+        ).filter(
+            copy_pgp_pub_field=expected
         )
-        instance = queryset.filter(pgp_pub_field__decrypted=expected).first()
-        self.assertEqual(instance.pgp_pub_field__decrypted, expected)
+
+        instance = queryset.first()
+        self.assertEqual(instance.copy_pgp_pub_field, expected)
+
+        queryset = self.model.objects.filter(
+            pgp_pub_field=expected
+        )
+
+        instance = queryset.first()
+        self.assertEqual(instance.pgp_pub_field, expected)
+
+        queryset = self.model.objects.filter(
+            pgp_pub_field__contains='jour'
+        )
+
+        instance = queryset.first()
+        self.assertEqual(instance.pgp_pub_field, expected)
+
+        queryset = self.model.objects.filter(
+            pgp_pub_field__startswith='bon'
+        )
+
+        instance = queryset.first()
+        self.assertEqual(instance.pgp_pub_field, expected)
 
     def test_digest_lookup(self):
         """Assert we can filter a digest value."""
@@ -800,43 +816,24 @@ class TestEncryptedTextFieldModel(TestCase):
             with self.subTest(field=field):
                 self.assertEqual(getattr(instance, field), None)
 
+    def test_defer(self):
+        """Test defer() functionality."""
+        expected = 'bonjour'
+        EncryptedModel.objects.create(pgp_sym_field=expected)
+        instance = self.model.objects.defer('pgp_sym_field').get()
 
-class TestPGPManager(TestCase):
-    """Test `PGPManager` can be integrated in a `Django` model."""
-    model = EncryptedModelWithManager
+        with self.assertNumQueries(1):
+            temp = instance.pgp_sym_field
 
-    def test_auto_decryption(self):
-        """Assert auto decryption via manager."""
-        expected_string = 'bonjour'
-        expected_date = date(2016, 9, 1)
-        expected_datetime = datetime(2016, 9, 1, 0, 0, 0)
+        self.assertEqual(expected, temp)
 
-        EncryptedModelFactory.create(
-            digest_field=expected_string,
-            hmac_field=expected_string,
-            pgp_pub_field=expected_string,
-            pgp_sym_field=expected_string,
-            date_pgp_sym_field=expected_date,  # Tests cast sql
-            datetime_pgp_sym_field=expected_datetime,  # Tests cast sql
-        )
+    def test_only(self):
+        """Test defer() functionality."""
+        expected = 'bonjour'
+        EncryptedModel.objects.create(pgp_sym_field=expected, pgp_pub_field=expected)
+        instance = self.model.objects.only('pgp_sym_field').get()
 
-        instance = self.model.objects.get()
+        with self.assertNumQueries(1):
+            temp = instance.pgp_pub_field
 
-        # Using `__dict__` bypasses "on the fly" decryption that normally occurs
-        # if accessing a field that is not yet decrypted.
-        # If decryption is not working, we get references to <In_Memory> classes
-        self.assertEqual(instance.__dict__['pgp_pub_field'], expected_string)
-        self.assertEqual(instance.__dict__['pgp_sym_field'], expected_string)
-        self.assertEqual(instance.__dict__['date_pgp_sym_field'], expected_date)
-        self.assertEqual(instance.__dict__['datetime_pgp_sym_field'], expected_datetime)
-
-        # Ensure digest / hmac fields are unaffected
-        count = self.model.objects.filter(
-            digest_field__hash_of=expected_string
-        ).count()
-        self.assertEqual(count, 1)
-
-        count = self.model.objects.filter(
-            hmac_field__hash_of=expected_string
-        ).count()
-        self.assertEqual(count, 1)
+        self.assertEqual(expected, temp)

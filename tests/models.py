@@ -28,6 +28,8 @@ class EncryptedModel(models.Model):
     date_pgp_sym_field = fields.DatePGPSymmetricKeyField(blank=True, null=True)
     datetime_pgp_sym_field = fields.DateTimePGPSymmetricKeyField(blank=True, null=True)
 
+    objects = EncryptedModelManager()
+
     class Meta:
         """Sets up the meta for the test model."""
         app_label = 'tests'
