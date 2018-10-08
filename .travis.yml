@@ -11,9 +11,7 @@ install:
   - pip install $DJANGO
 env:
   matrix:
-    - DJANGO='django>=1.8,<1.9'
-    - DJANGO='django>=1.9,<1.10'
-    - DJANGO='django>=1.10,<1.11'
+    - DJANGO='django>=1.11,<2.0'
     - DJANGO='django>=2.0,<2.1'
     - DJANGO='django>=2.1,<2.2'
     - DJANGO='--upgrade --pre django'

@@ -1,3 +1,7 @@
+### 2.3.0
+
+* Added `__range` lookup for Date / DateTime fields (#59)
+
 ### 2.2.1
 
 * Improved `setup.py`:
