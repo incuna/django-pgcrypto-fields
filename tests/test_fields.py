@@ -854,10 +854,58 @@ class TestEncryptedTextFieldModel(TestCase):
         self.assertEqual(temp, expected)
 
     def test_get_by_natural_key(self):
-        """Test get_by_natual_key support."""
+        """Test get_by_natual_key() support."""
         expected = 'peter@test.com'
         EncryptedModelFactory.create(email_pgp_pub_field=expected)
 
         instance = self.model.objects.get_by_natural_key(expected)
 
         self.assertEqual(instance.email_pgp_pub_field, expected)
+
+    def test_get_or_create(self):
+        """Test get_or_create() support."""
+        expected = 'peter@test.com'
+        original = EncryptedModelFactory.create(email_pgp_pub_field=expected)
+
+        instance, created = self.model.objects.get_or_create(
+            email_pgp_pub_field=expected
+        )
+
+        self.assertFalse(created)
+        self.assertEqual(instance.id, original.id)
+        self.assertEqual(instance.email_pgp_pub_field, original.email_pgp_pub_field)
+
+        instance, created = self.model.objects.get_or_create(
+            email_pgp_pub_field='jessica@test.com'
+        )
+
+        self.assertTrue(created)
+        self.assertNotEqual(instance.id, original.id)
+        self.assertEqual(instance.email_pgp_pub_field, 'jessica@test.com')
+
+    def test_update_or_create(self):
+        """Test update_or_create() support."""
+        expected = 'peter@test.com'
+        original = EncryptedModelFactory.create(
+            email_pgp_pub_field=expected,
+            pgp_sym_field='Test'
+        )
+
+        instance, created = self.model.objects.update_or_create(
+            email_pgp_pub_field='jessica@test.com'
+        )
+
+        self.assertTrue(created)
+        self.assertNotEqual(instance.id, original.id)
+        self.assertEqual(instance.email_pgp_pub_field, 'jessica@test.com')
+
+        instance, created = self.model.objects.update_or_create(
+            email_pgp_pub_field='jessica@test.com',
+            defaults={
+                'pgp_sym_field': 'Blue',
+            }
+        )
+
+        self.assertFalse(created)
+        self.assertNotEqual(instance.id, original.id)
+        self.assertEqual(instance.pgp_sym_field, 'Blue')
