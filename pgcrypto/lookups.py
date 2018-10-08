@@ -1,7 +1,8 @@
 from django.conf import settings
-from django.db.models.lookups import Lookup
+from django.db.models.lookups import FieldGetDbPrepValueIterableMixin, Lookup
 
 from pgcrypto import DIGEST_SQL, HMAC_SQL
+
 
 PGCRYPTO_KEY = settings.PGCRYPTO_KEY
 PRIVATE_PGP_KEY = settings.PRIVATE_PGP_KEY
@@ -58,12 +59,17 @@ class DatePGPSymmetricKeyLookupBase(Lookup):
 
     def as_sql(self, qn, connection):
         """Build SQL with decryption and casting."""
-        lhs, lhs_params = self.process_lhs(qn, connection)
+        lhs, params = self.process_lhs(qn, connection)
         rhs, rhs_params = self.process_rhs(qn, connection)
-        params = lhs_params + rhs_params
-        return "cast(pgp_sym_decrypt(%s, '%s') as DATE) %s %s" % (
-            lhs, PGCRYPTO_KEY, self.operator, rhs
+        params.extend(rhs_params)
+        rhs = self.get_rhs_op(connection, rhs)
+        return "cast(pgp_sym_decrypt(%s, '%s') as DATE) %s" % (
+            lhs, PGCRYPTO_KEY, rhs
         ), params
+
+    def get_rhs_op(self, connection, rhs):
+        """Build right hand SQL with operator."""
+        return '%s %s' % (self.operator, rhs)
 
 
 class DatePGPSymmetricKeyGT(DatePGPSymmetricKeyLookupBase):
@@ -96,6 +102,18 @@ class DatePGPSymmetricKeyEXACT(DatePGPSymmetricKeyLookupBase):
     operator = '='
 
 
+class DatePGPSymmetricKeyRANGE(
+    FieldGetDbPrepValueIterableMixin,
+    DatePGPSymmetricKeyLookupBase
+):
+    lookup_name = 'range'
+    operator = 'BETWEEN'
+
+    def get_rhs_op(self, connection, rhs):
+        """Build right hand sql with operator."""
+        return "%s %s AND %s" % (self.operator, rhs[0], rhs[1])
+
+
 class DateTimePGPSymmetricKeyLookupBase(Lookup):
     """Base class for DateTime lookups."""
     lookup_name = None  # Set in subclasses
@@ -109,12 +127,17 @@ class DateTimePGPSymmetricKeyLookupBase(Lookup):
 
     def as_sql(self, qn, connection):
         """Build SQL with decryption and casting."""
-        lhs, lhs_params = self.process_lhs(qn, connection)
+        lhs, params = self.process_lhs(qn, connection)
         rhs, rhs_params = self.process_rhs(qn, connection)
-        params = lhs_params + rhs_params
-        return "cast(pgp_sym_decrypt(%s, '%s') as TIMESTAMP) %s %s" % (
-            lhs, PGCRYPTO_KEY, self.operator, rhs
+        params.extend(rhs_params)
+        rhs = self.get_rhs_op(connection, rhs)
+        return "cast(pgp_sym_decrypt(%s, '%s') as TIMESTAMP) %s" % (
+            lhs, PGCRYPTO_KEY, rhs
         ), params
+
+    def get_rhs_op(self, connection, rhs):
+        """Build right hand sql with operator."""
+        return '%s %s' % (self.operator, rhs)
 
 
 class DateTimePGPSymmetricKeyGT(DateTimePGPSymmetricKeyLookupBase):
@@ -147,6 +170,18 @@ class DateTimePGPSymmetricKeyEXACT(DateTimePGPSymmetricKeyLookupBase):
     operator = '='
 
 
+class DateTimePGPSymmetricKeyRANGE(
+    FieldGetDbPrepValueIterableMixin,
+    DateTimePGPSymmetricKeyLookupBase
+):
+    lookup_name = 'range'
+    operator = 'BETWEEN'
+
+    def get_rhs_op(self, connection, rhs):
+        """Build right hand sql with operator."""
+        return "%s %s AND %s" % (self.operator, rhs[0], rhs[1])
+
+
 class DatePGPPublicKeyLookupBase(Lookup):
     """Base class for Date lookups."""
     lookup_name = None  # Set in subclasses
@@ -158,12 +193,17 @@ class DatePGPPublicKeyLookupBase(Lookup):
 
     def as_sql(self, qn, connection):
         """Build SQL with decryption and casting."""
-        lhs, lhs_params = self.process_lhs(qn, connection)
+        lhs, params = self.process_lhs(qn, connection)
         rhs, rhs_params = self.process_rhs(qn, connection)
-        params = lhs_params + rhs_params
-        return "cast(pgp_pub_decrypt(%s, dearmor('%s')) as DATE) %s %s" % (
-            lhs, PRIVATE_PGP_KEY, self.operator, rhs
+        params.extend(rhs_params)
+        rhs = self.get_rhs_op(connection, rhs)
+        return "cast(pgp_pub_decrypt(%s, dearmor('%s')) as DATE) %s" % (
+            lhs, PRIVATE_PGP_KEY, rhs
         ), params
+
+    def get_rhs_op(self, connection, rhs):
+        """Build right hand sql with operator."""
+        return '%s %s' % (self.operator, rhs)
 
 
 class DatePGPPublicKeyGT(DatePGPPublicKeyLookupBase):
@@ -196,6 +236,15 @@ class DatePGPPublicKeyEXACT(DatePGPPublicKeyLookupBase):
     operator = '='
 
 
+class DatePGPPublicKeyRANGE(FieldGetDbPrepValueIterableMixin, DatePGPPublicKeyLookupBase):
+    lookup_name = 'range'
+    operator = 'BETWEEN'
+
+    def get_rhs_op(self, connection, rhs):
+        """Build right hand sql with operator."""
+        return "%s %s AND %s" % (self.operator, rhs[0], rhs[1])
+
+
 class DateTimePGPPublicKeyLookupBase(Lookup):
     """Base class for DateTime lookups."""
     lookup_name = None  # Set in subclasses
@@ -207,12 +256,17 @@ class DateTimePGPPublicKeyLookupBase(Lookup):
 
     def as_sql(self, qn, connection):
         """Build SQL with decryption and casting."""
-        lhs, lhs_params = self.process_lhs(qn, connection)
+        lhs, params = self.process_lhs(qn, connection)
         rhs, rhs_params = self.process_rhs(qn, connection)
-        params = lhs_params + rhs_params
-        return "cast(pgp_pub_decrypt(%s, dearmor('%s')) as TIMESTAMP) %s %s" % (
-            lhs, PRIVATE_PGP_KEY, self.operator, rhs
+        params.extend(rhs_params)
+        rhs = self.get_rhs_op(connection, rhs)
+        return "cast(pgp_pub_decrypt(%s, dearmor('%s')) as TIMESTAMP) %s" % (
+            lhs, PRIVATE_PGP_KEY, rhs
         ), params
+
+    def get_rhs_op(self, connection, rhs):
+        """Build right hand sql with operator."""
+        return '%s %s' % (self.operator, rhs)
 
 
 class DateTimePGPPublicKeyGT(DateTimePGPPublicKeyLookupBase):
@@ -243,3 +297,15 @@ class DateTimePGPPublicKeyEXACT(DateTimePGPPublicKeyLookupBase):
     """Lookup for DateTime."""
     lookup_name = 'exact'
     operator = '='
+
+
+class DateTimePGPPublicKeyRANGE(
+    FieldGetDbPrepValueIterableMixin,
+    DateTimePGPPublicKeyLookupBase
+):
+    lookup_name = 'range'
+    operator = 'BETWEEN'
+
+    def get_rhs_op(self, connection, rhs):
+        """Build right hand sql with operator."""
+        return "%s %s AND %s" % (self.operator, rhs[0], rhs[1])
