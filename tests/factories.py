@@ -2,7 +2,16 @@ from datetime import date, datetime
 
 import factory
 
-from .models import EncryptedModel
+from .models import EncryptedFKModel, EncryptedModel
+
+
+class EncryptedFKModelFactory(factory.DjangoModelFactory):
+    """Factory to generate foreign key data."""
+    fk_pgp_sym_field = factory.Sequence('Text with symmetric key {}'.format)
+
+    class Meta:
+        """Sets up meta for test factory."""
+        model = EncryptedFKModel
 
 
 class EncryptedModelFactory(factory.DjangoModelFactory):
@@ -24,6 +33,8 @@ class EncryptedModelFactory(factory.DjangoModelFactory):
 
     date_pgp_sym_field = date.today()
     datetime_pgp_sym_field = datetime.now()
+
+    fk_model = factory.SubFactory(EncryptedFKModelFactory)
 
     class Meta:
         """Sets up meta for test factory."""

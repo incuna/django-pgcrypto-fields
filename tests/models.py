@@ -1,10 +1,27 @@
 from django.db import models
 
-from pgcrypto import fields, managers
+from pgcrypto import fields
 
 
-class EncryptedModelManager(managers.PGPManager):
-    pass
+class EncryptedFKModelManager(models.Manager):
+    use_for_related_fields = True
+    use_in_migrations = True
+
+
+class EncryptedFKModel(models.Model):
+    """Dummy model used to test FK decryption."""
+    fk_pgp_sym_field = fields.TextPGPSymmetricKeyField(blank=True, null=True)
+
+    objects = EncryptedFKModelManager()
+
+    class Meta:
+        """Sets up the meta for the test model."""
+        app_label = 'tests'
+
+
+class EncryptedModelManager(models.Manager):
+    use_for_related_fields = True
+    use_in_migrations = True
 
 
 class EncryptedModel(models.Model):
@@ -27,18 +44,12 @@ class EncryptedModel(models.Model):
     pgp_sym_field = fields.TextPGPSymmetricKeyField(blank=True, null=True)
     date_pgp_sym_field = fields.DatePGPSymmetricKeyField(blank=True, null=True)
     datetime_pgp_sym_field = fields.DateTimePGPSymmetricKeyField(blank=True, null=True)
+    fk_model = models.ForeignKey(
+        EncryptedFKModel, blank=True, null=True, on_delete=models.CASCADE
+    )
 
     objects = EncryptedModelManager()
 
     class Meta:
         """Sets up the meta for the test model."""
         app_label = 'tests'
-
-
-class EncryptedModelWithManager(EncryptedModel):
-
-    objects = EncryptedModelManager()
-
-    class Meta:
-        """Sets up the meta for the test manager."""
-        proxy = True

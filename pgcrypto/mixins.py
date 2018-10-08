@@ -83,7 +83,6 @@ class PGPMixin:
     """
     encrypt_sql = None  # Set in implementation class
     decrypt_sql = None  # Set in implementation class
-    cast_sql = None  # Set in implementation class
     cast_type = None
 
     def __init__(self, *args, **kwargs):
@@ -172,7 +171,6 @@ class EmailPGPSymmetricKeyFieldMixin(
 class DatePGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin):
     """Date mixin for PGP public key fields."""
     aggregate = DatePGPPublicKeyAggregate
-    cast_sql = 'cast(%s as DATE)'
     cast_type = 'DATE'
 
     def formfield(self, **kwargs):
@@ -185,7 +183,6 @@ class DatePGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin):
 class DatePGPSymmetricKeyFieldMixin(PGPSymmetricKeyFieldMixin):
     """Date mixin for PGP symmetric key fields."""
     aggregate = DatePGPSymmetricKeyAggregate
-    cast_sql = 'cast(%s as DATE)'
     cast_type = 'DATE'
 
     def formfield(self, **kwargs):
@@ -198,7 +195,6 @@ class DatePGPSymmetricKeyFieldMixin(PGPSymmetricKeyFieldMixin):
 class DateTimePGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin):
     """DateTime mixin for PGP public key fields."""
     aggregate = DateTimePGPPublicKeyAggregate
-    cast_sql = 'cast(%s as TIMESTAMP)'
     cast_type = 'TIMESTAMP'
 
     def formfield(self, **kwargs):
@@ -211,7 +207,6 @@ class DateTimePGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin):
 class DateTimePGPSymmetricKeyFieldMixin(PGPSymmetricKeyFieldMixin):
     """DateTime mixin for PGP symmetric key fields."""
     aggregate = DateTimePGPSymmetricKeyAggregate
-    cast_sql = 'cast(%s as TIMESTAMP)'
     cast_type = 'TIMESTAMP'
 
     def formfield(self, **kwargs):

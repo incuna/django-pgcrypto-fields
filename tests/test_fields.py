@@ -86,6 +86,7 @@ class TestEncryptedTextFieldModel(TestCase):
             'datetime_pgp_sym_field',
             'date_pgp_pub_field',
             'datetime_pgp_pub_field',
+            'fk_model',
         )
         self.assertCountEqual(fields, expected)
 
@@ -809,31 +810,45 @@ class TestEncryptedTextFieldModel(TestCase):
 
     def test_null(self):
         """Assert `NULL` values are saved."""
-        instance = EncryptedModel.objects.create()
+        instance = EncryptedModelFactory.create()
         fields = field_names(self.model)
         fields.remove('id')
         for field in fields:
             with self.subTest(field=field):
-                self.assertEqual(getattr(instance, field), None)
+                self.assertNotEqual(getattr(instance, field), None)
 
     def test_defer(self):
         """Test defer() functionality."""
         expected = 'bonjour'
-        EncryptedModel.objects.create(pgp_sym_field=expected)
+        EncryptedModelFactory.create(pgp_sym_field=expected)
         instance = self.model.objects.defer('pgp_sym_field').get()
 
+        # Assert that accessing a field that is in defer() causes a query
         with self.assertNumQueries(1):
             temp = instance.pgp_sym_field
 
-        self.assertEqual(expected, temp)
+        self.assertEqual(temp, expected)
 
     def test_only(self):
         """Test defer() functionality."""
         expected = 'bonjour'
-        EncryptedModel.objects.create(pgp_sym_field=expected, pgp_pub_field=expected)
+        EncryptedModelFactory.create(pgp_sym_field=expected, pgp_pub_field=expected)
         instance = self.model.objects.only('pgp_sym_field').get()
 
+        # Assert that accessing a field not in only() causes a query
         with self.assertNumQueries(1):
             temp = instance.pgp_pub_field
 
-        self.assertEqual(expected, temp)
+        self.assertEqual(temp, expected)
+
+    def test_fk_auto_decryption(self):
+        """Test auto decryption of FK when select related is defined."""
+        expected = 'bonjour'
+        EncryptedModelFactory.create(fk_model__fk_pgp_sym_field=expected)
+        instance = self.model.objects.select_related('fk_model').get()
+
+        # Assert no additional queries are made to decrypt
+        with self.assertNumQueries(0):
+            temp = instance.fk_model.fk_pgp_sym_field
+
+        self.assertEqual(temp, expected)
