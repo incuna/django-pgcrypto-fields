@@ -1,5 +1,7 @@
-### 2.2.1
+### 2.3.0
 
+* Added `__range` lookup for Date / DateTime fields (#59)
+* Remove compatibility for `Django 1.8, 1.9, and 1.10`
 * Improved `setup.py`:
     * check for Python 3.5+
     * updated classifiers
