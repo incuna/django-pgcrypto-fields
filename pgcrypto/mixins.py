@@ -1,5 +1,11 @@
 from django.core.validators import MaxLengthValidator
 
+from pgcrypto import (
+    PGP_PUB_DECRYPT_SQL,
+    PGP_PUB_ENCRYPT_SQL,
+    PGP_SYM_DECRYPT_SQL,
+    PGP_SYM_ENCRYPT_SQL,
+)
 from pgcrypto.aggregates import (
     DatePGPPublicKeyAggregate,
     DatePGPSymmetricKeyAggregate,
@@ -22,6 +28,8 @@ class HashMixin:
 
     `HashMixin` uses 'pgcrypto' to encrypt data in a postgres database.
     """
+    encrypt_sql = None  # Set in implementation class
+
     def __init__(self, original=None, *args, **kwargs):
         """Tells the init the original attr."""
         self.original = original
@@ -56,6 +64,9 @@ class PGPMixin:
     `PGPMixin` uses 'pgcrypto' to encrypt data in a postgres database.
     """
     descriptor_class = EncryptedProxyField
+    encrypt_sql = None  # Set in implementation class
+    decrypt_sql = None  # Set in implementation class
+    cast_sql = None  # Set in implementation class
 
     def __init__(self, *args, **kwargs):
         """`max_length` should be set to None as encrypted text size is variable."""
@@ -96,11 +107,15 @@ class PGPMixin:
 class PGPPublicKeyFieldMixin(PGPMixin):
     """PGP public key encrypted field mixin for postgres."""
     aggregate = PGPPublicKeyAggregate
+    encrypt_sql = PGP_PUB_ENCRYPT_SQL
+    decrypt_sql = PGP_PUB_DECRYPT_SQL
 
 
 class PGPSymmetricKeyFieldMixin(PGPMixin):
     """PGP symmetric key encrypted field mixin for postgres."""
     aggregate = PGPSymmetricKeyAggregate
+    encrypt_sql = PGP_SYM_ENCRYPT_SQL
+    decrypt_sql = PGP_SYM_DECRYPT_SQL
 
 
 class RemoveMaxLengthValidatorMixin:
@@ -123,9 +138,10 @@ class EmailPGPSymmetricKeyFieldMixin(
 class DatePGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin):
     """Date mixin for PGP public key fields."""
     aggregate = DatePGPPublicKeyAggregate
+    cast_sql = 'cast(%s as DATE)'
 
     def formfield(self, **kwargs):
-        """Override the form field with custom PCP DateField."""
+        """Override the form field with custom PGP DateField."""
         defaults = {'form_class': DateField}
         defaults.update(kwargs)
         return super().formfield(**defaults)
@@ -134,9 +150,10 @@ class DatePGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin):
 class DatePGPSymmetricKeyFieldMixin(PGPSymmetricKeyFieldMixin):
     """Date mixin for PGP symmetric key fields."""
     aggregate = DatePGPSymmetricKeyAggregate
+    cast_sql = 'cast(%s as DATE)'
 
     def formfield(self, **kwargs):
-        """Override the form field with custom PCP DateField."""
+        """Override the form field with custom PGP DateField."""
         defaults = {'form_class': DateField}
         defaults.update(kwargs)
         return super().formfield(**defaults)
@@ -145,9 +162,10 @@ class DatePGPSymmetricKeyFieldMixin(PGPSymmetricKeyFieldMixin):
 class DateTimePGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin):
     """DateTime mixin for PGP public key fields."""
     aggregate = DateTimePGPPublicKeyAggregate
+    cast_sql = 'cast(%s as TIMESTAMP)'
 
     def formfield(self, **kwargs):
-        """Override the form field with custom PCP DateTimeField."""
+        """Override the form field with custom PGP DateTimeField."""
         defaults = {'form_class': DateTimeField}
         defaults.update(kwargs)
         return super().formfield(**defaults)
@@ -156,9 +174,10 @@ class DateTimePGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin):
 class DateTimePGPSymmetricKeyFieldMixin(PGPSymmetricKeyFieldMixin):
     """DateTime mixin for PGP symmetric key fields."""
     aggregate = DateTimePGPSymmetricKeyAggregate
+    cast_sql = 'cast(%s as TIMESTAMP)'
 
     def formfield(self, **kwargs):
-        """Override the form field with custom PCP DateTimeField."""
+        """Override the form field with custom PGP DateTimeField."""
         defaults = {'form_class': DateTimeField}
         defaults.update(kwargs)
         return super().formfield(**defaults)

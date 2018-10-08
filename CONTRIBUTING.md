@@ -16,7 +16,10 @@ We welcome contributions in many forms:
 
 ## Releasing to PyPI
 
-This section only applies to maintainers
+This section only applies to maintainers.
 
-* Run `pip install setuptools twine`
-* Run `make release`
+In your virtual environment, run
+
+* `pip install pip --upgrade`
+* `pip install setuptools wheel twine`
+* `make release`
