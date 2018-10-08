@@ -9,6 +9,7 @@
 * Added additional shields to `README`
 * Updated Travis config to include Python 3.5 and 3.6
 * Refactored lookups and mixins
+* Added support for `AppConfig` (#18)
 
 ## 2.2.0
 
