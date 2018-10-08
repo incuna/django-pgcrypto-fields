@@ -59,8 +59,7 @@ N.B. `DatePGPPublicKeyField` and `DateTimePGPPublicKeyField` only support the fo
 - `__gte`
 - `__lt`
 - `__lte`
-
-There is no support for `__range` yet (SQL `BETWEEN`). Pull requests are welcome.
+- `__range`
 
 ##### Generate GPG keys.
 
@@ -104,8 +103,7 @@ N.B. `DatePGPSymmetricKeyField` and `DateTimePGPSymmetricKeyField` only support 
 - `__gte`
 - `__lt`
 - `__lte`
-
-There is no support for `__range` yet (SQL `BETWEEN`). Pull requests are welcome.
+- `__range`
 
 ### Django settings
 
