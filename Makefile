@@ -6,6 +6,8 @@ help:
 	@echo " make test | Run the tests."
 
 release:
+	rm -r -f dist/*
+	rm -r -f build/*
 	python setup.py sdist bdist_wheel
 	twine upload dist/*
 

@@ -1,3 +1,11 @@
+## 2.4.0
+
+* Added auto-decryption of all encrypted fields including FK tables
+* Removed `aggregates` as they are no longer needed
+* Added support for `get_or_create()` and `update_or_create()` (#27)
+* Added support for `get_by_natural_key()` (#23)
+* Added support for `only()` and `defer()` as they were not supported with `PGPManager`
+
 ## 2.3.1
 
 * Added `__range` lookup for Date / DateTime fields (#59)

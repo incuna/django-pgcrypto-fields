@@ -8,14 +8,7 @@ from pgcrypto import (
     PGP_SYM_DECRYPT_SQL,
     PGP_SYM_ENCRYPT_SQL,
 )
-from pgcrypto.aggregates import (
-    DatePGPPublicKeyAggregate,
-    DatePGPSymmetricKeyAggregate,
-    DateTimePGPPublicKeyAggregate,
-    DateTimePGPSymmetricKeyAggregate,
-    PGPPublicKeyAggregate,
-    PGPSymmetricKeyAggregate,
-)
+
 from pgcrypto.forms import DateField, DateTimeField
 
 
@@ -135,7 +128,6 @@ class PGPMixin:
 
 class PGPPublicKeyFieldMixin(PGPMixin):
     """PGP public key encrypted field mixin for postgres."""
-    aggregate = PGPPublicKeyAggregate
     encrypt_sql = PGP_PUB_ENCRYPT_SQL
     decrypt_sql = PGP_PUB_DECRYPT_SQL
     cast_type = 'TEXT'
@@ -143,7 +135,6 @@ class PGPPublicKeyFieldMixin(PGPMixin):
 
 class PGPSymmetricKeyFieldMixin(PGPMixin):
     """PGP symmetric key encrypted field mixin for postgres."""
-    aggregate = PGPSymmetricKeyAggregate
     encrypt_sql = PGP_SYM_ENCRYPT_SQL
     decrypt_sql = PGP_SYM_DECRYPT_SQL
     cast_type = 'TEXT'
@@ -170,7 +161,6 @@ class EmailPGPSymmetricKeyFieldMixin(
 
 class DatePGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin):
     """Date mixin for PGP public key fields."""
-    aggregate = DatePGPPublicKeyAggregate
     cast_type = 'DATE'
 
     def formfield(self, **kwargs):
@@ -182,7 +172,6 @@ class DatePGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin):
 
 class DatePGPSymmetricKeyFieldMixin(PGPSymmetricKeyFieldMixin):
     """Date mixin for PGP symmetric key fields."""
-    aggregate = DatePGPSymmetricKeyAggregate
     cast_type = 'DATE'
 
     def formfield(self, **kwargs):
@@ -194,7 +183,6 @@ class DatePGPSymmetricKeyFieldMixin(PGPSymmetricKeyFieldMixin):
 
 class DateTimePGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin):
     """DateTime mixin for PGP public key fields."""
-    aggregate = DateTimePGPPublicKeyAggregate
     cast_type = 'TIMESTAMP'
 
     def formfield(self, **kwargs):
@@ -206,7 +194,6 @@ class DateTimePGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin):
 
 class DateTimePGPSymmetricKeyFieldMixin(PGPSymmetricKeyFieldMixin):
     """DateTime mixin for PGP symmetric key fields."""
-    aggregate = DateTimePGPSymmetricKeyAggregate
     cast_type = 'TIMESTAMP'
 
     def formfield(self, **kwargs):

@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 from django.test import TestCase
 from incuna_test_utils.utils import field_names
 
-from pgcrypto import aggregates, fields
+from pgcrypto import fields
 from .factories import EncryptedModelFactory
 from .forms import EncryptedForm
 from .models import EncryptedModel
@@ -161,22 +161,6 @@ class TestEncryptedTextFieldModel(TestCase):
         self.assertEqual(instance.pgp_pub_field, expected)
         self.assertEqual(instance.pgp_pub_field, expected)
 
-    def test_decrypt_annotate(self):
-        """Assert we can get back the decrypted value."""
-        expected = 'bonjour'
-        EncryptedModelFactory.create(
-            pgp_pub_field=expected,
-            pgp_sym_field=expected,
-        )
-
-        queryset = self.model.objects.annotate(
-            copy_pgp_pub_field=aggregates.PGPPublicKeyAggregate('pgp_pub_field'),
-            copy_pgp_sym_field=aggregates.PGPSymmetricKeyAggregate('pgp_sym_field'),
-        )
-        instance = queryset.get()
-        self.assertEqual(instance.copy_pgp_pub_field, expected)
-        self.assertEqual(instance.copy_pgp_sym_field, expected)
-
     def test_decrypt_filter(self):
         """Assert we can get filter the decrypted value."""
         expected = 'bonjour'
@@ -184,9 +168,7 @@ class TestEncryptedTextFieldModel(TestCase):
             pgp_pub_field=expected,
         )
 
-        queryset = self.model.objects.annotate(
-            copy_pgp_pub_field=aggregates.PGPPublicKeyAggregate('pgp_pub_field'),
-        ).filter(
+        queryset = self.model.objects.filter(
             copy_pgp_pub_field=expected
         )
 

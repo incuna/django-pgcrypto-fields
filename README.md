@@ -28,6 +28,21 @@ INSTALLED_APPS = (
 )
 ```
 
+## Upgrading to 2.4.0 from previous versions
+
+The 2.4.0 version of this library received a large rewrite in order to support 
+auto-decryption when getting encrypted field data as well as the ability to filter 
+on encrypted fields without using the old PGPCrypto aggregate functions available
+in previous versions.
+
+The following items in this library have been removed and therefore references in 
+your application to these items need to be removed as well:
+
+* `managers.PGPManager`
+* `admin.PGPAdmin`
+* `aggregates.*`
+
+
 ## Fields
 
 `django-pgcrypto-fields` has 3 kinds of fields:
@@ -121,6 +136,7 @@ N.B. `DatePGPSymmetricKeyField` and `DateTimePGPSymmetricKeyField` only support 
 
 In `settings.py`:
 ```python
+import os
 BASEDIR = os.path.dirname(os.path.dirname(__file__))
 PUBLIC_PGP_KEY_PATH = os.path.abspath(os.path.join(BASEDIR, 'public.key'))
 PRIVATE_PGP_KEY_PATH = os.path.abspath(os.path.join(BASEDIR, 'private.key'))
@@ -137,9 +153,8 @@ PGCRYPTO_KEY='ultrasecret'
 # And add 'pgcrypto' to `INSTALLED_APPS` to create the extension for
 # pgcrypto (in a migration).
 INSTALLED_APPS = (
-    ...
     'pgcrypto',
-    ...
+    # Other installed apps
 )
 
 ```
@@ -151,9 +166,9 @@ INSTALLED_APPS = (
 ```python
 from django.db import models
 
-from pgcrypto import fields, managers
+from pgcrypto import fields
 
-class MyModelManager(managers.PGPManager):
+class MyModelManager(models.Manager):
     pass
 
 
@@ -180,10 +195,10 @@ class MyModel(models.Model):
 
 #### Encrypting
 
-Data is encrypted when inserted into the database.
+Data is automatically encrypted when inserted into the database.
 
 Example:
-```python
+```
 >>> MyModel.objects.create(value='Value to be encrypted...')
 ```
 
@@ -191,8 +206,11 @@ Hash fields can have hashes auto updated if you use the `original` attribute. Th
 attribute allows you to indicate another field name to base the hash value on.
 
 ```python
+from django.db import models
 
-class User(models.Models):
+from pgcrypto import fields
+
+class User(models.Model):
     first_name = fields.TextPGPSymmetricKeyField(max_length=20, verbose_name='First Name')
     first_name_hashed = fields.TextHMACField(original='first_name') 
 ```
@@ -202,71 +220,64 @@ take the unencrypted value from the first_name model field as the input value
 to create the hash. If you did not specify an original attribute, the field 
 would work as it does now and would remain backwards compatible.
 
-#### Decryption using custom model managers
-
-If you use the bundled `PGPManager` with your custom model manager, all encrypted 
-fields will automatically decrypted for you (except for hash fields which are one 
-way).
-
-N.B. The bundled manager does not support decryption of fields from FK joins. For 
-example if the `MyModel` class had a FK to to `AnotherModel` class, no encrypted 
-fields be decrypted in the joined `AnotherModel`.
-
-It is recommended that you use the bundled `PGPAdmin` class if using the custom 
-model manager and the Django Admin. The Django Admin performance suffers when 
-using the bundled custom manager. The `PGPAdmin` disables automatic decryption 
-for all ORM calls for that admin class.
-
-```python
-from django.contrib import admin
-
-from pgcrypto.admin import PGPAdmin
-
-
-class MyModelAdmin(admin.ModelAdmin, PGPAdmin):
-    # Your admin code here
-```
-
-#### Decrypting using aggregates
-
-This is useful if you are not using the custom manager or need to decrypt fields 
-coming from joined FK fields.
-
 ##### PGP fields
 
 When accessing the field name attribute on a model instance we are getting the
 decrypted value.
 
 Example:
-```python
+```
 >>> # When using a PGP public key based encryption
 >>> my_model = MyModel.objects.get()
->>> my_model.value  # field's proxy
+>>> my_model.value
 'Value decrypted'
 ```
 
-To be able to filter PGP values we first need to use an aggregate method to
-decrypt the values.
+Filtering encrypted values is now handled automatically as of 2.4.0. And `aggregate`
+methods are not longer supported and have been removed from the library.
 
-Example when using a `PGPPublicKeyField`:
+Also, auto-decryption is support for `select_related()` models. In your manager, be
+sure to set `use_for_related_fields = True` to enable auto-decryption.
+
 ```python
->>> from pgcrypto.aggregates import PGPPublicKeyAggregate
->>> my_models = MyModel.objects.annotate(PGPPublicKeyAggregate('pgp_pub_field'))
-[<MyModel: MyModel object>, <MyModel: MyModel object>]
->>> my_models.filter(pgp_pub_field__decrypted='Value decrypted')
-[<MyModel: MyModel object>]
->>> my_models.first().pgp_pub_field__decrypted
-'Value decrypted'
+from django.db import models
+
+from pgcrypto import fields
+
+
+class EncryptedFKModelManager(models.Manager):
+    use_for_related_fields = True
+    use_in_migrations = True
+
+
+class EncryptedFKModel(models.Model):
+    """Dummy model used to test FK decryption."""
+    fk_pgp_sym_field = fields.TextPGPSymmetricKeyField(blank=True, null=True)
+
+    objects = EncryptedFKModelManager()
+
+  
+class EncryptedModelManager(models.Manager):
+    use_for_related_fields = True
+    use_in_migrations = True
+
+
+class EncryptedModel(models.Model):
+    pgp_sym_field = fields.TextPGPSymmetricKeyField(blank=True, null=True)
+    fk_model = models.ForeignKey(
+        EncryptedFKModel, blank=True, null=True, on_delete=models.CASCADE
+    )
+
+    objects = EncryptedModelManager()
 ```
 
-Example when using a `PGPSymmetricKeyField`:
-```python
->>> from pgcrypto.aggregates import PGPSymmetricKeyAggregate
->>> my_models = MyModel.objects.annotate(PGPSymmetricKeyAggregate('pgp_sym_field'))
-[<MyModel: MyModel object>, <MyModel: MyModel object>]
->>> my_models.filter(pgp_pub_field__decrypted='Value decrypted')
-[<MyModel: MyModel object>]
->>> my_models.first().pgp_sym_field__decrypted
+Example:
+```
+>>> import EncryptedModel
+>>> my_model = EncryptedModel.objects.get().select_releated('fk_model')
+>>> my_model.pgp_sym_field
+'Value decrypted'
+>>> my_model.fk_model.fk_pgp_sym_field
 'Value decrypted'
 ```
 
@@ -276,7 +287,7 @@ To filter hash based values we need to compare hashes. This is achieved by using
 a `__hash_of` lookup.
 
 Example:
-```python
+```
 >>> my_model = MyModel.objects.filter(digest_field__hash_of='value')
 [<MyModel: MyModel object>]
 >>> my_model = MyModel.objects.filter(hmac_field__hash_of='value')
