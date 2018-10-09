@@ -12,6 +12,8 @@ release:
 	twine upload dist/*
 
 test:
+	rm -r -f dist/*
+	rm -r -f build/*
 	@coverage run ./tests/run.py
 	@coverage report
 	@flake8 .
