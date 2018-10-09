@@ -1,13 +1,14 @@
 ### 2.3.0
 
 * Added `__range` lookup for Date / DateTime fields (#59)
-* Remove compatibility for `Django 1.8, 1.9, and 1.10`
+* Remove compatibility for `Django 1.8, 1.9, and 1.10` (#62)
 * Improved `setup.py`:
     * check for Python 3.5+
     * updated classifiers
 * Improved `make` file for release to use `twine`
 * Added additional shields to `README`
 * Updated Travis config to include Python 3.5 and 3.6
+* Refactored lookups and mixins
 
 ## 2.2.0
 

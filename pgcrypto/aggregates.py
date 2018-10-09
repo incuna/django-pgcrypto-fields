@@ -46,26 +46,7 @@ class PGPSymmetricKeySQL:
     )
 
 
-class EncryptionBase(Aggregate):
-    """Base class to add a custom aggregate method to a query."""
-
-    def add_to_query(self, query, alias, col, source, is_summary):
-        """Add the aggregate to the query. This method will be removed in Django 1.10.
-
-        `alias` is `{self.lookup}__decrypt` where 'decrypt' is `self.name.lower()`.
-
-        `self.lookup` is defined in `models.Aggregate.__init__`.
-        """
-        aggregate = self.sql(
-            col,
-            source=source,
-            is_summary=is_summary,
-            **self.extra
-        )
-        query.aggregates[alias] = aggregate
-
-
-class PGPPublicKeyAggregate(PGPPublicKeySQL, EncryptionBase):
+class PGPPublicKeyAggregate(PGPPublicKeySQL, Aggregate):
     """PGP public key based aggregation.
 
     `pgp_pub_encrypt` and `dearmor` are pgcrypto functions which encrypt
@@ -74,7 +55,7 @@ class PGPPublicKeyAggregate(PGPPublicKeySQL, EncryptionBase):
     name = 'decrypted'
 
 
-class PGPSymmetricKeyAggregate(PGPSymmetricKeySQL, EncryptionBase):
+class PGPSymmetricKeyAggregate(PGPSymmetricKeySQL, Aggregate):
     """PGP symmetric key based aggregation.
 
     `pgp_sym_encrypt` is a pgcrypto functions, encrypts the field's value
@@ -83,7 +64,7 @@ class PGPSymmetricKeyAggregate(PGPSymmetricKeySQL, EncryptionBase):
     name = 'decrypted'
 
 
-class DatePGPPublicKeyAggregate(EncryptionBase):
+class DatePGPPublicKeyAggregate(Aggregate):
     """PGP public key based aggregation.
 
     `pgp_sym_encrypt` is a pgcrypto functions, encrypts the field's value
@@ -97,7 +78,7 @@ class DatePGPPublicKeyAggregate(EncryptionBase):
     )
 
 
-class DatePGPSymmetricKeyAggregate(EncryptionBase):
+class DatePGPSymmetricKeyAggregate(Aggregate):
     """PGP symmetric key based aggregation.
 
     `pgp_sym_encrypt` is a pgcrypto functions, encrypts the field's value
@@ -111,7 +92,7 @@ class DatePGPSymmetricKeyAggregate(EncryptionBase):
     )
 
 
-class DateTimePGPPublicKeyAggregate(EncryptionBase):
+class DateTimePGPPublicKeyAggregate(Aggregate):
     """PGP public key based aggregation.
 
     `pgp_sym_encrypt` is a pgcrypto functions, encrypts the field's value
@@ -125,7 +106,7 @@ class DateTimePGPPublicKeyAggregate(EncryptionBase):
     )
 
 
-class DateTimePGPSymmetricKeyAggregate(EncryptionBase):
+class DateTimePGPSymmetricKeyAggregate(Aggregate):
     """PGP symmetric key based aggregation.
 
     `pgp_sym_encrypt` is a pgcrypto functions, encrypts the field's value

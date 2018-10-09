@@ -19,6 +19,15 @@ encrypt and decrypt data for fields.
 pip install django-pgcrypto-fields
 ```
 
+In your Django `settings.py`, add `pgcrypto` to `INSTALLED_APPS`:
+
+```python
+INSTALLED_APPS = (
+    'pgcrypto',
+    # Other apps
+)
+```
+
 ## Fields
 
 `django-pgcrypto-fields` has 3 kinds of fields:
