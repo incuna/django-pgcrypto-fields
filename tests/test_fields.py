@@ -169,13 +169,6 @@ class TestEncryptedTextFieldModel(TestCase):
         )
 
         queryset = self.model.objects.filter(
-            copy_pgp_pub_field=expected
-        )
-
-        instance = queryset.first()
-        self.assertEqual(instance.copy_pgp_pub_field, expected)
-
-        queryset = self.model.objects.filter(
             pgp_pub_field=expected
         )
 
