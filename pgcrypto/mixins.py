@@ -8,7 +8,6 @@ from pgcrypto import (
     PGP_SYM_DECRYPT_SQL,
     PGP_SYM_ENCRYPT_SQL,
 )
-
 from pgcrypto.forms import DateField, DateTimeField
 
 
