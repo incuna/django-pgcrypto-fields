@@ -24,7 +24,7 @@ version of Python.
     sys.exit(1)
 
 
-version = '2.3.0'
+version = '2.3.1'
 
 setup(
     name='django-pgcrypto-fields',

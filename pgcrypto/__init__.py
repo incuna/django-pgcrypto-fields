@@ -1,7 +1,5 @@
 from django.conf import settings
 
-default_app_config = 'pgcrypto.apps.PgcryptoConfig'
-
 
 CAST_TO_TEXT = "nullif(%s, NULL)::text"
 DIGEST_SQL = "digest(%s, 'sha512')"
