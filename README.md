@@ -161,16 +161,12 @@ INSTALLED_APPS = (
 
 ### Usage
 
-#### Model / Manager definition
+#### Model Definition
 
 ```python
 from django.db import models
 
 from pgcrypto import fields
-
-class MyModelManager(models.Manager):
-    pass
-
 
 class MyModel(models.Model):
     digest_field = fields.TextDigestField()
@@ -189,8 +185,6 @@ class MyModel(models.Model):
     pgp_sym_field = fields.TextPGPSymmetricKeyField()
     date_pgp_sym_field = fields.DatePGPSymmetricKeyField()
     datetime_pgp_sym_field = fields.DateTimePGPSymmetricKeyField()
-    
-    objects = MyModelManager()
 ```
 
 #### Encrypting
@@ -236,8 +230,7 @@ Example:
 Filtering encrypted values is now handled automatically as of 2.4.0. And `aggregate`
 methods are not longer supported and have been removed from the library.
 
-Also, auto-decryption is support for `select_related()` models. In your manager, be
-sure to set `use_for_related_fields = True` to enable auto-decryption.
+Also, auto-decryption is support for `select_related()` models.
 
 ```python
 from django.db import models
@@ -245,21 +238,8 @@ from django.db import models
 from pgcrypto import fields
 
 
-class EncryptedFKModelManager(models.Manager):
-    use_for_related_fields = True
-    use_in_migrations = True
-
-
 class EncryptedFKModel(models.Model):
-    """Dummy model used to test FK decryption."""
     fk_pgp_sym_field = fields.TextPGPSymmetricKeyField(blank=True, null=True)
-
-    objects = EncryptedFKModelManager()
-
-  
-class EncryptedModelManager(models.Manager):
-    use_for_related_fields = True
-    use_in_migrations = True
 
 
 class EncryptedModel(models.Model):
@@ -267,8 +247,6 @@ class EncryptedModel(models.Model):
     fk_model = models.ForeignKey(
         EncryptedFKModel, blank=True, null=True, on_delete=models.CASCADE
     )
-
-    objects = EncryptedModelManager()
 ```
 
 Example:

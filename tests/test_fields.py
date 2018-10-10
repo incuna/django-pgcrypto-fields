@@ -785,12 +785,18 @@ class TestEncryptedTextFieldModel(TestCase):
 
     def test_null(self):
         """Assert `NULL` values are saved."""
-        instance = EncryptedModelFactory.create()
+        instance = EncryptedModel.objects.create()
         fields = field_names(self.model)
         fields.remove('id')
+
         for field in fields:
-            with self.subTest(field=field):
-                self.assertNotEqual(getattr(instance, field), None)
+            with self.subTest(instance=instance, field=field):
+                value = getattr(instance, field)
+                self.assertEqual(
+                    value,
+                    None,
+                    msg='Field {}, Value: {}'.format(field, value)
+                )
 
     def test_defer(self):
         """Test defer() functionality."""
@@ -805,10 +811,16 @@ class TestEncryptedTextFieldModel(TestCase):
         self.assertEqual(temp, expected)
 
     def test_only(self):
-        """Test defer() functionality."""
+        """Test only() functionality."""
         expected = 'bonjour'
         EncryptedModelFactory.create(pgp_sym_field=expected, pgp_pub_field=expected)
         instance = self.model.objects.only('pgp_sym_field').get()
+
+        # Assert that accessing a field in only() does not cause a query
+        with self.assertNumQueries(0):
+            temp = instance.pgp_sym_field
+
+        self.assertEqual(temp, expected)
 
         # Assert that accessing a field not in only() causes a query
         with self.assertNumQueries(1):
