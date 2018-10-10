@@ -1,13 +1,14 @@
 from datetime import date, datetime
 from unittest.mock import MagicMock
 
+from django.db import models
 from django.test import TestCase
 from incuna_test_utils.utils import field_names
 
 from pgcrypto import fields
-from .factories import EncryptedModelFactory
+from .factories import EncryptedFKModelFactory, EncryptedModelFactory
 from .forms import EncryptedForm
-from .models import EncryptedModel
+from .models import EncryptedFKModel, EncryptedModel
 
 KEYED_FIELDS = (fields.TextDigestField, fields.TextHMACField)
 EMAIL_PGP_FIELDS = (fields.EmailPGPPublicKeyField, fields.EmailPGPSymmetricKeyField)
@@ -896,3 +897,76 @@ class TestEncryptedTextFieldModel(TestCase):
         self.assertFalse(created)
         self.assertNotEqual(instance.id, original.id)
         self.assertEqual(instance.pgp_sym_field, 'Blue')
+
+    def test_aggregates(self):
+        """Test aggregate support."""
+        EncryptedModelFactory.create(datetime_pgp_sym_field=datetime(2016, 7, 1, 0, 0, 0))
+        EncryptedModelFactory.create(datetime_pgp_sym_field=datetime(2016, 7, 2, 0, 0, 0))
+        EncryptedModelFactory.create(datetime_pgp_sym_field=datetime(2016, 8, 1, 0, 0, 0))
+        EncryptedModelFactory.create(datetime_pgp_sym_field=datetime(2016, 9, 1, 0, 0, 0))
+        EncryptedModelFactory.create(datetime_pgp_sym_field=datetime(2016, 9, 2, 0, 0, 0))
+
+        total_2016 = self.model.objects.aggregate(
+            count=models.Count('datetime_pgp_sym_field')
+        )
+
+        self.assertEqual(5, total_2016['count'])
+
+        total_july = self.model.objects.filter(
+            datetime_pgp_sym_field__range=[
+                datetime(2016, 7, 1, 0, 0, 0),
+                datetime(2016, 7, 30, 23, 59, 59)
+            ]
+        ).aggregate(
+            count=models.Count('datetime_pgp_sym_field')
+        )
+
+        self.assertEqual(2, total_july['count'])
+
+    def test_distinct(self):
+        """Test distinct support."""
+        EncryptedModelFactory.create(pgp_sym_field='Paul')
+        EncryptedModelFactory.create(pgp_sym_field='Paul')
+        EncryptedModelFactory.create(pgp_sym_field='Peter')
+        EncryptedModelFactory.create(pgp_sym_field='Peter')
+        EncryptedModelFactory.create(pgp_sym_field='Jessica')
+        EncryptedModelFactory.create(pgp_sym_field='Jessica')
+
+        items = self.model.objects.filter(
+            pgp_sym_field__startswith='P'
+        ).only(
+            'id', 'pgp_sym_field', 'fk_model__fk_pgp_sym_field'
+        ).distinct('pgp_sym_field', )
+
+        self.assertEqual(
+            2,
+            len(items)
+        )
+
+    def test_annotate(self):
+        """Test annotate support."""
+        efk = EncryptedFKModelFactory.create()
+        EncryptedModelFactory.create(pgp_sym_field='Paul', fk_model=efk)
+        EncryptedModelFactory.create(pgp_sym_field='Peter', fk_model=efk)
+        EncryptedModelFactory.create(pgp_sym_field='Peter', fk_model=efk)
+        EncryptedModelFactory.create(pgp_sym_field='Jessica', fk_model=efk)
+
+        items = EncryptedFKModel.objects.annotate(
+            name_count=models.Count('encryptedmodel')
+        )
+
+        self.assertEqual(
+            4,
+            items[0].name_count
+        )
+
+        items = EncryptedFKModel.objects.filter(
+            encryptedmodel__pgp_sym_field__startswith='J'
+        ).annotate(
+            name_count=models.Count('encryptedmodel')
+        )
+
+        self.assertEqual(
+            1,
+            items[0].name_count
+        )
