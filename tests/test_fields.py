@@ -936,7 +936,11 @@ class TestEncryptedTextFieldModel(TestCase):
             pgp_sym_field__startswith='P'
         ).only(
             'id', 'pgp_sym_field', 'fk_model__fk_pgp_sym_field'
-        ).distinct('pgp_sym_field', )
+        ).distinct(
+            'pgp_sym_field'
+        )
+
+        print(items.query)
 
         self.assertEqual(
             2,
