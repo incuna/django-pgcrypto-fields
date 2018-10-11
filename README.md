@@ -277,7 +277,7 @@ Example:
 
 #### `.distinct('encrypted_field_name')`
 
-Due to a missing feature in the Django ORM, using `discinct()` on an encrypted field
+Due to a missing feature in the Django ORM, using `distinct()` on an encrypted field
 does not work for Django 2.0.x and lower.
 
 The normal distinct works on Django 2.1.x and higher:
