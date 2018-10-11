@@ -273,6 +273,45 @@ Example:
 
 ```
 
+## Limitations
+
+#### `.distinct('encrypted_field_name')`
+
+Due to a missing feature in the Django ORM, using `discinct()` on an encrypted field
+does not work for Django 2.0.x and lower.
+
+The normal distinct works on Django 2.1.x and higher:
+
+```python
+items = EncryptedFKModel.objects.filter(
+    pgp_sym_field__startswith='P'
+).only(
+    'id', 'pgp_sym_field', 'fk_model__fk_pgp_sym_field'
+).distinct(
+    'pgp_sym_field'
+)
+```
+
+Workaround for Django 2.0.x and lower:
+
+```python
+from django.db import models
+
+items = EncryptedFKModel.objects.filter(
+    pgp_sym_field__startswith='P'
+).annotate(
+    _distinct=models.F('pgp_sym_field')
+).only(
+    'id', 'pgp_sym_field', 'fk_model__fk_pgp_sym_field'
+).distinct(
+    '_distinct'
+)
+```
+
+This works because the annotated field is auto-decrypted by Django as a `F` field and that 
+field is used in the `distinct()`.
+
+
 ## Security Limitations
 
 Taken direction from the PostgreSQL documentation:

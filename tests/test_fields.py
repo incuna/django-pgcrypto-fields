@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from unittest.mock import MagicMock
 
+from django import VERSION as DJANGO_VERSION
 from django.db import models
 from django.test import TestCase
 from incuna_test_utils.utils import field_names
@@ -934,18 +935,33 @@ class TestEncryptedTextFieldModel(TestCase):
 
         items = self.model.objects.filter(
             pgp_sym_field__startswith='P'
+        ).annotate(
+            _distinct=models.F('pgp_sym_field')
         ).only(
             'id', 'pgp_sym_field', 'fk_model__fk_pgp_sym_field'
         ).distinct(
-            'pgp_sym_field'
+            '_distinct'
         )
-
-        print(items.query)
 
         self.assertEqual(
             2,
             len(items)
         )
+
+        # This only works on Django 2.1+
+        if DJANGO_VERSION[0] >= 2 and DJANGO_VERSION[1] >= 1:
+            items = self.model.objects.filter(
+                pgp_sym_field__startswith='P'
+            ).only(
+                'id', 'pgp_sym_field', 'fk_model__fk_pgp_sym_field'
+            ).distinct(
+                'pgp_sym_field'
+            )
+
+            self.assertEqual(
+                2,
+                len(items)
+            )
 
     def test_annotate(self):
         """Test annotate support."""
