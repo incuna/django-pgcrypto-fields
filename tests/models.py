@@ -3,16 +3,9 @@ from django.db import models
 from pgcrypto import fields
 
 
-class EncryptedFKModelManager(models.Manager):
-    use_for_related_fields = True
-    use_in_migrations = True
-
-
 class EncryptedFKModel(models.Model):
     """Dummy model used to test FK decryption."""
     fk_pgp_sym_field = fields.TextPGPSymmetricKeyField(blank=True, null=True)
-
-    objects = EncryptedFKModelManager()
 
     class Meta:
         """Sets up the meta for the test model."""
@@ -20,8 +13,6 @@ class EncryptedFKModel(models.Model):
 
 
 class EncryptedModelManager(models.Manager):
-    use_for_related_fields = True
-    use_in_migrations = True
 
     def get_by_natural_key(self, email_pgp_pub_field):
         """Get by natual key of email pub field."""
