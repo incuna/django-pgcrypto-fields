@@ -9,7 +9,7 @@ from incuna_test_utils.utils import field_names
 from pgcrypto import fields
 from .factories import EncryptedFKModelFactory, EncryptedModelFactory
 from .forms import EncryptedForm
-from .models import EncryptedFKModel, EncryptedModel
+from .models import EncryptedDateTime, EncryptedFKModel, EncryptedModel, RelatedDateTime
 
 KEYED_FIELDS = (fields.TextDigestField, fields.TextHMACField)
 EMAIL_PGP_FIELDS = (fields.EmailPGPPublicKeyField, fields.EmailPGPSymmetricKeyField)
@@ -1015,3 +1015,16 @@ class TestEncryptedTextFieldModel(TestCase):
             1,
             items[0].name_count
         )
+
+    def test_get_col(self):
+        """Test get_col for related alias."""
+        related = EncryptedDateTime.objects.create(value=datetime.now())
+        related_again = EncryptedDateTime.objects.create(value=datetime.now())
+
+        RelatedDateTime.objects.create(related=related, related_again=related_again)
+
+        instance = RelatedDateTime.objects.select_related(
+            'related', 'related_again'
+        ).get()
+
+        self.assertIsInstance(instance, RelatedDateTime)

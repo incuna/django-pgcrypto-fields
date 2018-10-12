@@ -49,3 +49,18 @@ class EncryptedModel(models.Model):
     class Meta:
         """Sets up the meta for the test model."""
         app_label = 'tests'
+
+
+class EncryptedDateTime(models.Model):
+    value = fields.DateTimePGPPublicKeyField()
+
+
+class RelatedDateTime(models.Model):
+    related = models.ForeignKey(
+        EncryptedDateTime,
+        on_delete=models.CASCADE,
+        related_name='related')
+    related_again = models.ForeignKey(
+        EncryptedDateTime, null=True,
+        on_delete=models.CASCADE, related_name='related_again'
+    )
