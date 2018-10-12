@@ -924,6 +924,31 @@ class TestEncryptedTextFieldModel(TestCase):
 
         self.assertEqual(2, total_july['count'])
 
+        total_2016 = self.model.objects.aggregate(
+            count=models.Count('datetime_pgp_sym_field'),
+            min=models.Min('datetime_pgp_sym_field'),
+            max=models.Max('datetime_pgp_sym_field'),
+        )
+
+        self.assertEqual(5, total_2016['count'])
+        self.assertEqual(datetime(2016, 7, 1, 0, 0, 0), total_2016['min'])
+        self.assertEqual(datetime(2016, 9, 2, 0, 0, 0), total_2016['max'])
+
+        total_july = self.model.objects.filter(
+            datetime_pgp_sym_field__range=[
+                datetime(2016, 7, 1, 0, 0, 0),
+                datetime(2016, 7, 30, 23, 59, 59)
+            ]
+        ).aggregate(
+            count=models.Count('datetime_pgp_sym_field'),
+            min=models.Min('datetime_pgp_sym_field'),
+            max=models.Max('datetime_pgp_sym_field'),
+        )
+
+        self.assertEqual(2, total_july['count'])
+        self.assertEqual(datetime(2016, 7, 1, 0, 0, 0), total_july['min'])
+        self.assertEqual(datetime(2016, 7, 2, 0, 0, 0), total_july['max'])
+
     def test_distinct(self):
         """Test distinct support."""
         EncryptedModelFactory.create(pgp_sym_field='Paul')
