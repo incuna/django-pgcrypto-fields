@@ -1025,6 +1025,10 @@ class TestEncryptedTextFieldModel(TestCase):
 
         instance = RelatedDateTime.objects.select_related(
             'related', 'related_again'
+        )
+
+        instance = RelatedDateTime.objects.select_related(
+            'related', 'related_again'
         ).get()
 
         self.assertIsInstance(instance, RelatedDateTime)

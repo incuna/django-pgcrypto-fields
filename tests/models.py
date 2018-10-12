@@ -52,7 +52,7 @@ class EncryptedModel(models.Model):
 
 
 class EncryptedDateTime(models.Model):
-    value = fields.DateTimePGPPublicKeyField()
+    value = fields.DateTimePGPSymmetricKeyField()
 
 
 class RelatedDateTime(models.Model):
