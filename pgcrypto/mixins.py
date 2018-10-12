@@ -19,18 +19,19 @@ def remove_validators(validators, validator_class):
 class DecryptedCol(Col):
     """Provide DecryptedCol support without using `extra` sql."""
 
-    def __init__(self, alias, target, decrypt_sql, cast_type, output_field=None):
+    def __init__(self, alias, target, output_field=None):
         """Init the decryption."""
-        self.decrypt_sql = decrypt_sql
-        self.cast_type = cast_type
+        self.decrypt_sql = target.decrypt_sql
+        self.cast_type = target.cast_type
         self.target = target
+
         super(DecryptedCol, self).__init__(alias, target, output_field)
 
     def as_sql(self, compiler, connection):
         """Build SQL with decryption and casting."""
         sql, params = super(DecryptedCol, self).as_sql(compiler, connection)
-        decrypt_sql = self.decrypt_sql % (sql, self.cast_type)
-        return decrypt_sql, params
+        sql = self.decrypt_sql % (sql, self.cast_type)
+        return sql, params
 
 
 class HashMixin:
@@ -107,8 +108,6 @@ class PGPMixin:
             return DecryptedCol(
                 alias,
                 self,
-                self.decrypt_sql,
-                self.cast_type,
                 output_field
             )
         else:
@@ -119,9 +118,7 @@ class PGPMixin:
         """Get cached version of decryption for col."""
         return DecryptedCol(
             self.model._meta.db_table,
-            self,
-            self.decrypt_sql,
-            self.cast_type,
+            self
         )
 
 
