@@ -1,13 +1,19 @@
 language: python
+sudo: required
+dist: xenial
 python:
   - 3.5
   - 3.6
+  - 3.7
 script: make test
 notifications:
   email: false
-install:
+services:
+  - postgresql
+before_script:
   - psql -c 'CREATE DATABASE pgcrypto_fields' -U postgres
-  - pip install -r requirements.txt
+install:
+  - pip install -e .
   - pip install -r requirements_dev.txt
   - pip install $DJANGO
 env:

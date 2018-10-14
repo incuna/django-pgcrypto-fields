@@ -9,6 +9,7 @@
 * Separated out dev requirements from setup.py requirements
 * Updated packaging / setup.py to include long description
 * Added AUTHORS and updated CONTRIBUTING
+* Updated TravisCI to use Xenial to gain Python 3.7 in the matrix
 
 ## 2.3.1
 
