@@ -26,27 +26,30 @@ export PRINT_HELP_PYSCRIPT
 BROWSER := python -c "$$BROWSER_PYSCRIPT"
 
 help:
-	@echo "Usage:"
-	@echo " lint | Lint code with Flake8."
-	@echo " make release | Release to PyPi."
-	@echo " make test | Run the tests."
+	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
-lint:
+lint: ## check style with flake8
 	@flake8 .
 
-clean-build:
+clean-build: ## Remove build artifacts
 	rm -r -f dist/*
 	rm -r -f build/*
 	rm -fr htmlcov/
 
-build: clean-build
+build: clean-build ## Builds source and wheel package
 	python setup.py sdist bdist_wheel
+	ls -l dist
 
-release: build
+release: ## Package and upload a release
 	twine upload dist/*
 
-test: clean-build lint
+test: clean-build lint ## Run tests quickly with the default Python
+	./tests/run.py
+
+test-coverage: ## Check code coverage quickly with the default Python
 	coverage run ./tests/run.py
-	coverage report
+	coverage report -m
+
+test-coverage-html: coverage  ## Check code coverage quickly with the default Python and show report
 	coverage html
 	$(BROWSER) htmlcov/index.html
