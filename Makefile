@@ -13,11 +13,11 @@ clean-build:
 	rm -r -f dist/*
 	rm -r -f build/*
 
-release: clean
+release: clean-build
 	python setup.py sdist bdist_wheel
 	twine upload dist/*
 
-test: clean
+test: clean-build
 	@coverage run ./tests/run.py
 	@coverage report
 	@flake8 .
