@@ -28,7 +28,7 @@ BROWSER := python -c "$$BROWSER_PYSCRIPT"
 help:
 	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
-lint: ## check style with flake8
+lint: ## Check style with flake8
 	@flake8 .
 
 clean-build: ## Remove build artifacts
@@ -50,6 +50,6 @@ test-coverage: ## Check code coverage quickly with the default Python
 	coverage run ./tests/run.py
 	coverage report -m
 
-test-coverage-html: coverage  ## Check code coverage quickly with the default Python and show report
+test-coverage-html: test-coverage  ## Check code coverage quickly with the default Python and show report
 	coverage html
 	$(BROWSER) htmlcov/index.html
