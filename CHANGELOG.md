@@ -6,6 +6,9 @@
 * Added support for `get_by_natural_key()` (#23)
 * Added support for `only()` and `defer()` as they were not supported with `PGPManager`
 * Added support for `distinct()` (Django 2.1+ with workaround available for 2.0 and lower)
+* Separated out dev requirements from setup.py requirements
+* Updated packaging / setup.py to include long description
+* Added AUTHORS and updated CONTRIBUTING
 
 ## 2.3.1
 

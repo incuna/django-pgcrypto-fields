@@ -22,6 +22,13 @@ have pip >= 9.0 and setuptools >= 24.2, then try again:
     sys.exit(1)
 
 
+with open('README.md') as readme_file:
+    readme = readme_file.read()
+
+
+with open('CHANGELOG.md') as changelog_file:
+    changelog = changelog_file.read()
+
 version = '2.4.0'
 
 setup(
@@ -31,7 +38,9 @@ setup(
     version=version,
     python_requires='>={}.{}'.format(*REQUIRED_PYTHON),
     license='BSD',
-    description='Encrypted fields dealing with pgcrypto postgres extension.',
+    description='Encrypted fields for Django dealing with pgcrypto postgres extension.',
+    long_description=readme + '\n\n' + changelog,
+    long_description_content_type='text/markdown',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Framework :: Django',
@@ -50,4 +59,5 @@ setup(
     author='Incuna Ltd',
     author_email='admin@incuna.com',
     url='https://github.com/incuna/django-pgcrypto-fields',
+    test_suite='tests',
 )
