@@ -8,18 +8,15 @@ We welcome contributions in many forms:
 
 ## Running Tests
 
-* Install requirements to a virtual environment
+Install the developers packages:
+
+* `pip install -r requirements.txt --upgrade`
 * Setup a local PostgreSQL server
 * Create a PostreSQL database named `pgcrypto_fields`
-* In a terminal, run `make test`
-
+* In your virtual env, run `make test`
 
 ## Releasing to PyPI
 
 This section only applies to maintainers.
 
-In your virtual environment, run
-
-* `pip install pip --upgrade`
-* `pip install setuptools wheel twine`
 * `make release`

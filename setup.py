@@ -18,8 +18,6 @@ understand the python_requires classifier. Make sure you
 have pip >= 9.0 and setuptools >= 24.2, then try again:
     $ python -m pip install --upgrade pip setuptools
     $ python -m pip install django-pgcrypto-fields
-This will install the latest version of Django which works on your
-version of Python.
 """.format(*(REQUIRED_PYTHON + CURRENT_PYTHON)))
     sys.exit(1)
 
