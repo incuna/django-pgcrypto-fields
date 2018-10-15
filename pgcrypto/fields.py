@@ -51,6 +51,7 @@ class EmailPGPPublicKeyField(EmailPGPPublicKeyFieldMixin, models.EmailField):
 class IntegerPGPPublicKeyField(PGPPublicKeyFieldMixin, models.IntegerField):
     """Integer PGP public key encrypted field."""
     encrypt_sql = INTEGER_PGP_PUB_ENCRYPT_SQL
+    cast_type = 'INT4'
 
 
 class TextPGPPublicKeyField(PGPPublicKeyFieldMixin, models.TextField):
@@ -88,6 +89,7 @@ class EmailPGPSymmetricKeyField(EmailPGPSymmetricKeyFieldMixin, models.EmailFiel
 class IntegerPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.IntegerField):
     """Integer PGP symmetric key encrypted field."""
     encrypt_sql = INTEGER_PGP_SYM_ENCRYPT_SQL
+    cast_type = 'INT4'
 
 
 class TextPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.TextField):

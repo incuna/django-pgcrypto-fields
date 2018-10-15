@@ -1,4 +1,6 @@
 from django.core.validators import MaxLengthValidator
+from django.db.models.expressions import Col
+from django.utils.functional import cached_property
 
 from pgcrypto import (
     PGP_PUB_DECRYPT_SQL,
@@ -6,21 +8,30 @@ from pgcrypto import (
     PGP_SYM_DECRYPT_SQL,
     PGP_SYM_ENCRYPT_SQL,
 )
-from pgcrypto.aggregates import (
-    DatePGPPublicKeyAggregate,
-    DatePGPSymmetricKeyAggregate,
-    DateTimePGPPublicKeyAggregate,
-    DateTimePGPSymmetricKeyAggregate,
-    PGPPublicKeyAggregate,
-    PGPSymmetricKeyAggregate,
-)
 from pgcrypto.forms import DateField, DateTimeField
-from pgcrypto.proxy import EncryptedProxyField
 
 
 def remove_validators(validators, validator_class):
     """Exclude `validator_class` instances from `validators` list."""
     return [v for v in validators if not isinstance(v, validator_class)]
+
+
+class DecryptedCol(Col):
+    """Provide DecryptedCol support without using `extra` sql."""
+
+    def __init__(self, alias, target, output_field=None):
+        """Init the decryption."""
+        self.decrypt_sql = target.decrypt_sql
+        self.cast_type = target.cast_type
+        self.target = target
+
+        super(DecryptedCol, self).__init__(alias, target, output_field)
+
+    def as_sql(self, compiler, connection):
+        """Build SQL with decryption and casting."""
+        sql, params = super(DecryptedCol, self).as_sql(compiler, connection)
+        sql = self.decrypt_sql % (sql, self.cast_type)
+        return sql, params
 
 
 class HashMixin:
@@ -63,28 +74,14 @@ class PGPMixin:
 
     `PGPMixin` uses 'pgcrypto' to encrypt data in a postgres database.
     """
-    descriptor_class = EncryptedProxyField
     encrypt_sql = None  # Set in implementation class
     decrypt_sql = None  # Set in implementation class
-    cast_sql = None  # Set in implementation class
+    cast_type = None
 
     def __init__(self, *args, **kwargs):
         """`max_length` should be set to None as encrypted text size is variable."""
         kwargs['max_length'] = None
         super().__init__(*args, **kwargs)
-
-    def contribute_to_class(self, cls, name, **kwargs):
-        """
-        Add a decrypted field proxy to the model.
-
-        Add to the field model an `EncryptedProxyField` to get the decrypted
-        values of the field.
-
-        The decrypted value can be accessed using the field's name attribute on
-        the model instance.
-        """
-        super().contribute_to_class(cls, name, **kwargs)
-        setattr(cls, self.name, self.descriptor_class(field=self))
 
     def db_type(self, connection=None):
         """Value stored in the database is hexadecimal."""
@@ -103,19 +100,40 @@ class PGPMixin:
         """Override `_check_max_length_attribute` to remove check on max_length."""
         return []
 
+    def get_col(self, alias, output_field=None):
+        """Get the decryption for col."""
+        if output_field is None:
+            output_field = self
+        if alias != self.model._meta.db_table or output_field != self:
+            return DecryptedCol(
+                alias,
+                self,
+                output_field
+            )
+        else:
+            return self.cached_col
+
+    @cached_property
+    def cached_col(self):
+        """Get cached version of decryption for col."""
+        return DecryptedCol(
+            self.model._meta.db_table,
+            self
+        )
+
 
 class PGPPublicKeyFieldMixin(PGPMixin):
     """PGP public key encrypted field mixin for postgres."""
-    aggregate = PGPPublicKeyAggregate
     encrypt_sql = PGP_PUB_ENCRYPT_SQL
     decrypt_sql = PGP_PUB_DECRYPT_SQL
+    cast_type = 'TEXT'
 
 
 class PGPSymmetricKeyFieldMixin(PGPMixin):
     """PGP symmetric key encrypted field mixin for postgres."""
-    aggregate = PGPSymmetricKeyAggregate
     encrypt_sql = PGP_SYM_ENCRYPT_SQL
     decrypt_sql = PGP_SYM_DECRYPT_SQL
+    cast_type = 'TEXT'
 
 
 class RemoveMaxLengthValidatorMixin:
@@ -131,14 +149,15 @@ class EmailPGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin, RemoveMaxLengthValidat
 
 
 class EmailPGPSymmetricKeyFieldMixin(
-        PGPSymmetricKeyFieldMixin, RemoveMaxLengthValidatorMixin):
+    PGPSymmetricKeyFieldMixin,
+    RemoveMaxLengthValidatorMixin
+):
     """Email mixin for PGP symmetric key fields."""
 
 
 class DatePGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin):
     """Date mixin for PGP public key fields."""
-    aggregate = DatePGPPublicKeyAggregate
-    cast_sql = 'cast(%s as DATE)'
+    cast_type = 'DATE'
 
     def formfield(self, **kwargs):
         """Override the form field with custom PGP DateField."""
@@ -149,8 +168,7 @@ class DatePGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin):
 
 class DatePGPSymmetricKeyFieldMixin(PGPSymmetricKeyFieldMixin):
     """Date mixin for PGP symmetric key fields."""
-    aggregate = DatePGPSymmetricKeyAggregate
-    cast_sql = 'cast(%s as DATE)'
+    cast_type = 'DATE'
 
     def formfield(self, **kwargs):
         """Override the form field with custom PGP DateField."""
@@ -161,8 +179,7 @@ class DatePGPSymmetricKeyFieldMixin(PGPSymmetricKeyFieldMixin):
 
 class DateTimePGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin):
     """DateTime mixin for PGP public key fields."""
-    aggregate = DateTimePGPPublicKeyAggregate
-    cast_sql = 'cast(%s as TIMESTAMP)'
+    cast_type = 'TIMESTAMP'
 
     def formfield(self, **kwargs):
         """Override the form field with custom PGP DateTimeField."""
@@ -173,8 +190,7 @@ class DateTimePGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin):
 
 class DateTimePGPSymmetricKeyFieldMixin(PGPSymmetricKeyFieldMixin):
     """DateTime mixin for PGP symmetric key fields."""
-    aggregate = DateTimePGPSymmetricKeyAggregate
-    cast_sql = 'cast(%s as TIMESTAMP)'
+    cast_type = 'TIMESTAMP'
 
     def formfield(self, **kwargs):
         """Override the form field with custom PGP DateTimeField."""

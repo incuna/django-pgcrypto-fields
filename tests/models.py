@@ -1,10 +1,22 @@
 from django.db import models
 
-from pgcrypto import fields, managers
+from pgcrypto import fields
 
 
-class EncryptedModelManager(managers.PGPManager):
-    pass
+class EncryptedFKModel(models.Model):
+    """Dummy model used to test FK decryption."""
+    fk_pgp_sym_field = fields.TextPGPSymmetricKeyField(blank=True, null=True)
+
+    class Meta:
+        """Sets up the meta for the test model."""
+        app_label = 'tests'
+
+
+class EncryptedModelManager(models.Manager):
+
+    def get_by_natural_key(self, email_pgp_pub_field):
+        """Get by natual key of email pub field."""
+        return self.get(email_pgp_pub_field=email_pgp_pub_field)
 
 
 class EncryptedModel(models.Model):
@@ -16,7 +28,8 @@ class EncryptedModel(models.Model):
     hmac_with_original_field = fields.TextHMACField(blank=True, null=True,
                                                     original='pgp_sym_field')
 
-    email_pgp_pub_field = fields.EmailPGPPublicKeyField(blank=True, null=True)
+    email_pgp_pub_field = fields.EmailPGPPublicKeyField(blank=True, null=True,
+                                                        unique=True)
     integer_pgp_pub_field = fields.IntegerPGPPublicKeyField(blank=True, null=True)
     pgp_pub_field = fields.TextPGPPublicKeyField(blank=True, null=True)
     date_pgp_pub_field = fields.DatePGPPublicKeyField(blank=True, null=True)
@@ -27,16 +40,27 @@ class EncryptedModel(models.Model):
     pgp_sym_field = fields.TextPGPSymmetricKeyField(blank=True, null=True)
     date_pgp_sym_field = fields.DatePGPSymmetricKeyField(blank=True, null=True)
     datetime_pgp_sym_field = fields.DateTimePGPSymmetricKeyField(blank=True, null=True)
+    fk_model = models.ForeignKey(
+        EncryptedFKModel, blank=True, null=True, on_delete=models.CASCADE
+    )
+
+    objects = EncryptedModelManager()
 
     class Meta:
         """Sets up the meta for the test model."""
         app_label = 'tests'
 
 
-class EncryptedModelWithManager(EncryptedModel):
+class EncryptedDateTime(models.Model):
+    value = fields.DateTimePGPSymmetricKeyField()
 
-    objects = EncryptedModelManager()
 
-    class Meta:
-        """Sets up the meta for the test manager."""
-        proxy = True
+class RelatedDateTime(models.Model):
+    related = models.ForeignKey(
+        EncryptedDateTime,
+        on_delete=models.CASCADE,
+        related_name='related')
+    related_again = models.ForeignKey(
+        EncryptedDateTime, null=True,
+        on_delete=models.CASCADE, related_name='related_again'
+    )

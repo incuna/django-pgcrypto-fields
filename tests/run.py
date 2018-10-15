@@ -29,10 +29,7 @@ settings.configure(
     PRIVATE_PGP_KEY=open(PRIVATE_PGP_KEY_PATH, 'r').read(),
     PGCRYPTO_KEY='ultrasecret',
 )
-
-
-if django.VERSION >= (1, 7):
-    django.setup()
+django.setup()
 
 
 class TestRunner(ColourRunnerMixin, DiscoverRunner):
