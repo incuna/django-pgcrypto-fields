@@ -34,14 +34,19 @@ class EncryptedModel(models.Model):
     pgp_pub_field = fields.TextPGPPublicKeyField(blank=True, null=True)
     date_pgp_pub_field = fields.DatePGPPublicKeyField(blank=True, null=True)
     datetime_pgp_pub_field = fields.DateTimePGPPublicKeyField(blank=True, null=True)
-    decimal_pgp_pub_field = fields.DecimalPGPPublicKeyField(max_digits=8, decimal_places=2,
-                                                            null=True, blank=True)
+    decimal_pgp_pub_field = fields.DecimalPGPPublicKeyField(
+        max_digits=8, decimal_places=2, null=True, blank=True
+    )
 
     email_pgp_sym_field = fields.EmailPGPSymmetricKeyField(blank=True, null=True)
     integer_pgp_sym_field = fields.IntegerPGPSymmetricKeyField(blank=True, null=True)
     pgp_sym_field = fields.TextPGPSymmetricKeyField(blank=True, null=True)
     date_pgp_sym_field = fields.DatePGPSymmetricKeyField(blank=True, null=True)
     datetime_pgp_sym_field = fields.DateTimePGPSymmetricKeyField(blank=True, null=True)
+    decimal_pgp_sym_field = fields.DecimalPGPSymmetricKeyField(
+        max_digits=8, decimal_places=2, null=True, blank=True
+    )
+
     fk_model = models.ForeignKey(
         EncryptedFKModel, blank=True, null=True, on_delete=models.CASCADE
     )

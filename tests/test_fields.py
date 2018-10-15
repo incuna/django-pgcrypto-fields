@@ -90,6 +90,7 @@ class TestEncryptedTextFieldModel(TestCase):
             'datetime_pgp_sym_field',
             'date_pgp_pub_field',
             'datetime_pgp_pub_field',
+            'decimal_pgp_sym_field',
             'fk_model',
         )
         self.assertCountEqual(fields, expected)
@@ -788,6 +789,7 @@ class TestEncryptedTextFieldModel(TestCase):
         )
 
     def test_decimal_pgp_pub_field(self):
+        """Test DecimalPGPPublicKeyField."""
         expected = '100000.99'
         EncryptedModelFactory.create(decimal_pgp_pub_field=expected)
 
@@ -811,6 +813,37 @@ class TestEncryptedTextFieldModel(TestCase):
         )
 
         items = EncryptedModel.objects.filter(decimal_pgp_pub_field__gte='100001.00')
+
+        self.assertEqual(
+            0,
+            len(items)
+        )
+
+    def test_decimal_pgp_sym_field(self):
+        """Test DecimalPGPSymmetricKeyField."""
+        expected = '100000.99'
+        EncryptedModelFactory.create(decimal_pgp_sym_field=expected)
+
+        instance = EncryptedModel.objects.get()
+
+        self.assertIsInstance(
+            instance.decimal_pgp_sym_field,
+            Decimal
+        )
+
+        self.assertEqual(
+            instance.decimal_pgp_sym_field,
+            Decimal(expected)
+        )
+
+        items = EncryptedModel.objects.filter(decimal_pgp_sym_field__gte='100')
+
+        self.assertEqual(
+            1,
+            len(items)
+        )
+
+        items = EncryptedModel.objects.filter(decimal_pgp_sym_field__gte='100001.00')
 
         self.assertEqual(
             0,

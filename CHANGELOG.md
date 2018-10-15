@@ -1,3 +1,9 @@
+# CHANGELOG
+
+## 2.5.0
+
+* Added new DecimalFields for both public and symmetric key
+
 ## 2.4.0
 
 * Added auto-decryption of all encrypted fields including FK tables

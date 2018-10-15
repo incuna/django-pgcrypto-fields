@@ -6,6 +6,7 @@ from pgcrypto import (
     INTEGER_PGP_PUB_ENCRYPT_SQL,
     INTEGER_PGP_SYM_ENCRYPT_SQL,
 )
+from pgcrypto import forms
 from pgcrypto.lookups import (
     DateTimeExactLookup,
     DateTimeGteLookup,
@@ -16,16 +17,10 @@ from pgcrypto.lookups import (
     HashLookup,
 )
 from pgcrypto.mixins import (
-    DatePGPPublicKeyFieldMixin,
-    DatePGPSymmetricKeyFieldMixin,
-    DateTimePGPPublicKeyFieldMixin,
-    DateTimePGPSymmetricKeyFieldMixin,
-    DecimalPGPPublicKeyFieldMixin,
-    EmailPGPPublicKeyFieldMixin,
-    EmailPGPSymmetricKeyFieldMixin,
     HashMixin,
     PGPPublicKeyFieldMixin,
     PGPSymmetricKeyFieldMixin,
+    RemoveMaxLengthValidatorMixin,
 )
 
 
@@ -45,7 +40,8 @@ class TextHMACField(HashMixin, models.TextField):
 TextHMACField.register_lookup(HashLookup)
 
 
-class EmailPGPPublicKeyField(EmailPGPPublicKeyFieldMixin, models.EmailField):
+class EmailPGPPublicKeyField(RemoveMaxLengthValidatorMixin,
+                             PGPSymmetricKeyFieldMixin, models.EmailField):
     """Email PGP public key encrypted field."""
 
 
@@ -59,8 +55,15 @@ class TextPGPPublicKeyField(PGPPublicKeyFieldMixin, models.TextField):
     """Text PGP public key encrypted field."""
 
 
-class DatePGPPublicKeyField(DatePGPPublicKeyFieldMixin, models.TextField):
+class DatePGPPublicKeyField(PGPPublicKeyFieldMixin, models.TextField):
     """Date PGP public key encrypted field for postgres."""
+    cast_type = 'DATE'
+
+    def formfield(self, **kwargs):
+        """Override the form field with custom PGP DateField."""
+        defaults = {'form_class': forms.DateField}
+        defaults.update(kwargs)
+        return super().formfield(**defaults)
 
 
 DatePGPPublicKeyField.register_lookup(DateTimeExactLookup)
@@ -71,8 +74,15 @@ DatePGPPublicKeyField.register_lookup(DateTimeGteLookup)
 DatePGPPublicKeyField.register_lookup(DateTimeRangeLookup)
 
 
-class DateTimePGPPublicKeyField(DateTimePGPPublicKeyFieldMixin, models.TextField):
+class DateTimePGPPublicKeyField(PGPPublicKeyFieldMixin, models.TextField):
     """DateTime PGP public key encrypted field for postgres."""
+    cast_type = 'TIMESTAMP'
+
+    def formfield(self, **kwargs):
+        """Override the form field with custom PGP DateTimeField."""
+        defaults = {'form_class': forms.DateTimeField}
+        defaults.update(kwargs)
+        return super().formfield(**defaults)
 
 
 DateTimePGPPublicKeyField.register_lookup(DateTimeExactLookup)
@@ -83,7 +93,8 @@ DateTimePGPPublicKeyField.register_lookup(DateTimeGteLookup)
 DateTimePGPPublicKeyField.register_lookup(DateTimeRangeLookup)
 
 
-class EmailPGPSymmetricKeyField(EmailPGPSymmetricKeyFieldMixin, models.EmailField):
+class EmailPGPSymmetricKeyField(RemoveMaxLengthValidatorMixin,
+                                PGPSymmetricKeyFieldMixin, models.EmailField):
     """Email PGP symmetric key encrypted field."""
 
 
@@ -97,8 +108,15 @@ class TextPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.TextField):
     """Text PGP symmetric key encrypted field for postgres."""
 
 
-class DatePGPSymmetricKeyField(DatePGPSymmetricKeyFieldMixin, models.TextField):
+class DatePGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.TextField):
     """Date PGP symmetric key encrypted field for postgres."""
+    cast_type = 'DATE'
+
+    def formfield(self, **kwargs):
+        """Override the form field with custom PGP DateField."""
+        defaults = {'form_class': forms.DateField}
+        defaults.update(kwargs)
+        return super().formfield(**defaults)
 
 
 DatePGPSymmetricKeyField.register_lookup(DateTimeExactLookup)
@@ -109,8 +127,15 @@ DatePGPSymmetricKeyField.register_lookup(DateTimeGteLookup)
 DatePGPSymmetricKeyField.register_lookup(DateTimeRangeLookup)
 
 
-class DateTimePGPSymmetricKeyField(DateTimePGPSymmetricKeyFieldMixin, models.TextField):
+class DateTimePGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.TextField):
     """DateTime PGP symmetric key encrypted field for postgres."""
+    cast_type = 'TIMESTAMP'
+
+    def formfield(self, **kwargs):
+        """Override the form field with custom PGP DateTimeField."""
+        defaults = {'form_class': forms.DateTimeField}
+        defaults.update(kwargs)
+        return super().formfield(**defaults)
 
 
 DateTimePGPSymmetricKeyField.register_lookup(DateTimeExactLookup)
@@ -121,5 +146,37 @@ DateTimePGPSymmetricKeyField.register_lookup(DateTimeGteLookup)
 DateTimePGPSymmetricKeyField.register_lookup(DateTimeRangeLookup)
 
 
-class DecimalPGPPublicKeyField(DecimalPGPPublicKeyFieldMixin, models.DecimalField):
+class DecimalPGPPublicKeyField(PGPPublicKeyFieldMixin, models.DecimalField):
     """Decimal PGP public key encrypted field for postgres."""
+    cast_type = 'NUMERIC(%(max_digits)s, %(decimal_places)s)'
+
+    def formfield(self, **kwargs):
+        """Override the form field with custom PGP DecimalTimeField."""
+        defaults = {'form_class': forms.DecimalField}
+        defaults.update(kwargs)
+        return super().formfield(**defaults)
+
+    def get_cast_sql(self):
+        """Get cast sql."""
+        return self.cast_type % {
+            'max_digits': self.max_digits,
+            'decimal_places': self.decimal_places
+        }
+
+
+class DecimalPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.DecimalField):
+    """Decimal PGP symmetric key encrypted field for postgres."""
+    cast_type = 'NUMERIC(%(max_digits)s, %(decimal_places)s)'
+
+    def formfield(self, **kwargs):
+        """Override the form field with custom PGP DecimalTimeField."""
+        defaults = {'form_class': forms.DecimalField}
+        defaults.update(kwargs)
+        return super().formfield(**defaults)
+
+    def get_cast_sql(self):
+        """Get cast sql."""
+        return self.cast_type % {
+            'max_digits': self.max_digits,
+            'decimal_places': self.decimal_places
+        }
