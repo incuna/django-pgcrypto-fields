@@ -850,6 +850,44 @@ class TestEncryptedTextFieldModel(TestCase):
             len(items)
         )
 
+    def test_pgp_public_key_decimal_form(self):
+        """Assert form field and widget for `DecimalPGPSymmetricKeyField` field."""
+        expected = '100000.99'
+        instance = EncryptedModelFactory.create(decimal_pgp_pub_field=expected)
+
+        payload = {
+            'decimal_pgp_pub_field': expected
+        }
+
+        form = EncryptedForm(payload, instance=instance)
+        self.assertTrue(form.is_valid())
+
+        cleaned_data = form.cleaned_data
+
+        self.assertTrue(
+            cleaned_data['decimal_pgp_pub_field'],
+            Decimal(expected)
+        )
+
+    def test_pgp_symmetric_key_decimal_form(self):
+        """Assert form field and widget for `DecimalPGPSymmetricKeyField` field."""
+        expected = '100000.99'
+        instance = EncryptedModelFactory.create(decimal_pgp_sym_field=expected)
+
+        payload = {
+            'decimal_pgp_sym_field': expected
+        }
+
+        form = EncryptedForm(payload, instance=instance)
+        self.assertTrue(form.is_valid())
+
+        cleaned_data = form.cleaned_data
+
+        self.assertTrue(
+            cleaned_data['decimal_pgp_sym_field'],
+            Decimal(expected)
+        )
+
     def test_null(self):
         """Assert `NULL` values are saved."""
         instance = EncryptedModel.objects.create()
