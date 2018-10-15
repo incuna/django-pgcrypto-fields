@@ -37,6 +37,7 @@ class EncryptedModel(models.Model):
     decimal_pgp_pub_field = fields.DecimalPGPPublicKeyField(
         max_digits=8, decimal_places=2, null=True, blank=True
     )
+    float_pgp_pub_field = fields.FloatPGPPublicKeyField(blank=True, null=True)
 
     email_pgp_sym_field = fields.EmailPGPSymmetricKeyField(blank=True, null=True)
     integer_pgp_sym_field = fields.IntegerPGPSymmetricKeyField(blank=True, null=True)
@@ -46,6 +47,7 @@ class EncryptedModel(models.Model):
     decimal_pgp_sym_field = fields.DecimalPGPSymmetricKeyField(
         max_digits=8, decimal_places=2, null=True, blank=True
     )
+    float_pgp_sym_field = fields.FloatPGPSymmetricKeyField(blank=True, null=True)
 
     fk_model = models.ForeignKey(
         EncryptedFKModel, blank=True, null=True, on_delete=models.CASCADE

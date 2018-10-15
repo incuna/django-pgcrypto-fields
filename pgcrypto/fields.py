@@ -3,8 +3,8 @@ from django.db import models
 from pgcrypto import (
     DIGEST_SQL,
     HMAC_SQL,
-    INTEGER_PGP_PUB_ENCRYPT_SQL,
-    INTEGER_PGP_SYM_ENCRYPT_SQL,
+    PGP_PUB_ENCRYPT_SQL_WITH_NULLIF,
+    PGP_SYM_ENCRYPT_SQL_WITH_NULLIF,
 )
 from pgcrypto import forms
 from pgcrypto.lookups import (
@@ -47,7 +47,7 @@ class EmailPGPPublicKeyField(RemoveMaxLengthValidatorMixin,
 
 class IntegerPGPPublicKeyField(PGPPublicKeyFieldMixin, models.IntegerField):
     """Integer PGP public key encrypted field."""
-    encrypt_sql = INTEGER_PGP_PUB_ENCRYPT_SQL
+    encrypt_sql = PGP_PUB_ENCRYPT_SQL_WITH_NULLIF
     cast_type = 'INT4'
 
 
@@ -100,7 +100,7 @@ class EmailPGPSymmetricKeyField(RemoveMaxLengthValidatorMixin,
 
 class IntegerPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.IntegerField):
     """Integer PGP symmetric key encrypted field."""
-    encrypt_sql = INTEGER_PGP_SYM_ENCRYPT_SQL
+    encrypt_sql = PGP_SYM_ENCRYPT_SQL_WITH_NULLIF
     cast_type = 'INT4'
 
 
@@ -151,7 +151,7 @@ class DecimalPGPPublicKeyField(PGPPublicKeyFieldMixin, models.DecimalField):
     cast_type = 'NUMERIC(%(max_digits)s, %(decimal_places)s)'
 
     def formfield(self, **kwargs):
-        """Override the form field with custom PGP DecimalTimeField."""
+        """Override the form field with custom PGP DecimalField."""
         defaults = {'form_class': forms.DecimalField}
         defaults.update(kwargs)
         return super().formfield(**defaults)
@@ -169,7 +169,7 @@ class DecimalPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.DecimalField
     cast_type = 'NUMERIC(%(max_digits)s, %(decimal_places)s)'
 
     def formfield(self, **kwargs):
-        """Override the form field with custom PGP DecimalTimeField."""
+        """Override the form field with custom PGP DecimalField."""
         defaults = {'form_class': forms.DecimalField}
         defaults.update(kwargs)
         return super().formfield(**defaults)
@@ -180,3 +180,29 @@ class DecimalPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.DecimalField
             'max_digits': self.max_digits,
             'decimal_places': self.decimal_places
         }
+
+
+class FloatPGPPublicKeyField(PGPPublicKeyFieldMixin, models.FloatField):
+    """Float PGP public key encrypted field for postgres."""
+    encrypt_sql = PGP_PUB_ENCRYPT_SQL_WITH_NULLIF
+    cast_type = 'DOUBLE PRECISION'
+
+    def formfield(self, **kwargs):
+        """Override the form field with custom PGP FloatField."""
+        from django import forms
+        defaults = {'form_class': forms.FloatField}
+        defaults.update(kwargs)
+        return super().formfield(**defaults)
+
+
+class FloatPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.FloatField):
+    """Float PGP symmetric key encrypted field for postgres."""
+    encrypt_sql = PGP_SYM_ENCRYPT_SQL_WITH_NULLIF
+    cast_type = 'DOUBLE PRECISION'
+
+    def formfield(self, **kwargs):
+        """Override the form field with custom PGP FloatField."""
+        from django import forms
+        defaults = {'form_class': forms.FloatField}
+        defaults.update(kwargs)
+        return super().formfield(**defaults)

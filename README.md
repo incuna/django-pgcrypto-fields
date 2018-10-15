@@ -74,6 +74,7 @@ Supported PGP public key fields are:
  - `DatePGPPublicKeyField`
  - `DateTimePGPPublicKeyField`
  - `DecimalPGPPublicKeyField`
+ - `FloatPGPPublicKeyField`
 
 Public key encryption creates a token generated with a public key to
 encrypt the data and a private key to decrypt it.
@@ -123,6 +124,7 @@ Supported PGP symmetric key fields are:
  - `DatePGPSymmetricKeyField`
  - `DateTimePGPSymmetricKeyField`
  - `DecimalPGPSymmetricKeyField`
+ - `FloatPGPSymmetricKeyField`
 
 Encrypt and decrypt the data with `settings.PGCRYPTO_KEY` which acts like a password.
 
@@ -183,6 +185,7 @@ class MyModel(models.Model):
     date_pgp_pub_field = fields.DatePGPPublicKeyField()
     datetime_pgp_pub_field = fields.DateTimePGPPublicKeyField()
     decimal_pgp_pub_field = fields.DecimalPGPPublicKeyField()
+    float_pgp_pub_field = fields.FloatPGPPublicKeyField()
     
     email_pgp_sym_field = fields.EmailPGPSymmetricKeyField()
     integer_pgp_sym_field = fields.IntegerPGPSymmetricKeyField()
@@ -190,6 +193,7 @@ class MyModel(models.Model):
     date_pgp_sym_field = fields.DatePGPSymmetricKeyField()
     datetime_pgp_sym_field = fields.DateTimePGPSymmetricKeyField()
     decimal_pgp_sym_field = fields.DecimalPGPSymmetricKeyField()
+    float_pgp_sym_field = fields.FloatPGPSymmetricKeyField()
 ```
 
 #### Encrypting
