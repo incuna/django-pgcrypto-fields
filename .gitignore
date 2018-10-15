@@ -42,6 +42,7 @@ nosetests.xml
 coverage.xml
 *,cover
 .hypothesis/
+.idea/
 
 # Django stuff:
 *.log
