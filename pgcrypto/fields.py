@@ -20,6 +20,7 @@ from pgcrypto.mixins import (
     DatePGPSymmetricKeyFieldMixin,
     DateTimePGPPublicKeyFieldMixin,
     DateTimePGPSymmetricKeyFieldMixin,
+    DecimalPGPPublicKeyFieldMixin,
     EmailPGPPublicKeyFieldMixin,
     EmailPGPSymmetricKeyFieldMixin,
     HashMixin,
@@ -118,3 +119,7 @@ DateTimePGPSymmetricKeyField.register_lookup(DateTimeLteLookup)
 DateTimePGPSymmetricKeyField.register_lookup(DateTimeGtLookup)
 DateTimePGPSymmetricKeyField.register_lookup(DateTimeGteLookup)
 DateTimePGPSymmetricKeyField.register_lookup(DateTimeRangeLookup)
+
+
+class DecimalPGPPublicKeyField(DecimalPGPPublicKeyFieldMixin, models.DecimalField):
+    """Decimal PGP public key encrypted field for postgres."""

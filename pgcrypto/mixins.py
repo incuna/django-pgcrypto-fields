@@ -8,7 +8,7 @@ from pgcrypto import (
     PGP_SYM_DECRYPT_SQL,
     PGP_SYM_ENCRYPT_SQL,
 )
-from pgcrypto.forms import DateField, DateTimeField
+from pgcrypto.forms import DateField, DateTimeField, DecimalField
 
 
 def remove_validators(validators, validator_class):
@@ -22,7 +22,7 @@ class DecryptedCol(Col):
     def __init__(self, alias, target, output_field=None):
         """Init the decryption."""
         self.decrypt_sql = target.decrypt_sql
-        self.cast_type = target.cast_type
+        self.cast_sql = target.get_cast_sql()
         self.target = target
 
         super(DecryptedCol, self).__init__(alias, target, output_field)
@@ -30,7 +30,7 @@ class DecryptedCol(Col):
     def as_sql(self, compiler, connection):
         """Build SQL with decryption and casting."""
         sql, params = super(DecryptedCol, self).as_sql(compiler, connection)
-        sql = self.decrypt_sql % (sql, self.cast_type)
+        sql = self.decrypt_sql % (sql, self.cast_sql)
         return sql, params
 
 
@@ -95,6 +95,9 @@ class PGPMixin:
         custom operators.
         """
         return self.encrypt_sql
+
+    def get_cast_sql(self):
+        return self.cast_type
 
     def _check_max_length_attribute(self, **kwargs):
         """Override `_check_max_length_attribute` to remove check on max_length."""
@@ -197,3 +200,20 @@ class DateTimePGPSymmetricKeyFieldMixin(PGPSymmetricKeyFieldMixin):
         defaults = {'form_class': DateTimeField}
         defaults.update(kwargs)
         return super().formfield(**defaults)
+
+
+class DecimalPGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin):
+    """Decimal mixin for PGP symmetric key fields."""
+    cast_type = 'NUMERIC(%(max_digits)s, %(decimal_places)s)'
+
+    def formfield(self, **kwargs):
+        """Override the form field with custom PGP DecimalTimeField."""
+        defaults = {'form_class': DecimalField}
+        defaults.update(kwargs)
+        return super().formfield(**defaults)
+
+    def get_cast_sql(self):
+        return self.cast_type % {
+            'max_digits': self.max_digits,
+            'decimal_places': self.decimal_places
+        }

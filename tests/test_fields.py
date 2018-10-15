@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from decimal import Decimal
 from unittest.mock import MagicMock
 
 from django import VERSION as DJANGO_VERSION
@@ -81,6 +82,7 @@ class TestEncryptedTextFieldModel(TestCase):
             'email_pgp_pub_field',
             'integer_pgp_pub_field',
             'pgp_pub_field',
+            'decimal_pgp_pub_field',
             'email_pgp_sym_field',
             'integer_pgp_sym_field',
             'pgp_sym_field',
@@ -783,6 +785,36 @@ class TestEncryptedTextFieldModel(TestCase):
                     None
                 ]
             ).count()
+        )
+
+    def test_decimal_pgp_pub_field(self):
+        expected = '100000.99'
+        EncryptedModelFactory.create(decimal_pgp_pub_field=expected)
+
+        instance = EncryptedModel.objects.get()
+
+        self.assertIsInstance(
+            instance.decimal_pgp_pub_field,
+            Decimal
+        )
+
+        self.assertEqual(
+            instance.decimal_pgp_pub_field,
+            Decimal(expected)
+        )
+
+        items = EncryptedModel.objects.filter(decimal_pgp_pub_field__gte='100')
+
+        self.assertEqual(
+            1,
+            len(items)
+        )
+
+        items = EncryptedModel.objects.filter(decimal_pgp_pub_field__gte='100001.00')
+
+        self.assertEqual(
+            0,
+            len(items)
         )
 
     def test_null(self):

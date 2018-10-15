@@ -1,4 +1,5 @@
-SHELL := /bin/bash
+.PHONY: clean-build lint help
+.DEFAULT_GOAL := help
 
 define BROWSER_PYSCRIPT
 import os, webbrowser, sys
@@ -29,11 +30,11 @@ help:
 	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
 lint: ## Check style with flake8
-	@flake8 .
+	flake8 . --exit-zero
 
 clean-build: ## Remove build artifacts
-	rm -r -f dist/*
-	rm -r -f build/*
+	rm -rf dist/*
+	rm -rf build/*
 	rm -fr htmlcov/
 
 build: clean-build ## Builds source and wheel package
@@ -46,7 +47,7 @@ release: ## Package and upload a release
 test: clean-build lint ## Run tests quickly with the default Python
 	./tests/run.py
 
-test-coverage: ## Check code coverage quickly with the default Python
+test-coverage: clean-build lint ## Check code coverage quickly with the default Python
 	coverage run ./tests/run.py
 	coverage report -m
 
