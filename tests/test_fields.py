@@ -1,13 +1,15 @@
 from datetime import date, datetime
 from unittest.mock import MagicMock
 
+from django import VERSION as DJANGO_VERSION
+from django.db import models
 from django.test import TestCase
 from incuna_test_utils.utils import field_names
 
-from pgcrypto import aggregates, fields, proxy
-from .factories import EncryptedModelFactory
+from pgcrypto import fields
+from .factories import EncryptedFKModelFactory, EncryptedModelFactory
 from .forms import EncryptedForm
-from .models import EncryptedModel, EncryptedModelWithManager
+from .models import EncryptedDateTime, EncryptedFKModel, EncryptedModel, RelatedDateTime
 
 KEYED_FIELDS = (fields.TextDigestField, fields.TextHMACField)
 EMAIL_PGP_FIELDS = (fields.EmailPGPPublicKeyField, fields.EmailPGPSymmetricKeyField)
@@ -86,6 +88,7 @@ class TestEncryptedTextFieldModel(TestCase):
             'datetime_pgp_sym_field',
             'date_pgp_pub_field',
             'datetime_pgp_pub_field',
+            'fk_model',
         )
         self.assertCountEqual(fields, expected)
 
@@ -109,26 +112,18 @@ class TestEncryptedTextFieldModel(TestCase):
         self.assertIsInstance(instance.date_pgp_sym_field, date)
         self.assertIsInstance(instance.datetime_pgp_sym_field, datetime)
 
-    def test_fields_descriptor_is_not_instance(self):
-        """`EncryptedProxyField` instance returns itself when accessed from the model."""
-        self.assertIsInstance(
-            self.model.pgp_pub_field,
-            proxy.EncryptedProxyField,
-        )
-        self.assertIsInstance(
-            self.model.pgp_sym_field,
-            proxy.EncryptedProxyField,
-        )
-
     def test_value_query(self):
-        """Assert querying the field's value is making one query."""
+        """Assert querying the field's value is making zero queries."""
         expected = 'bonjour'
+        temp = None
         EncryptedModelFactory.create(pgp_pub_field=expected)
 
         instance = self.model.objects.get()
 
-        with self.assertNumQueries(1):
-            instance.pgp_pub_field
+        with self.assertNumQueries(0):
+            temp = instance.pgp_pub_field
+
+        self.assertEqual(expected, temp)
 
     def test_value_pgp_pub(self):
         """Assert we can get back the decrypted value."""
@@ -168,22 +163,6 @@ class TestEncryptedTextFieldModel(TestCase):
         self.assertEqual(instance.pgp_pub_field, expected)
         self.assertEqual(instance.pgp_pub_field, expected)
 
-    def test_decrypt_annotate(self):
-        """Assert we can get back the decrypted value."""
-        expected = 'bonjour'
-        EncryptedModelFactory.create(
-            pgp_pub_field=expected,
-            pgp_sym_field=expected,
-        )
-
-        queryset = self.model.objects.annotate(
-            aggregates.PGPPublicKeyAggregate('pgp_pub_field'),
-            aggregates.PGPSymmetricKeyAggregate('pgp_sym_field'),
-        )
-        instance = queryset.get()
-        self.assertEqual(instance.pgp_pub_field__decrypted, expected)
-        self.assertEqual(instance.pgp_sym_field__decrypted, expected)
-
     def test_decrypt_filter(self):
         """Assert we can get filter the decrypted value."""
         expected = 'bonjour'
@@ -191,11 +170,26 @@ class TestEncryptedTextFieldModel(TestCase):
             pgp_pub_field=expected,
         )
 
-        queryset = self.model.objects.annotate(
-            aggregates.PGPPublicKeyAggregate('pgp_pub_field'),
+        queryset = self.model.objects.filter(
+            pgp_pub_field=expected
         )
-        instance = queryset.filter(pgp_pub_field__decrypted=expected).first()
-        self.assertEqual(instance.pgp_pub_field__decrypted, expected)
+
+        instance = queryset.first()
+        self.assertEqual(instance.pgp_pub_field, expected)
+
+        queryset = self.model.objects.filter(
+            pgp_pub_field__contains='jour'
+        )
+
+        instance = queryset.first()
+        self.assertEqual(instance.pgp_pub_field, expected)
+
+        queryset = self.model.objects.filter(
+            pgp_pub_field__startswith='bon'
+        )
+
+        instance = queryset.first()
+        self.assertEqual(instance.pgp_pub_field, expected)
 
     def test_digest_lookup(self):
         """Assert we can filter a digest value."""
@@ -796,47 +790,245 @@ class TestEncryptedTextFieldModel(TestCase):
         instance = EncryptedModel.objects.create()
         fields = field_names(self.model)
         fields.remove('id')
+
         for field in fields:
-            with self.subTest(field=field):
-                self.assertEqual(getattr(instance, field), None)
+            with self.subTest(instance=instance, field=field):
+                value = getattr(instance, field)
+                self.assertEqual(
+                    value,
+                    None,
+                    msg='Field {}, Value: {}'.format(field, value)
+                )
 
+    def test_defer(self):
+        """Test defer() functionality."""
+        expected = 'bonjour'
+        EncryptedModelFactory.create(pgp_sym_field=expected)
+        instance = self.model.objects.defer('pgp_sym_field').get()
 
-class TestPGPManager(TestCase):
-    """Test `PGPManager` can be integrated in a `Django` model."""
-    model = EncryptedModelWithManager
+        # Assert that accessing a field that is in defer() causes a query
+        with self.assertNumQueries(1):
+            temp = instance.pgp_sym_field
 
-    def test_auto_decryption(self):
-        """Assert auto decryption via manager."""
-        expected_string = 'bonjour'
-        expected_date = date(2016, 9, 1)
-        expected_datetime = datetime(2016, 9, 1, 0, 0, 0)
+        self.assertEqual(temp, expected)
 
-        EncryptedModelFactory.create(
-            digest_field=expected_string,
-            hmac_field=expected_string,
-            pgp_pub_field=expected_string,
-            pgp_sym_field=expected_string,
-            date_pgp_sym_field=expected_date,  # Tests cast sql
-            datetime_pgp_sym_field=expected_datetime,  # Tests cast sql
+    def test_only(self):
+        """Test only() functionality."""
+        expected = 'bonjour'
+        EncryptedModelFactory.create(pgp_sym_field=expected, pgp_pub_field=expected)
+        instance = self.model.objects.only('pgp_sym_field').get()
+
+        # Assert that accessing a field in only() does not cause a query
+        with self.assertNumQueries(0):
+            temp = instance.pgp_sym_field
+
+        self.assertEqual(temp, expected)
+
+        # Assert that accessing a field not in only() causes a query
+        with self.assertNumQueries(1):
+            temp = instance.pgp_pub_field
+
+        self.assertEqual(temp, expected)
+
+    def test_fk_auto_decryption(self):
+        """Test auto decryption of FK when select related is defined."""
+        expected = 'bonjour'
+        EncryptedModelFactory.create(fk_model__fk_pgp_sym_field=expected)
+        instance = self.model.objects.select_related('fk_model').get()
+
+        # Assert no additional queries are made to decrypt
+        with self.assertNumQueries(0):
+            temp = instance.fk_model.fk_pgp_sym_field
+
+        self.assertEqual(temp, expected)
+
+    def test_get_by_natural_key(self):
+        """Test get_by_natual_key() support."""
+        expected = 'peter@test.com'
+        EncryptedModelFactory.create(email_pgp_pub_field=expected)
+
+        instance = self.model.objects.get_by_natural_key(expected)
+
+        self.assertEqual(instance.email_pgp_pub_field, expected)
+
+    def test_get_or_create(self):
+        """Test get_or_create() support."""
+        expected = 'peter@test.com'
+        original = EncryptedModelFactory.create(email_pgp_pub_field=expected)
+
+        instance, created = self.model.objects.get_or_create(
+            email_pgp_pub_field=expected
         )
 
-        instance = self.model.objects.get()
+        self.assertFalse(created)
+        self.assertEqual(instance.id, original.id)
+        self.assertEqual(instance.email_pgp_pub_field, original.email_pgp_pub_field)
 
-        # Using `__dict__` bypasses "on the fly" decryption that normally occurs
-        # if accessing a field that is not yet decrypted.
-        # If decryption is not working, we get references to <In_Memory> classes
-        self.assertEqual(instance.__dict__['pgp_pub_field'], expected_string)
-        self.assertEqual(instance.__dict__['pgp_sym_field'], expected_string)
-        self.assertEqual(instance.__dict__['date_pgp_sym_field'], expected_date)
-        self.assertEqual(instance.__dict__['datetime_pgp_sym_field'], expected_datetime)
+        instance, created = self.model.objects.get_or_create(
+            email_pgp_pub_field='jessica@test.com'
+        )
 
-        # Ensure digest / hmac fields are unaffected
-        count = self.model.objects.filter(
-            digest_field__hash_of=expected_string
-        ).count()
-        self.assertEqual(count, 1)
+        self.assertTrue(created)
+        self.assertNotEqual(instance.id, original.id)
+        self.assertEqual(instance.email_pgp_pub_field, 'jessica@test.com')
 
-        count = self.model.objects.filter(
-            hmac_field__hash_of=expected_string
-        ).count()
-        self.assertEqual(count, 1)
+    def test_update_or_create(self):
+        """Test update_or_create() support."""
+        expected = 'peter@test.com'
+        original = EncryptedModelFactory.create(
+            email_pgp_pub_field=expected,
+            pgp_sym_field='Test'
+        )
+
+        instance, created = self.model.objects.update_or_create(
+            email_pgp_pub_field='jessica@test.com'
+        )
+
+        self.assertTrue(created)
+        self.assertNotEqual(instance.id, original.id)
+        self.assertEqual(instance.email_pgp_pub_field, 'jessica@test.com')
+
+        instance, created = self.model.objects.update_or_create(
+            email_pgp_pub_field='jessica@test.com',
+            defaults={
+                'pgp_sym_field': 'Blue',
+            }
+        )
+
+        self.assertFalse(created)
+        self.assertNotEqual(instance.id, original.id)
+        self.assertEqual(instance.pgp_sym_field, 'Blue')
+
+    def test_aggregates(self):
+        """Test aggregate support."""
+        EncryptedModelFactory.create(datetime_pgp_sym_field=datetime(2016, 7, 1, 0, 0, 0))
+        EncryptedModelFactory.create(datetime_pgp_sym_field=datetime(2016, 7, 2, 0, 0, 0))
+        EncryptedModelFactory.create(datetime_pgp_sym_field=datetime(2016, 8, 1, 0, 0, 0))
+        EncryptedModelFactory.create(datetime_pgp_sym_field=datetime(2016, 9, 1, 0, 0, 0))
+        EncryptedModelFactory.create(datetime_pgp_sym_field=datetime(2016, 9, 2, 0, 0, 0))
+
+        total_2016 = self.model.objects.aggregate(
+            count=models.Count('datetime_pgp_sym_field')
+        )
+
+        self.assertEqual(5, total_2016['count'])
+
+        total_july = self.model.objects.filter(
+            datetime_pgp_sym_field__range=[
+                datetime(2016, 7, 1, 0, 0, 0),
+                datetime(2016, 7, 30, 23, 59, 59)
+            ]
+        ).aggregate(
+            count=models.Count('datetime_pgp_sym_field')
+        )
+
+        self.assertEqual(2, total_july['count'])
+
+        total_2016 = self.model.objects.aggregate(
+            count=models.Count('datetime_pgp_sym_field'),
+            min=models.Min('datetime_pgp_sym_field'),
+            max=models.Max('datetime_pgp_sym_field'),
+        )
+
+        self.assertEqual(5, total_2016['count'])
+        self.assertEqual(datetime(2016, 7, 1, 0, 0, 0), total_2016['min'])
+        self.assertEqual(datetime(2016, 9, 2, 0, 0, 0), total_2016['max'])
+
+        total_july = self.model.objects.filter(
+            datetime_pgp_sym_field__range=[
+                datetime(2016, 7, 1, 0, 0, 0),
+                datetime(2016, 7, 30, 23, 59, 59)
+            ]
+        ).aggregate(
+            count=models.Count('datetime_pgp_sym_field'),
+            min=models.Min('datetime_pgp_sym_field'),
+            max=models.Max('datetime_pgp_sym_field'),
+        )
+
+        self.assertEqual(2, total_july['count'])
+        self.assertEqual(datetime(2016, 7, 1, 0, 0, 0), total_july['min'])
+        self.assertEqual(datetime(2016, 7, 2, 0, 0, 0), total_july['max'])
+
+    def test_distinct(self):
+        """Test distinct support."""
+        EncryptedModelFactory.create(pgp_sym_field='Paul')
+        EncryptedModelFactory.create(pgp_sym_field='Paul')
+        EncryptedModelFactory.create(pgp_sym_field='Peter')
+        EncryptedModelFactory.create(pgp_sym_field='Peter')
+        EncryptedModelFactory.create(pgp_sym_field='Jessica')
+        EncryptedModelFactory.create(pgp_sym_field='Jessica')
+
+        items = self.model.objects.filter(
+            pgp_sym_field__startswith='P'
+        ).annotate(
+            _distinct=models.F('pgp_sym_field')
+        ).only(
+            'id', 'pgp_sym_field', 'fk_model__fk_pgp_sym_field'
+        ).distinct(
+            '_distinct'
+        )
+
+        self.assertEqual(
+            2,
+            len(items)
+        )
+
+        # This only works on Django 2.1+
+        if DJANGO_VERSION[0] >= 2 and DJANGO_VERSION[1] >= 1:
+            items = self.model.objects.filter(
+                pgp_sym_field__startswith='P'
+            ).only(
+                'id', 'pgp_sym_field', 'fk_model__fk_pgp_sym_field'
+            ).distinct(
+                'pgp_sym_field'
+            )
+
+            self.assertEqual(
+                2,
+                len(items)
+            )
+
+    def test_annotate(self):
+        """Test annotate support."""
+        efk = EncryptedFKModelFactory.create()
+        EncryptedModelFactory.create(pgp_sym_field='Paul', fk_model=efk)
+        EncryptedModelFactory.create(pgp_sym_field='Peter', fk_model=efk)
+        EncryptedModelFactory.create(pgp_sym_field='Peter', fk_model=efk)
+        EncryptedModelFactory.create(pgp_sym_field='Jessica', fk_model=efk)
+
+        items = EncryptedFKModel.objects.annotate(
+            name_count=models.Count('encryptedmodel')
+        )
+
+        self.assertEqual(
+            4,
+            items[0].name_count
+        )
+
+        items = EncryptedFKModel.objects.filter(
+            encryptedmodel__pgp_sym_field__startswith='J'
+        ).annotate(
+            name_count=models.Count('encryptedmodel')
+        )
+
+        self.assertEqual(
+            1,
+            items[0].name_count
+        )
+
+    def test_get_col(self):
+        """Test get_col for related alias."""
+        related = EncryptedDateTime.objects.create(value=datetime.now())
+        related_again = EncryptedDateTime.objects.create(value=datetime.now())
+
+        RelatedDateTime.objects.create(related=related, related_again=related_again)
+
+        instance = RelatedDateTime.objects.select_related(
+            'related', 'related_again'
+        )
+
+        instance = RelatedDateTime.objects.select_related(
+            'related', 'related_again'
+        ).get()
+
+        self.assertIsInstance(instance, RelatedDateTime)

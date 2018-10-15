@@ -1,4 +1,17 @@
-### 2.3.0
+## 2.4.0
+
+* Added auto-decryption of all encrypted fields including FK tables
+* Removed django-pgcrypto-fields `aggregates`, `PGPManager` and `PGPAdmin` as they are no longer needed
+* Added support for `get_or_create()` and `update_or_create()` (#27)
+* Added support for `get_by_natural_key()` (#23)
+* Added support for `only()` and `defer()` as they were not supported with `PGPManager`
+* Added support for `distinct()` (Django 2.1+ with workaround available for 2.0 and lower)
+* Separated out dev requirements from setup.py requirements
+* Updated packaging / setup.py to include long description
+* Added AUTHORS and updated CONTRIBUTING
+* Updated TravisCI to use Xenial to gain Python 3.7 in the matrix
+
+## 2.3.1
 
 * Added `__range` lookup for Date / DateTime fields (#59)
 * Remove compatibility for `Django 1.8, 1.9, and 1.10` (#62)
@@ -9,6 +22,10 @@
 * Added additional shields to `README`
 * Updated Travis config to include Python 3.5 and 3.6
 * Refactored lookups and mixins
+
+## 2.3.0
+
+* Invalid release, bump to 2.3.1
 
 ## 2.2.0
 
