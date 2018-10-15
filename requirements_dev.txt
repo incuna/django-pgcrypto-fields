@@ -9,7 +9,7 @@ incuna-test-utils==6.6.0
 pip==18.1
 psycopg2-binary==2.7.5
 pyflakes==1.6.0
-pycodestyle==2.3.1
+pycodestyle==2.4.0
 setuptools==39.1.0
 twine==1.12.1
 wheel==0.32.1
