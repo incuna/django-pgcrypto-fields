@@ -1313,7 +1313,9 @@ class TestEncryptedTextFieldModel(TestCase):
         expected = 'bonjour'
         instance = EncryptedDiff.objects.create(
             pub_field=expected,
-            sym_field=expected
+            sym_field=expected,
+            digest_field=expected,
+            hmac_field=expected,
         )
         instance.refresh_from_db()
 
@@ -1323,5 +1325,19 @@ class TestEncryptedTextFieldModel(TestCase):
         )
         self.assertTrue(
             instance.sym_field,
+            expected
+        )
+
+        instance = EncryptedDiff.objects.get(digest_field__hash_of=expected)
+
+        self.assertTrue(
+            instance.digest_field,
+            expected
+        )
+
+        instance = EncryptedDiff.objects.get(hmac_field__hash_of=expected)
+
+        self.assertTrue(
+            instance.hmac_field,
             expected
         )
