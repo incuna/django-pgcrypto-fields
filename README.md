@@ -147,6 +147,7 @@ the data and also changing the hash to match.
 #### Public Key Encryption Fields
 
 Supported PGP public key fields are:
+ - `CharPGPPublicKeyField`
  - `EmailPGPPublicKeyField`
  - `IntegerPGPPublicKeyField`
  - `TextPGPPublicKeyField`
@@ -165,6 +166,7 @@ Public and private keys can be set in settings with `PUBLIC_PGP_KEY` and
 #### Symmetric Key Encryption Fields
 
 Supported PGP symmetric key fields are:
+ - `CharPGPSymmetricKeyField`
  - `EmailPGPSymmetricKeyField`
  - `IntegerPGPSymmetricKeyField`
  - `TextPGPSymmetricKeyField`

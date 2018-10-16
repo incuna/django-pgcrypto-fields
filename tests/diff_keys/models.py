@@ -4,8 +4,14 @@ from pgcrypto import fields
 
 
 class EncryptedDiff(models.Model):
-    pub_field = fields.TextPGPPublicKeyField()
-    sym_field = fields.TextPGPSymmetricKeyField()
+    CHOICES = (
+        ('a', 'a'),
+        (1, '1'),
+    )
+    pub_field = fields.CharPGPPublicKeyField(blank=True, null=True,
+                                             choices=CHOICES, max_length=1)
+    sym_field = fields.CharPGPSymmetricKeyField(blank=True, null=True,
+                                                choices=CHOICES, max_length=1)
     digest_field = fields.TextDigestField(blank=True, null=True)
     hmac_field = fields.TextHMACField(blank=True, null=True)
 

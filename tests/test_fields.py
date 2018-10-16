@@ -447,6 +447,7 @@ class TestEncryptedTextFieldModel(TestCase):
         )
 
     def test_pgp_public_key_char_field(self):
+        """Test public key CharField."""
         expect = 'Peter'
         EncryptedModelFactory.create(char_pub_field=expect)
 
@@ -468,6 +469,7 @@ class TestEncryptedTextFieldModel(TestCase):
         self.assertTrue(1, len(errors['char_pub_field']))
 
     def test_pgp_symmetric_key_char_field(self):
+        """Test symmetric key CharField."""
         expect = 'Peter'
         EncryptedModelFactory.create(char_sym_field=expect)
 
@@ -1342,9 +1344,29 @@ class TestEncryptedTextFieldModel(TestCase):
 
         self.assertIsInstance(instance, RelatedDateTime)
 
+    def test_char_field_choices(self):
+        """Test CharField choices."""
+        expected = 1
+        instance = EncryptedDiff.objects.create(
+            pub_field=expected,
+            sym_field=expected,
+        )
+        instance.refresh_from_db()
+
+        # choices always come back as strings
+        self.assertTrue(
+            '{}'.format(expected),
+            instance.pub_field
+        )
+
+        self.assertTrue(
+            '{}'.format(expected),
+            instance.sym_field
+        )
+
     def test_write_to_diff_keys(self):
         """Test writing to diff_keys db which uses different keys."""
-        expected = 'bonjour'
+        expected = 'a'
         instance = EncryptedDiff.objects.create(
             pub_field=expected,
             sym_field=expected,
