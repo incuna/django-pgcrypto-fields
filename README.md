@@ -73,21 +73,15 @@ Supported PGP public key fields are:
  - `TextPGPPublicKeyField`
  - `DatePGPPublicKeyField`
  - `DateTimePGPPublicKeyField`
+ - `DecimalPGPPublicKeyField`
+ - `FloatPGPPublicKeyField`
+ - `TimePGPPublicKeyField`
 
 Public key encryption creates a token generated with a public key to
 encrypt the data and a private key to decrypt it.
 
 Public and private keys can be set in settings with `PUBLIC_PGP_KEY` and
 `PRIVATE_PGP_KEY`.
-
-N.B. `DatePGPPublicKeyField` and `DateTimePGPPublicKeyField` only support the following lookups:
-
-- `__exact`
-- `__gt`
-- `__gte`
-- `__lt`
-- `__lte`
-- `__range`
 
 ##### Generate GPG keys.
 
@@ -121,17 +115,11 @@ Supported PGP symmetric key fields are:
  - `TextPGPSymmetricKeyField`
  - `DatePGPSymmetricKeyField`
  - `DateTimePGPSymmetricKeyField`
+ - `DecimalPGPSymmetricKeyField`
+ - `FloatPGPSymmetricKeyField`
+ - `TimePGPSymmetricKeyField`
 
 Encrypt and decrypt the data with `settings.PGCRYPTO_KEY` which acts like a password.
-
-N.B. `DatePGPSymmetricKeyField` and `DateTimePGPSymmetricKeyField` only support the following lookups:
-
-- `__exact`
-- `__gt`
-- `__gte`
-- `__lt`
-- `__lte`
-- `__range`
 
 ### Django settings
 
@@ -180,12 +168,18 @@ class MyModel(models.Model):
     pgp_pub_field = fields.TextPGPPublicKeyField()
     date_pgp_pub_field = fields.DatePGPPublicKeyField()
     datetime_pgp_pub_field = fields.DateTimePGPPublicKeyField()
+    time_pgp_pub_field = fields.TimePGPPublicKeyField()
+    decimal_pgp_pub_field = fields.DecimalPGPPublicKeyField()
+    float_pgp_pub_field = fields.FloatPGPPublicKeyField()
     
     email_pgp_sym_field = fields.EmailPGPSymmetricKeyField()
     integer_pgp_sym_field = fields.IntegerPGPSymmetricKeyField()
     pgp_sym_field = fields.TextPGPSymmetricKeyField()
     date_pgp_sym_field = fields.DatePGPSymmetricKeyField()
     datetime_pgp_sym_field = fields.DateTimePGPSymmetricKeyField()
+    time_pgp_sym_field = fields.TimePGPSymmetricKeyField()
+    decimal_pgp_sym_field = fields.DecimalPGPSymmetricKeyField()
+    float_pgp_sym_field = fields.FloatPGPSymmetricKeyField()
 ```
 
 #### Encrypting
