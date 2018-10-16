@@ -3,6 +3,8 @@
 ## 2.5.0
 
 * Added new DecimalFields for both public and symmetric key
+* Added new FloatFields for both public and symmetric key
+* Added new TimeFields for both public and symmetric key
 
 ## 2.4.0
 

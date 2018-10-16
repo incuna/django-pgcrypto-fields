@@ -88,8 +88,10 @@ class TestEncryptedTextFieldModel(TestCase):
             'pgp_sym_field',
             'date_pgp_sym_field',
             'datetime_pgp_sym_field',
+            'time_pgp_sym_field',
             'date_pgp_pub_field',
             'datetime_pgp_pub_field',
+            'time_pgp_pub_field',
             'decimal_pgp_sym_field',
             'float_pgp_pub_field',
             'float_pgp_sym_field',
@@ -346,6 +348,7 @@ class TestEncryptedTextFieldModel(TestCase):
         """Assert form field and widget for `DateTimePGPSymmetricKeyField` field."""
         expected = date.today()
         instance = EncryptedModelFactory.create(date_pgp_sym_field=expected)
+        instance.refresh_from_db()  # Ensure the PGSQL casting works right
 
         payload = {
             'date_pgp_sym_field': '08/01/2016'
@@ -365,6 +368,7 @@ class TestEncryptedTextFieldModel(TestCase):
         """Assert form field and widget for `DateTimePGPSymmetricKeyField` field."""
         expected = datetime.now()
         instance = EncryptedModelFactory.create(datetime_pgp_sym_field=expected)
+        instance.refresh_from_db()  # Ensure the PGSQL casting works right
 
         payload = {
             'datetime_pgp_sym_field': '08/01/2016 14:00'
@@ -378,6 +382,70 @@ class TestEncryptedTextFieldModel(TestCase):
         self.assertTrue(
             cleaned_data['datetime_pgp_sym_field'],
             datetime(2016, 8, 1, 14, 0, 0)
+        )
+
+    def test_pgp_symmetric_key_time(self):
+        """Assert date is save with an `TimePGPSymmetricKeyField` field."""
+        expected = datetime.now().time()
+        instance = EncryptedModelFactory.create(time_pgp_sym_field=expected)
+        instance.refresh_from_db()  # Ensure the PGSQL casting works right
+
+        self.assertEqual(instance.time_pgp_sym_field, expected)
+
+        instance = EncryptedModel.objects.get(pk=instance.id)
+
+        self.assertEqual(instance.time_pgp_sym_field, expected)
+
+    def test_pgp_pub_key_time(self):
+        """Assert date is save with an `TimePGPPublicKeyField` field."""
+        expected = datetime.now().time()
+        instance = EncryptedModelFactory.create(time_pgp_pub_field=expected)
+        instance.refresh_from_db()  # Ensure the PGSQL casting works right
+
+        self.assertEqual(instance.time_pgp_pub_field, expected)
+
+        instance = EncryptedModel.objects.get(pk=instance.id)
+
+        self.assertEqual(instance.time_pgp_pub_field, expected)
+
+    def test_pgp_symmetric_key_time_form(self):
+        """Assert form field and widget for `TimePGPSymmetricKeyField` field."""
+        expected = datetime.now().time()
+        instance = EncryptedModelFactory.create(time_pgp_sym_field=expected)
+        instance.refresh_from_db()  # Ensure the PGSQL casting works right
+
+        payload = {
+            'time_pgp_sym_field': '{}'.format(expected)
+        }
+
+        form = EncryptedForm(payload, instance=instance)
+        self.assertTrue(form.is_valid())
+
+        cleaned_data = form.cleaned_data
+
+        self.assertTrue(
+            cleaned_data['time_pgp_sym_field'],
+            expected
+        )
+
+    def test_pgp_public_key_time_form(self):
+        """Assert form field and widget for `TimePGPSymmetricKeyField` field."""
+        expected = datetime.now().time()
+        instance = EncryptedModelFactory.create(time_pgp_pub_field=expected)
+        instance.refresh_from_db()  # Ensure the PGSQL casting works right
+
+        payload = {
+            'time_pgp_pub_field': '{}'.format(expected)
+        }
+
+        form = EncryptedForm(payload, instance=instance)
+        self.assertTrue(form.is_valid())
+
+        cleaned_data = form.cleaned_data
+
+        self.assertTrue(
+            cleaned_data['time_pgp_pub_field'],
+            expected
         )
 
     def test_pgp_symmetric_key_date_lookups(self):

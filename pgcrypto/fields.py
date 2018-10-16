@@ -180,3 +180,15 @@ class FloatPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.FloatField):
     """Float PGP symmetric key encrypted field for postgres."""
     encrypt_sql = PGP_SYM_ENCRYPT_SQL_WITH_NULLIF
     cast_type = 'DOUBLE PRECISION'
+
+
+class TimePGPPublicKeyField(PGPPublicKeyFieldMixin, models.TimeField):
+    """Time PGP public key encrypted field for postgres."""
+    encrypt_sql = PGP_PUB_ENCRYPT_SQL_WITH_NULLIF
+    cast_type = 'TIME'
+
+
+class TimePGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.TimeField):
+    """Float PGP symmetric key encrypted field for postgres."""
+    encrypt_sql = PGP_SYM_ENCRYPT_SQL_WITH_NULLIF
+    cast_type = 'TIME'
