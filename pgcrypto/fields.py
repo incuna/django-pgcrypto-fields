@@ -6,14 +6,7 @@ from pgcrypto import (
     PGP_PUB_ENCRYPT_SQL_WITH_NULLIF,
     PGP_SYM_ENCRYPT_SQL_WITH_NULLIF,
 )
-from pgcrypto import forms
 from pgcrypto.lookups import (
-    DateTimeExactLookup,
-    DateTimeGteLookup,
-    DateTimeGtLookup,
-    DateTimeLteLookup,
-    DateTimeLtLookup,
-    DateTimeRangeLookup,
     HashLookup,
 )
 from pgcrypto.mixins import (
@@ -55,42 +48,16 @@ class TextPGPPublicKeyField(PGPPublicKeyFieldMixin, models.TextField):
     """Text PGP public key encrypted field."""
 
 
-class DatePGPPublicKeyField(PGPPublicKeyFieldMixin, models.TextField):
+class DatePGPPublicKeyField(PGPPublicKeyFieldMixin, models.DateField):
     """Date PGP public key encrypted field for postgres."""
+    encrypt_sql = PGP_PUB_ENCRYPT_SQL_WITH_NULLIF
     cast_type = 'DATE'
 
-    def formfield(self, **kwargs):
-        """Override the form field with custom PGP DateField."""
-        defaults = {'form_class': forms.DateField}
-        defaults.update(kwargs)
-        return super().formfield(**defaults)
 
-
-DatePGPPublicKeyField.register_lookup(DateTimeExactLookup)
-DatePGPPublicKeyField.register_lookup(DateTimeLtLookup)
-DatePGPPublicKeyField.register_lookup(DateTimeLteLookup)
-DatePGPPublicKeyField.register_lookup(DateTimeGtLookup)
-DatePGPPublicKeyField.register_lookup(DateTimeGteLookup)
-DatePGPPublicKeyField.register_lookup(DateTimeRangeLookup)
-
-
-class DateTimePGPPublicKeyField(PGPPublicKeyFieldMixin, models.TextField):
+class DateTimePGPPublicKeyField(PGPPublicKeyFieldMixin, models.DateTimeField):
     """DateTime PGP public key encrypted field for postgres."""
+    encrypt_sql = PGP_PUB_ENCRYPT_SQL_WITH_NULLIF
     cast_type = 'TIMESTAMP'
-
-    def formfield(self, **kwargs):
-        """Override the form field with custom PGP DateTimeField."""
-        defaults = {'form_class': forms.DateTimeField}
-        defaults.update(kwargs)
-        return super().formfield(**defaults)
-
-
-DateTimePGPPublicKeyField.register_lookup(DateTimeExactLookup)
-DateTimePGPPublicKeyField.register_lookup(DateTimeLtLookup)
-DateTimePGPPublicKeyField.register_lookup(DateTimeLteLookup)
-DateTimePGPPublicKeyField.register_lookup(DateTimeGtLookup)
-DateTimePGPPublicKeyField.register_lookup(DateTimeGteLookup)
-DateTimePGPPublicKeyField.register_lookup(DateTimeRangeLookup)
 
 
 class EmailPGPSymmetricKeyField(RemoveMaxLengthValidatorMixin,
@@ -108,42 +75,16 @@ class TextPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.TextField):
     """Text PGP symmetric key encrypted field for postgres."""
 
 
-class DatePGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.TextField):
+class DatePGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.DateField):
     """Date PGP symmetric key encrypted field for postgres."""
+    encrypt_sql = PGP_SYM_ENCRYPT_SQL_WITH_NULLIF
     cast_type = 'DATE'
 
-    def formfield(self, **kwargs):
-        """Override the form field with custom PGP DateField."""
-        defaults = {'form_class': forms.DateField}
-        defaults.update(kwargs)
-        return super().formfield(**defaults)
 
-
-DatePGPSymmetricKeyField.register_lookup(DateTimeExactLookup)
-DatePGPSymmetricKeyField.register_lookup(DateTimeLtLookup)
-DatePGPSymmetricKeyField.register_lookup(DateTimeLteLookup)
-DatePGPSymmetricKeyField.register_lookup(DateTimeGtLookup)
-DatePGPSymmetricKeyField.register_lookup(DateTimeGteLookup)
-DatePGPSymmetricKeyField.register_lookup(DateTimeRangeLookup)
-
-
-class DateTimePGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.TextField):
+class DateTimePGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.DateTimeField):
     """DateTime PGP symmetric key encrypted field for postgres."""
+    encrypt_sql = PGP_SYM_ENCRYPT_SQL_WITH_NULLIF
     cast_type = 'TIMESTAMP'
-
-    def formfield(self, **kwargs):
-        """Override the form field with custom PGP DateTimeField."""
-        defaults = {'form_class': forms.DateTimeField}
-        defaults.update(kwargs)
-        return super().formfield(**defaults)
-
-
-DateTimePGPSymmetricKeyField.register_lookup(DateTimeExactLookup)
-DateTimePGPSymmetricKeyField.register_lookup(DateTimeLtLookup)
-DateTimePGPSymmetricKeyField.register_lookup(DateTimeLteLookup)
-DateTimePGPSymmetricKeyField.register_lookup(DateTimeGtLookup)
-DateTimePGPSymmetricKeyField.register_lookup(DateTimeGteLookup)
-DateTimePGPSymmetricKeyField.register_lookup(DateTimeRangeLookup)
 
 
 class DecimalPGPPublicKeyField(PGPPublicKeyFieldMixin, models.DecimalField):
