@@ -67,10 +67,11 @@ class HashMixin:
         if value is None or value.startswith('\\x'):
             return '%s'
 
-        if self.encrypt_sql.startswith("hmac"):
-            return self.encrypt_sql
-        else:
-            return self.encrypt_sql.format(settings.PGCRYPTO_KEY)
+        return self.get_encrypt_sql()
+
+    def get_encrypt_sql(self):
+        """Get encrypt sql. This may be overidden by some implementations."""
+        return self.encrypt_sql
 
 
 class PGPMixin:
@@ -157,6 +158,18 @@ class PGPSymmetricKeyFieldMixin(PGPMixin):
     def get_decrypt_sql(self):
         """Get decrypt sql."""
         return self.decrypt_sql.format(settings.PGCRYPTO_KEY)
+
+
+class DecimalPGPFieldMixin:
+    """Decimal PGP encrypted field mixin for postgres."""
+    cast_type = 'NUMERIC(%(max_digits)s, %(decimal_places)s)'
+
+    def get_cast_sql(self):
+        """Get cast sql."""
+        return self.cast_type % {
+            'max_digits': self.max_digits,
+            'decimal_places': self.decimal_places
+        }
 
 
 class RemoveMaxLengthValidatorMixin:

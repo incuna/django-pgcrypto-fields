@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 from pgcrypto import (
@@ -10,6 +11,7 @@ from pgcrypto.lookups import (
     HashLookup,
 )
 from pgcrypto.mixins import (
+    DecimalPGPFieldMixin,
     HashMixin,
     PGPPublicKeyFieldMixin,
     PGPSymmetricKeyFieldMixin,
@@ -20,6 +22,10 @@ from pgcrypto.mixins import (
 class TextDigestField(HashMixin, models.TextField):
     """Text digest field for postgres."""
     encrypt_sql = DIGEST_SQL
+
+    def get_encrypt_sql(self):
+        """Get encrypt sql."""
+        return self.encrypt_sql.format(settings.PGCRYPTO_KEY)
 
 
 TextDigestField.register_lookup(HashLookup)
@@ -87,28 +93,14 @@ class DateTimePGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.DateTimeFie
     cast_type = 'TIMESTAMP'
 
 
-class DecimalPGPPublicKeyField(PGPPublicKeyFieldMixin, models.DecimalField):
+class DecimalPGPPublicKeyField(DecimalPGPFieldMixin,
+                               PGPPublicKeyFieldMixin, models.DecimalField):
     """Decimal PGP public key encrypted field for postgres."""
-    cast_type = 'NUMERIC(%(max_digits)s, %(decimal_places)s)'
-
-    def get_cast_sql(self):
-        """Get cast sql."""
-        return self.cast_type % {
-            'max_digits': self.max_digits,
-            'decimal_places': self.decimal_places
-        }
 
 
-class DecimalPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.DecimalField):
+class DecimalPGPSymmetricKeyField(DecimalPGPFieldMixin,
+                                  PGPSymmetricKeyFieldMixin, models.DecimalField):
     """Decimal PGP symmetric key encrypted field for postgres."""
-    cast_type = 'NUMERIC(%(max_digits)s, %(decimal_places)s)'
-
-    def get_cast_sql(self):
-        """Get cast sql."""
-        return self.cast_type % {
-            'max_digits': self.max_digits,
-            'decimal_places': self.decimal_places
-        }
 
 
 class FloatPGPPublicKeyField(PGPPublicKeyFieldMixin, models.FloatField):
