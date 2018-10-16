@@ -952,6 +952,44 @@ class TestEncryptedTextFieldModel(TestCase):
             len(items)
         )
 
+    def test_pgp_public_key_float_form(self):
+        """Assert form field and widget for `FloatPGPPublicKeyField` field."""
+        expected = '100000.99'
+        instance = EncryptedModelFactory.create(float_pgp_pub_field=expected)
+
+        payload = {
+            'float_pgp_pub_field': expected
+        }
+
+        form = EncryptedForm(payload, instance=instance)
+        self.assertTrue(form.is_valid())
+
+        cleaned_data = form.cleaned_data
+
+        self.assertTrue(
+            cleaned_data['float_pgp_pub_field'],
+            float(expected)
+        )
+
+    def test_pgp_symmetric_key_float_form(self):
+        """Assert form field and widget for `FloatPGPSymmetricKeyField` field."""
+        expected = '100000.99'
+        instance = EncryptedModelFactory.create(float_pgp_sym_field=expected)
+
+        payload = {
+            'float_pgp_sym_field': expected
+        }
+
+        form = EncryptedForm(payload, instance=instance)
+        self.assertTrue(form.is_valid())
+
+        cleaned_data = form.cleaned_data
+
+        self.assertTrue(
+            cleaned_data['float_pgp_sym_field'],
+            float(expected)
+        )
+
     def test_null(self):
         """Assert `NULL` values are saved."""
         instance = EncryptedModel.objects.create()

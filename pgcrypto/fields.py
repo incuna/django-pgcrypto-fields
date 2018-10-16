@@ -150,12 +150,6 @@ class DecimalPGPPublicKeyField(PGPPublicKeyFieldMixin, models.DecimalField):
     """Decimal PGP public key encrypted field for postgres."""
     cast_type = 'NUMERIC(%(max_digits)s, %(decimal_places)s)'
 
-    def formfield(self, **kwargs):
-        """Override the form field with custom PGP DecimalField."""
-        defaults = {'form_class': forms.DecimalField}
-        defaults.update(kwargs)
-        return super().formfield(**defaults)
-
     def get_cast_sql(self):
         """Get cast sql."""
         return self.cast_type % {
@@ -167,12 +161,6 @@ class DecimalPGPPublicKeyField(PGPPublicKeyFieldMixin, models.DecimalField):
 class DecimalPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.DecimalField):
     """Decimal PGP symmetric key encrypted field for postgres."""
     cast_type = 'NUMERIC(%(max_digits)s, %(decimal_places)s)'
-
-    def formfield(self, **kwargs):
-        """Override the form field with custom PGP DecimalField."""
-        defaults = {'form_class': forms.DecimalField}
-        defaults.update(kwargs)
-        return super().formfield(**defaults)
 
     def get_cast_sql(self):
         """Get cast sql."""
@@ -187,22 +175,8 @@ class FloatPGPPublicKeyField(PGPPublicKeyFieldMixin, models.FloatField):
     encrypt_sql = PGP_PUB_ENCRYPT_SQL_WITH_NULLIF
     cast_type = 'DOUBLE PRECISION'
 
-    def formfield(self, **kwargs):
-        """Override the form field with custom PGP FloatField."""
-        from django import forms
-        defaults = {'form_class': forms.FloatField}
-        defaults.update(kwargs)
-        return super().formfield(**defaults)
-
 
 class FloatPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.FloatField):
     """Float PGP symmetric key encrypted field for postgres."""
     encrypt_sql = PGP_SYM_ENCRYPT_SQL_WITH_NULLIF
     cast_type = 'DOUBLE PRECISION'
-
-    def formfield(self, **kwargs):
-        """Override the form field with custom PGP FloatField."""
-        from django import forms
-        defaults = {'form_class': forms.FloatField}
-        defaults.update(kwargs)
-        return super().formfield(**defaults)
