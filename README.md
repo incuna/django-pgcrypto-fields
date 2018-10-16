@@ -16,20 +16,100 @@ encrypt and decrypt data for fields.
 
 ## Installation
 
+### Install package 
+
 ```bash
 pip install django-pgcrypto-fields
 ```
 
-In your Django `settings.py`, add `pgcrypto` to `INSTALLED_APPS`:
+### Django settings
 
+Our library support different crypto keys for multiple databases by 
+defining the keys in your `DATABASES` settings.
+
+In `settings.py`:
 ```python
+import os
+BASEDIR = os.path.dirname(os.path.dirname(__file__))
+PUBLIC_PGP_KEY_PATH = os.path.abspath(os.path.join(BASEDIR, 'public.key'))
+PRIVATE_PGP_KEY_PATH = os.path.abspath(os.path.join(BASEDIR, 'private.key'))
+
+# Used by PGPPublicKeyField used by default if not specified by the db
+PUBLIC_PGP_KEY = open(PUBLIC_PGP_KEY_PATH).read()
+PRIVATE_PGP_KEY = open(PRIVATE_PGP_KEY_PATH).read()
+
+# Used by TextHMACField and PGPSymmetricKeyField if not specified by the db
+PGCRYPTO_KEY='ultrasecret'
+
+DIFF_PUBLIC_PGP_KEY_PATH = os.path.abspath(
+    os.path.join(BASEDIR, 'tests/keys/public_diff.key')
+)
+DIFF_PRIVATE_PGP_KEY_PATH = os.path.abspath(
+    os.path.join(BASEDIR, 'tests/keys/private_diff.key')
+)
+
+# And add 'pgcrypto' to `INSTALLED_APPS` to create the extension for
+# pgcrypto (in a migration).
 INSTALLED_APPS = (
     'pgcrypto',
-    # Other apps
+    # Other installed apps
 )
+
+DATABASES = {
+    # This db will use the default keys above
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'pgcryto_fields',
+        'USER': 'pgcryto_fields',
+        'PASSWORD': 'xxxx',
+        'HOST': 'psql.test.com',
+        'PORT': 5432,
+        'OPTIONS': {
+            'sslmode': 'require',
+        }
+    },
+    'diff_keys': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'pgcryto_fields_diff',
+        'USER': 'pgcryto_fields_diff',
+        'PASSWORD': 'xxxx',
+        'HOST': 'psqldiff.test.com',
+        'PORT': 5432,
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
+        'PGCRYPTO_KEY': 'djangorocks',
+        'PUBLIC_PGP_KEY': open(DIFF_PUBLIC_PGP_KEY_PATH, 'r').read(),
+        'PRIVATE_PGP_KEY': open(DIFF_PRIVATE_PGP_KEY_PATH, 'r').read(),
+    },
+}
 ```
 
-## Upgrading to 2.4.0 from previous versions
+### Generate GPG keys if using Public Key Encryption
+
+The public key is going to encrypt the message and the private key will be
+needed to decrypt the content. The following commands have been taken from the
+[pgcrypto documentation](http://www.postgresql.org/docs/devel/static/pgcrypto.html)
+(see Generating PGP Keys with GnuPG).
+
+Generating a public and a private key (The preferred key type is "DSA and Elgamal".):
+
+```bash
+$ gpg --gen-key
+$ gpg --list-secret-keys
+
+/home/bob/.gnupg/secring.gpg
+---------------------------
+sec   2048R/21 2014-10-23
+uid                  Test Key <example@example.com>
+ssb   2048R/42 2014-10-23
+
+
+$ gpg -a --export 42 > public.key
+$ gpg -a --export-secret-keys 21 > private.key
+```
+
+### Upgrading to 2.4.0 from previous versions
 
 The 2.4.0 version of this library received a large rewrite in order to support 
 auto-decryption when getting encrypted field data as well as the ability to filter 
@@ -42,7 +122,6 @@ your application to these items need to be removed as well:
 * `managers.PGPManager`
 * `admin.PGPAdmin`
 * `aggregates.*`
-
 
 ## Fields
 
@@ -83,30 +162,6 @@ encrypt the data and a private key to decrypt it.
 Public and private keys can be set in settings with `PUBLIC_PGP_KEY` and
 `PRIVATE_PGP_KEY`.
 
-##### Generate GPG keys.
-
-The public key is going to encrypt the message and the private key will be
-needed to decrypt the content. The following commands have been taken from the
-[pgcrypto documentation](http://www.postgresql.org/docs/devel/static/pgcrypto.html)
-(see Generating PGP Keys with GnuPG).
-
-Generating a public and a private key:
-
-```bash
-$ gpg --gen-key
-$ gpg --list-secret-keys
-
-/home/bob/.gnupg/secring.gpg
----------------------------
-sec   2048R/21 2014-10-23
-uid                  Test Key <example@example.com>
-ssb   2048R/42 2014-10-23
-
-
-$ gpg -a --export 42 > public.key
-$ gpg -a --export-secret-keys 21 > private.key
-```
-
 #### Symmetric Key Encryption Fields
 
 Supported PGP symmetric key fields are:
@@ -120,33 +175,6 @@ Supported PGP symmetric key fields are:
  - `TimePGPSymmetricKeyField`
 
 Encrypt and decrypt the data with `settings.PGCRYPTO_KEY` which acts like a password.
-
-### Django settings
-
-In `settings.py`:
-```python
-import os
-BASEDIR = os.path.dirname(os.path.dirname(__file__))
-PUBLIC_PGP_KEY_PATH = os.path.abspath(os.path.join(BASEDIR, 'public.key'))
-PRIVATE_PGP_KEY_PATH = os.path.abspath(os.path.join(BASEDIR, 'private.key'))
-
-
-# Used by PGPPublicKeyField
-PUBLIC_PGP_KEY = open(PUBLIC_PGP_KEY_PATH).read()
-PRIVATE_PGP_KEY = open(PRIVATE_PGP_KEY_PATH).read()
-
-# Used by TextHMACField and PGPSymmetricKeyField
-PGCRYPTO_KEY='ultrasecret'
-
-
-# And add 'pgcrypto' to `INSTALLED_APPS` to create the extension for
-# pgcrypto (in a migration).
-INSTALLED_APPS = (
-    'pgcrypto',
-    # Other installed apps
-)
-
-```
 
 ### Usage
 

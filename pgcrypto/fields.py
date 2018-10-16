@@ -23,9 +23,17 @@ class TextDigestField(HashMixin, models.TextField):
     """Text digest field for postgres."""
     encrypt_sql = DIGEST_SQL
 
-    def get_encrypt_sql(self):
+    @staticmethod
+    def get_key(connection):
+        """Get key from connection or default to settings."""
+        if 'PGCRYPTO_KEY' in connection.settings_dict:
+            return connection.settings_dict['PGCRYPTO_KEY']
+        else:
+            return settings.PGCRYPTO_KEY
+
+    def get_encrypt_sql(self, connection):
         """Get encrypt sql."""
-        return self.encrypt_sql.format(settings.PGCRYPTO_KEY)
+        return self.encrypt_sql.format(self.get_key(connection))
 
 
 TextDigestField.register_lookup(HashLookup)

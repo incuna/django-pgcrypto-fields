@@ -8,9 +8,11 @@ from django.test import TestCase
 from incuna_test_utils.utils import field_names
 
 from pgcrypto import fields
+from .diff_keys.models import EncryptedDiff
 from .factories import EncryptedFKModelFactory, EncryptedModelFactory
 from .forms import EncryptedForm
-from .models import EncryptedDateTime, EncryptedFKModel, EncryptedModel, RelatedDateTime
+from .models import EncryptedDateTime, EncryptedFKModel, \
+    EncryptedModel, RelatedDateTime
 
 KEYED_FIELDS = (fields.TextDigestField, fields.TextHMACField)
 EMAIL_PGP_FIELDS = (fields.EmailPGPPublicKeyField, fields.EmailPGPSymmetricKeyField)
@@ -1305,3 +1307,21 @@ class TestEncryptedTextFieldModel(TestCase):
         ).get()
 
         self.assertIsInstance(instance, RelatedDateTime)
+
+    def test_write_to_diff_keys(self):
+        """Test writing to diff_keys db which uses different keys."""
+        expected = 'bonjour'
+        instance = EncryptedDiff.objects.create(
+            pub_field=expected,
+            sym_field=expected
+        )
+        instance.refresh_from_db()
+
+        self.assertTrue(
+            instance.pub_field,
+            expected
+        )
+        self.assertTrue(
+            instance.sym_field,
+            expected
+        )
