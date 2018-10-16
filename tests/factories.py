@@ -24,6 +24,7 @@ class EncryptedModelFactory(factory.DjangoModelFactory):
     email_pgp_pub_field = factory.Sequence('email{}@public.key'.format)
     integer_pgp_pub_field = 42
     pgp_pub_field = factory.Sequence('Text with public key {}'.format)
+    char_pub_field = factory.Sequence('Text {}'.format)
 
     date_pgp_pub_field = date.today()
     datetime_pgp_pub_field = datetime.now()
@@ -32,6 +33,7 @@ class EncryptedModelFactory(factory.DjangoModelFactory):
     email_pgp_sym_field = factory.Sequence('email{}@symmetric.key'.format)
     integer_pgp_sym_field = 43
     pgp_sym_field = factory.Sequence('Text with symmetric key {}'.format)
+    char_sym_field = factory.Sequence('Text {}'.format)
 
     date_pgp_sym_field = date.today()
     datetime_pgp_sym_field = datetime.now()

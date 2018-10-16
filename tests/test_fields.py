@@ -45,12 +45,6 @@ class TestPGPMixin(TestCase):
                 field.model = MagicMock()
                 self.assertEqual(field(name='field').check(), [])
 
-    def test_max_length(self):
-        """Assert `max_length` is ignored."""
-        for field in PGP_FIELDS:
-            with self.subTest(field=field):
-                self.assertEqual(field(max_length=42).max_length, None)
-
     def test_db_type(self):
         """Check db_type is `bytea`."""
         for field in PGP_FIELDS:
@@ -84,10 +78,12 @@ class TestEncryptedTextFieldModel(TestCase):
             'email_pgp_pub_field',
             'integer_pgp_pub_field',
             'pgp_pub_field',
+            'char_pub_field',
             'decimal_pgp_pub_field',
             'email_pgp_sym_field',
             'integer_pgp_sym_field',
             'pgp_sym_field',
+            'char_sym_field',
             'date_pgp_sym_field',
             'datetime_pgp_sym_field',
             'time_pgp_sym_field',
@@ -449,6 +445,48 @@ class TestEncryptedTextFieldModel(TestCase):
             cleaned_data['time_pgp_pub_field'],
             expected
         )
+
+    def test_pgp_public_key_char_field(self):
+        expect = 'Peter'
+        EncryptedModelFactory.create(char_pub_field=expect)
+
+        instance = EncryptedModel.objects.get()
+
+        self.assertTrue(
+            instance.char_pub_field,
+            expect
+        )
+
+        payload = {
+            'char_pub_field': 'This is beyond 15 max length'
+        }
+
+        form = EncryptedForm(payload, instance=instance)
+        is_valid = form.is_valid()
+        errors = form.errors.as_data()
+        self.assertFalse(is_valid)
+        self.assertTrue(1, len(errors['char_pub_field']))
+
+    def test_pgp_symmetric_key_char_field(self):
+        expect = 'Peter'
+        EncryptedModelFactory.create(char_sym_field=expect)
+
+        instance = EncryptedModel.objects.get()
+
+        self.assertTrue(
+            instance.char_sym_field,
+            expect
+        )
+
+        payload = {
+            'char_sym_field': 'This is beyond 15 max length'
+        }
+
+        form = EncryptedForm(payload, instance=instance)
+        is_valid = form.is_valid()
+        errors = form.errors.as_data()
+        self.assertFalse(is_valid)
+        self.assertTrue(1, len(errors['char_sym_field']))
 
     def test_pgp_symmetric_key_date_lookups(self):
         """Assert lookups `DatePGPSymmetricKeyField` field."""
@@ -1297,10 +1335,6 @@ class TestEncryptedTextFieldModel(TestCase):
         related_again = EncryptedDateTime.objects.create(value=datetime.now())
 
         RelatedDateTime.objects.create(related=related, related_again=related_again)
-
-        instance = RelatedDateTime.objects.select_related(
-            'related', 'related_again'
-        )
 
         instance = RelatedDateTime.objects.select_related(
             'related', 'related_again'
