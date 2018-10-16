@@ -82,15 +82,6 @@ encrypt the data and a private key to decrypt it.
 Public and private keys can be set in settings with `PUBLIC_PGP_KEY` and
 `PRIVATE_PGP_KEY`.
 
-N.B. `DatePGPPublicKeyField` and `DateTimePGPPublicKeyField` only support the following lookups:
-
-- `__exact`
-- `__gt`
-- `__gte`
-- `__lt`
-- `__lte`
-- `__range`
-
 ##### Generate GPG keys.
 
 The public key is going to encrypt the message and the private key will be
@@ -127,15 +118,6 @@ Supported PGP symmetric key fields are:
  - `FloatPGPSymmetricKeyField`
 
 Encrypt and decrypt the data with `settings.PGCRYPTO_KEY` which acts like a password.
-
-N.B. `DatePGPSymmetricKeyField` and `DateTimePGPSymmetricKeyField` only support the following lookups:
-
-- `__exact`
-- `__gt`
-- `__gte`
-- `__lt`
-- `__lte`
-- `__range`
 
 ### Django settings
 
