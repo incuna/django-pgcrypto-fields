@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 from django import VERSION as DJANGO_VERSION
 from django.conf import settings
-from django.db import connections, models
+from django.db import connections, models, reset_queries
 from django.test import TestCase
 from incuna_test_utils.utils import field_names
 
@@ -1324,6 +1324,7 @@ class TestEncryptedTextFieldModel(TestCase):
             hmac_field=expected,
         )
 
+        reset_queries()  # Required for Django 1.11
         instance = EncryptedDiff.objects.get(id=1)
 
         self.assertTrue(
@@ -1344,7 +1345,7 @@ class TestEncryptedTextFieldModel(TestCase):
         )
 
         self.assertIn(
-            'mQMuBFvGJCARCAD',
+            'lQNTBFvGJCARCAD',
             str(query)
         )
 
