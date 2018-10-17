@@ -1,15 +1,19 @@
 from datetime import date, datetime
+from decimal import Decimal
 from unittest.mock import MagicMock
 
 from django import VERSION as DJANGO_VERSION
-from django.db import models
+from django.conf import settings
+from django.db import connections, models, reset_queries
 from django.test import TestCase
 from incuna_test_utils.utils import field_names
 
 from pgcrypto import fields
+from .diff_keys.models import EncryptedDiff
 from .factories import EncryptedFKModelFactory, EncryptedModelFactory
 from .forms import EncryptedForm
-from .models import EncryptedDateTime, EncryptedFKModel, EncryptedModel, RelatedDateTime
+from .models import EncryptedDateTime, EncryptedFKModel, \
+    EncryptedModel, RelatedDateTime
 
 KEYED_FIELDS = (fields.TextDigestField, fields.TextHMACField)
 EMAIL_PGP_FIELDS = (fields.EmailPGPPublicKeyField, fields.EmailPGPSymmetricKeyField)
@@ -34,6 +38,7 @@ class TestTextFieldHash(TestCase):
 
 
 class TestPGPMixin(TestCase):
+    multi_db = True
     """Test `PGPMixin` behave properly."""
     def test_check(self):
         """Assert `max_length` check does not return any error."""
@@ -66,8 +71,12 @@ class TestEmailPGPMixin(TestCase):
 
 
 class TestEncryptedTextFieldModel(TestCase):
+    multi_db = True
     """Test `EncryptedTextField` can be integrated in a `Django` model."""
     model = EncryptedModel
+
+    # You have to do it here or queries is empty
+    settings.DEBUG = True
 
     def test_fields(self):
         """Assert fields are representing our model."""
@@ -81,13 +90,19 @@ class TestEncryptedTextFieldModel(TestCase):
             'email_pgp_pub_field',
             'integer_pgp_pub_field',
             'pgp_pub_field',
+            'decimal_pgp_pub_field',
             'email_pgp_sym_field',
             'integer_pgp_sym_field',
             'pgp_sym_field',
             'date_pgp_sym_field',
             'datetime_pgp_sym_field',
+            'time_pgp_sym_field',
             'date_pgp_pub_field',
             'datetime_pgp_pub_field',
+            'time_pgp_pub_field',
+            'decimal_pgp_sym_field',
+            'float_pgp_pub_field',
+            'float_pgp_sym_field',
             'fk_model',
         )
         self.assertCountEqual(fields, expected)
@@ -341,6 +356,7 @@ class TestEncryptedTextFieldModel(TestCase):
         """Assert form field and widget for `DateTimePGPSymmetricKeyField` field."""
         expected = date.today()
         instance = EncryptedModelFactory.create(date_pgp_sym_field=expected)
+        instance.refresh_from_db()  # Ensure the PGSQL casting works right
 
         payload = {
             'date_pgp_sym_field': '08/01/2016'
@@ -360,6 +376,7 @@ class TestEncryptedTextFieldModel(TestCase):
         """Assert form field and widget for `DateTimePGPSymmetricKeyField` field."""
         expected = datetime.now()
         instance = EncryptedModelFactory.create(datetime_pgp_sym_field=expected)
+        instance.refresh_from_db()  # Ensure the PGSQL casting works right
 
         payload = {
             'datetime_pgp_sym_field': '08/01/2016 14:00'
@@ -373,6 +390,70 @@ class TestEncryptedTextFieldModel(TestCase):
         self.assertTrue(
             cleaned_data['datetime_pgp_sym_field'],
             datetime(2016, 8, 1, 14, 0, 0)
+        )
+
+    def test_pgp_symmetric_key_time(self):
+        """Assert date is save with an `TimePGPSymmetricKeyField` field."""
+        expected = datetime.now().time()
+        instance = EncryptedModelFactory.create(time_pgp_sym_field=expected)
+        instance.refresh_from_db()  # Ensure the PGSQL casting works right
+
+        self.assertEqual(instance.time_pgp_sym_field, expected)
+
+        instance = EncryptedModel.objects.get(pk=instance.id)
+
+        self.assertEqual(instance.time_pgp_sym_field, expected)
+
+    def test_pgp_pub_key_time(self):
+        """Assert date is save with an `TimePGPPublicKeyField` field."""
+        expected = datetime.now().time()
+        instance = EncryptedModelFactory.create(time_pgp_pub_field=expected)
+        instance.refresh_from_db()  # Ensure the PGSQL casting works right
+
+        self.assertEqual(instance.time_pgp_pub_field, expected)
+
+        instance = EncryptedModel.objects.get(pk=instance.id)
+
+        self.assertEqual(instance.time_pgp_pub_field, expected)
+
+    def test_pgp_symmetric_key_time_form(self):
+        """Assert form field and widget for `TimePGPSymmetricKeyField` field."""
+        expected = datetime.now().time()
+        instance = EncryptedModelFactory.create(time_pgp_sym_field=expected)
+        instance.refresh_from_db()  # Ensure the PGSQL casting works right
+
+        payload = {
+            'time_pgp_sym_field': '{}'.format(expected)
+        }
+
+        form = EncryptedForm(payload, instance=instance)
+        self.assertTrue(form.is_valid())
+
+        cleaned_data = form.cleaned_data
+
+        self.assertTrue(
+            cleaned_data['time_pgp_sym_field'],
+            expected
+        )
+
+    def test_pgp_public_key_time_form(self):
+        """Assert form field and widget for `TimePGPSymmetricKeyField` field."""
+        expected = datetime.now().time()
+        instance = EncryptedModelFactory.create(time_pgp_pub_field=expected)
+        instance.refresh_from_db()  # Ensure the PGSQL casting works right
+
+        payload = {
+            'time_pgp_pub_field': '{}'.format(expected)
+        }
+
+        form = EncryptedForm(payload, instance=instance)
+        self.assertTrue(form.is_valid())
+
+        cleaned_data = form.cleaned_data
+
+        self.assertTrue(
+            cleaned_data['time_pgp_pub_field'],
+            expected
         )
 
     def test_pgp_symmetric_key_date_lookups(self):
@@ -785,6 +866,206 @@ class TestEncryptedTextFieldModel(TestCase):
             ).count()
         )
 
+    def test_decimal_pgp_pub_field(self):
+        """Test DecimalPGPPublicKeyField."""
+        expected = '100000.99'
+        EncryptedModelFactory.create(decimal_pgp_pub_field=expected)
+
+        instance = EncryptedModel.objects.get()
+
+        self.assertIsInstance(
+            instance.decimal_pgp_pub_field,
+            Decimal
+        )
+
+        self.assertEqual(
+            instance.decimal_pgp_pub_field,
+            Decimal(expected)
+        )
+
+        items = EncryptedModel.objects.filter(decimal_pgp_pub_field__gte='100')
+
+        self.assertEqual(
+            1,
+            len(items)
+        )
+
+        items = EncryptedModel.objects.filter(decimal_pgp_pub_field__gte='100001.00')
+
+        self.assertEqual(
+            0,
+            len(items)
+        )
+
+    def test_decimal_pgp_sym_field(self):
+        """Test DecimalPGPSymmetricKeyField."""
+        expected = '100000.99'
+        EncryptedModelFactory.create(decimal_pgp_sym_field=expected)
+
+        instance = EncryptedModel.objects.get()
+
+        self.assertIsInstance(
+            instance.decimal_pgp_sym_field,
+            Decimal
+        )
+
+        self.assertEqual(
+            instance.decimal_pgp_sym_field,
+            Decimal(expected)
+        )
+
+        items = EncryptedModel.objects.filter(decimal_pgp_sym_field__gte='100')
+
+        self.assertEqual(
+            1,
+            len(items)
+        )
+
+        items = EncryptedModel.objects.filter(decimal_pgp_sym_field__gte='100001.00')
+
+        self.assertEqual(
+            0,
+            len(items)
+        )
+
+    def test_pgp_public_key_decimal_form(self):
+        """Assert form field and widget for `DecimalPGPSymmetricKeyField` field."""
+        expected = '100000.99'
+        instance = EncryptedModelFactory.create(decimal_pgp_pub_field=expected)
+
+        payload = {
+            'decimal_pgp_pub_field': expected
+        }
+
+        form = EncryptedForm(payload, instance=instance)
+        self.assertTrue(form.is_valid())
+
+        cleaned_data = form.cleaned_data
+
+        self.assertTrue(
+            cleaned_data['decimal_pgp_pub_field'],
+            Decimal(expected)
+        )
+
+    def test_pgp_symmetric_key_decimal_form(self):
+        """Assert form field and widget for `DecimalPGPSymmetricKeyField` field."""
+        expected = '100000.99'
+        instance = EncryptedModelFactory.create(decimal_pgp_sym_field=expected)
+
+        payload = {
+            'decimal_pgp_sym_field': expected
+        }
+
+        form = EncryptedForm(payload, instance=instance)
+        self.assertTrue(form.is_valid())
+
+        cleaned_data = form.cleaned_data
+
+        self.assertTrue(
+            cleaned_data['decimal_pgp_sym_field'],
+            Decimal(expected)
+        )
+
+    def test_float_pgp_pub_field(self):
+        """Test FloatPGPPublicKeyField."""
+        expected = 1234.6788
+        EncryptedModelFactory.create(float_pgp_pub_field=expected)
+
+        instance = EncryptedModel.objects.get()
+
+        self.assertIsInstance(
+            instance.float_pgp_pub_field,
+            float
+        )
+
+        self.assertEqual(
+            instance.float_pgp_pub_field,
+            expected
+        )
+
+        items = EncryptedModel.objects.filter(float_pgp_pub_field__gte='100')
+
+        self.assertEqual(
+            1,
+            len(items)
+        )
+
+        items = EncryptedModel.objects.filter(float_pgp_pub_field__gte='100001.00')
+
+        self.assertEqual(
+            0,
+            len(items)
+        )
+
+    def test_float_pgp_sym_field(self):
+        """Test FloatPGPSymmetricKeyField."""
+        expected = float(1234.6788)
+        EncryptedModelFactory.create(float_pgp_sym_field=expected)
+
+        instance = EncryptedModel.objects.get()
+
+        self.assertIsInstance(
+            instance.float_pgp_sym_field,
+            float
+        )
+
+        self.assertEqual(
+            instance.float_pgp_sym_field,
+            expected
+        )
+
+        items = EncryptedModel.objects.filter(float_pgp_sym_field__gte='100')
+
+        self.assertEqual(
+            1,
+            len(items)
+        )
+
+        items = EncryptedModel.objects.filter(float_pgp_sym_field__gte='100001.00')
+
+        self.assertEqual(
+            0,
+            len(items)
+        )
+
+    def test_pgp_public_key_float_form(self):
+        """Assert form field and widget for `FloatPGPPublicKeyField` field."""
+        expected = '100000.99'
+        instance = EncryptedModelFactory.create(float_pgp_pub_field=expected)
+
+        payload = {
+            'float_pgp_pub_field': expected
+        }
+
+        form = EncryptedForm(payload, instance=instance)
+        self.assertTrue(form.is_valid())
+
+        cleaned_data = form.cleaned_data
+
+        self.assertTrue(
+            cleaned_data['float_pgp_pub_field'],
+            float(expected)
+        )
+
+    def test_pgp_symmetric_key_float_form(self):
+        """Assert form field and widget for `FloatPGPSymmetricKeyField` field."""
+        expected = '100000.99'
+        instance = EncryptedModelFactory.create(float_pgp_sym_field=expected)
+
+        payload = {
+            'float_pgp_sym_field': expected
+        }
+
+        form = EncryptedForm(payload, instance=instance)
+        self.assertTrue(form.is_valid())
+
+        cleaned_data = form.cleaned_data
+
+        self.assertTrue(
+            cleaned_data['float_pgp_sym_field'],
+            float(expected)
+        )
+
     def test_null(self):
         """Assert `NULL` values are saved."""
         instance = EncryptedModel.objects.create()
@@ -1032,3 +1313,52 @@ class TestEncryptedTextFieldModel(TestCase):
         ).get()
 
         self.assertIsInstance(instance, RelatedDateTime)
+
+    def test_write_to_diff_keys(self):
+        """Test writing to diff_keys db which uses different keys."""
+        expected = 'bonjour'
+        instance = EncryptedDiff.objects.create(
+            pub_field=expected,
+            sym_field=expected,
+            digest_field=expected,
+            hmac_field=expected,
+        )
+
+        reset_queries()  # Required for Django 1.11
+        instance = EncryptedDiff.objects.get(id=1)
+
+        self.assertTrue(
+            instance.pub_field,
+            expected
+        )
+        self.assertTrue(
+            instance.sym_field,
+            expected
+        )
+
+        conn = connections['diff_keys']
+        query = conn.queries[0]
+
+        self.assertIn(
+            'djangorocks',
+            str(query)
+        )
+
+        self.assertIn(
+            'lQNTBFvGJCARCAD',
+            str(query)
+        )
+
+        instance = EncryptedDiff.objects.get(digest_field__hash_of=expected)
+
+        self.assertTrue(
+            instance.digest_field,
+            expected
+        )
+
+        instance = EncryptedDiff.objects.get(hmac_field__hash_of=expected)
+
+        self.assertTrue(
+            instance.hmac_field,
+            expected
+        )
