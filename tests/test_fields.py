@@ -3,14 +3,17 @@ from decimal import Decimal
 from unittest.mock import MagicMock
 
 from django import VERSION as DJANGO_VERSION
-from django.db import models
+from django.conf import settings
+from django.db import connections, models, reset_queries
 from django.test import TestCase
 from incuna_test_utils.utils import field_names
 
 from pgcrypto import fields
+from .diff_keys.models import EncryptedDiff
 from .factories import EncryptedFKModelFactory, EncryptedModelFactory
 from .forms import EncryptedForm
-from .models import EncryptedDateTime, EncryptedFKModel, EncryptedModel, RelatedDateTime
+from .models import EncryptedDateTime, EncryptedFKModel, \
+    EncryptedModel, RelatedDateTime
 
 KEYED_FIELDS = (fields.TextDigestField, fields.TextHMACField)
 EMAIL_PGP_FIELDS = (fields.EmailPGPPublicKeyField, fields.EmailPGPSymmetricKeyField)
@@ -35,6 +38,7 @@ class TestTextFieldHash(TestCase):
 
 
 class TestPGPMixin(TestCase):
+    multi_db = True
     """Test `PGPMixin` behave properly."""
     def test_check(self):
         """Assert `max_length` check does not return any error."""
@@ -67,8 +71,12 @@ class TestEmailPGPMixin(TestCase):
 
 
 class TestEncryptedTextFieldModel(TestCase):
+    multi_db = True
     """Test `EncryptedTextField` can be integrated in a `Django` model."""
     model = EncryptedModel
+
+    # You have to do it here or queries is empty
+    settings.DEBUG = True
 
     def test_fields(self):
         """Assert fields are representing our model."""
@@ -1305,3 +1313,52 @@ class TestEncryptedTextFieldModel(TestCase):
         ).get()
 
         self.assertIsInstance(instance, RelatedDateTime)
+
+    def test_write_to_diff_keys(self):
+        """Test writing to diff_keys db which uses different keys."""
+        expected = 'bonjour'
+        instance = EncryptedDiff.objects.create(
+            pub_field=expected,
+            sym_field=expected,
+            digest_field=expected,
+            hmac_field=expected,
+        )
+
+        reset_queries()  # Required for Django 1.11
+        instance = EncryptedDiff.objects.get(id=1)
+
+        self.assertTrue(
+            instance.pub_field,
+            expected
+        )
+        self.assertTrue(
+            instance.sym_field,
+            expected
+        )
+
+        conn = connections['diff_keys']
+        query = conn.queries[0]
+
+        self.assertIn(
+            'djangorocks',
+            str(query)
+        )
+
+        self.assertIn(
+            'lQNTBFvGJCARCAD',
+            str(query)
+        )
+
+        instance = EncryptedDiff.objects.get(digest_field__hash_of=expected)
+
+        self.assertTrue(
+            instance.digest_field,
+            expected
+        )
+
+        instance = EncryptedDiff.objects.get(hmac_field__hash_of=expected)
+
+        self.assertTrue(
+            instance.hmac_field,
+            expected
+        )

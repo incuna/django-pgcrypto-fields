@@ -5,6 +5,7 @@
 * Added new DecimalFields for both public and symmetric key (#64)
 * Added new FloatFields for both public and symmetric key (#64)
 * Added new TimeFields for both public and symmetric key (#64)
+* Added support for different keys based on database (#67)
 
 ## 2.4.0
 

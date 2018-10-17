@@ -16,13 +16,19 @@ def remove_validators(validators, validator_class):
     return [v for v in validators if not isinstance(v, validator_class)]
 
 
+def get_setting(connection, key):
+    """Get key from connection or default to settings."""
+    if key in connection.settings_dict:
+        return connection.settings_dict[key]
+    else:
+        return getattr(settings, key)
+
+
 class DecryptedCol(Col):
     """Provide DecryptedCol support without using `extra` sql."""
 
     def __init__(self, alias, target, output_field=None):
         """Init the decryption."""
-        self.decrypt_sql = target.get_decrypt_sql()
-        self.cast_sql = target.get_cast_sql()
         self.target = target
 
         super(DecryptedCol, self).__init__(alias, target, output_field)
@@ -30,7 +36,7 @@ class DecryptedCol(Col):
     def as_sql(self, compiler, connection):
         """Build SQL with decryption and casting."""
         sql, params = super(DecryptedCol, self).as_sql(compiler, connection)
-        sql = self.decrypt_sql % (sql, self.cast_sql)
+        sql = self.target.get_decrypt_sql(connection) % (sql, self.target.get_cast_sql())
         return sql, params
 
 
@@ -67,9 +73,9 @@ class HashMixin:
         if value is None or value.startswith('\\x'):
             return '%s'
 
-        return self.get_encrypt_sql()
+        return self.get_encrypt_sql(connection)
 
-    def get_encrypt_sql(self):
+    def get_encrypt_sql(self, connection):
         """Get encrypt sql. This may be overidden by some implementations."""
         return self.encrypt_sql
 
@@ -92,7 +98,7 @@ class PGPMixin:
         """Value stored in the database is hexadecimal."""
         return 'bytea'
 
-    def get_placeholder(self, value=None, compiler=None, connection=None):
+    def get_placeholder(self, value, compiler, connection):
         """Tell postgres to encrypt this field using PGP."""
         raise NotImplementedError('The `get_placeholder` needs to be implemented.')
 
@@ -100,7 +106,7 @@ class PGPMixin:
         """Get cast sql. This may be overidden by some implementations."""
         return self.cast_type
 
-    def get_decrypt_sql(self):
+    def get_decrypt_sql(self, connection):
         """Get decrypt sql."""
         raise NotImplementedError('The `get_decrypt_sql` needs to be implemented.')
 
@@ -138,11 +144,11 @@ class PGPPublicKeyFieldMixin(PGPMixin):
 
     def get_placeholder(self, value=None, compiler=None, connection=None):
         """Tell postgres to encrypt this field using PGP."""
-        return self.encrypt_sql.format(settings.PUBLIC_PGP_KEY)
+        return self.encrypt_sql.format(get_setting(connection, 'PUBLIC_PGP_KEY'))
 
-    def get_decrypt_sql(self):
+    def get_decrypt_sql(self, connection):
         """Get decrypt sql."""
-        return self.decrypt_sql.format(settings.PRIVATE_PGP_KEY)
+        return self.decrypt_sql.format(get_setting(connection, 'PRIVATE_PGP_KEY'))
 
 
 class PGPSymmetricKeyFieldMixin(PGPMixin):
@@ -151,13 +157,13 @@ class PGPSymmetricKeyFieldMixin(PGPMixin):
     decrypt_sql = PGP_SYM_DECRYPT_SQL
     cast_type = 'TEXT'
 
-    def get_placeholder(self, value=None, compiler=None, connection=None):
+    def get_placeholder(self, value, compiler, connection):
         """Tell postgres to encrypt this field using PGP."""
-        return self.encrypt_sql.format(settings.PGCRYPTO_KEY)
+        return self.encrypt_sql.format(get_setting(connection, 'PGCRYPTO_KEY'))
 
-    def get_decrypt_sql(self):
+    def get_decrypt_sql(self, connection):
         """Get decrypt sql."""
-        return self.decrypt_sql.format(settings.PGCRYPTO_KEY)
+        return self.decrypt_sql.format(get_setting(connection, 'PGCRYPTO_KEY'))
 
 
 class DecimalPGPFieldMixin:
