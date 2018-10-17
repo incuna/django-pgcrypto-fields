@@ -1373,7 +1373,7 @@ class TestEncryptedTextFieldModel(TestCase):
     def test_write_to_diff_keys(self):
         """Test writing to diff_keys db which uses different keys."""
         expected = 'a'
-        EncryptedDiff.objects.create(
+        instance = EncryptedDiff.objects.create(
             pub_field=expected,
             sym_field=expected,
             digest_field=expected,
@@ -1381,7 +1381,7 @@ class TestEncryptedTextFieldModel(TestCase):
         )
 
         reset_queries()  # Required for Django 1.11
-        instance = EncryptedDiff.objects.get(id=1)
+        instance = EncryptedDiff.objects.get()
 
         self.assertTrue(
             instance.pub_field,
