@@ -16,6 +16,14 @@ def remove_validators(validators, validator_class):
     return [v for v in validators if not isinstance(v, validator_class)]
 
 
+def get_setting(connection, key):
+    """Get key from connection or default to settings."""
+    if key in connection.settings_dict:
+        return connection.settings_dict[key]
+    else:
+        return getattr(settings, key)
+
+
 class DecryptedCol(Col):
     """Provide DecryptedCol support without using `extra` sql."""
 
@@ -129,29 +137,13 @@ class PGPPublicKeyFieldMixin(PGPMixin):
     decrypt_sql = PGP_PUB_DECRYPT_SQL
     cast_type = 'TEXT'
 
-    @staticmethod
-    def get_public_key(connection):
-        """Get public key from connection or default to settings."""
-        if 'PUBLIC_PGP_KEY' in connection.settings_dict:
-            return connection.settings_dict['PUBLIC_PGP_KEY']
-        else:
-            return settings.PUBLIC_PGP_KEY
-
-    @staticmethod
-    def get_private_key(connection):
-        """Get private key from connection or default to settings."""
-        if 'PRIVATE_PGP_KEY' in connection.settings_dict:
-            return connection.settings_dict['PRIVATE_PGP_KEY']
-        else:
-            return settings.PRIVATE_PGP_KEY
-
     def get_placeholder(self, value=None, compiler=None, connection=None):
         """Tell postgres to encrypt this field using PGP."""
-        return self.encrypt_sql.format(self.get_public_key(connection))
+        return self.encrypt_sql.format(get_setting(connection, 'PUBLIC_PGP_KEY'))
 
     def get_decrypt_sql(self, connection):
         """Get decrypt sql."""
-        return self.decrypt_sql.format(self.get_private_key(connection))
+        return self.decrypt_sql.format(get_setting(connection, 'PRIVATE_PGP_KEY'))
 
 
 class PGPSymmetricKeyFieldMixin(PGPMixin):
@@ -160,21 +152,13 @@ class PGPSymmetricKeyFieldMixin(PGPMixin):
     decrypt_sql = PGP_SYM_DECRYPT_SQL
     cast_type = 'TEXT'
 
-    @staticmethod
-    def get_key(connection):
-        """Get key from connection or default to settings."""
-        if 'PGCRYPTO_KEY' in connection.settings_dict:
-            return connection.settings_dict['PGCRYPTO_KEY']
-        else:
-            return settings.PGCRYPTO_KEY
-
     def get_placeholder(self, value, compiler, connection):
         """Tell postgres to encrypt this field using PGP."""
-        return self.encrypt_sql.format(self.get_key(connection))
+        return self.encrypt_sql.format(get_setting(connection, 'PGCRYPTO_KEY'))
 
     def get_decrypt_sql(self, connection):
         """Get decrypt sql."""
-        return self.decrypt_sql.format(self.get_key(connection))
+        return self.decrypt_sql.format(get_setting(connection, 'PGCRYPTO_KEY'))
 
 
 class DecimalPGPFieldMixin:

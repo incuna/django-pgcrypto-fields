@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.db import models
 
 from pgcrypto import (
@@ -12,6 +11,7 @@ from pgcrypto.lookups import (
 )
 from pgcrypto.mixins import (
     DecimalPGPFieldMixin,
+    get_setting,
     HashMixin,
     PGPPublicKeyFieldMixin,
     PGPSymmetricKeyFieldMixin,
@@ -22,17 +22,9 @@ class TextDigestField(HashMixin, models.TextField):
     """Text digest field for postgres."""
     encrypt_sql = DIGEST_SQL
 
-    @staticmethod
-    def get_key(connection):
-        """Get key from connection or default to settings."""
-        if 'PGCRYPTO_KEY' in connection.settings_dict:
-            return connection.settings_dict['PGCRYPTO_KEY']
-        else:
-            return settings.PGCRYPTO_KEY
-
     def get_encrypt_sql(self, connection):
         """Get encrypt sql."""
-        return self.encrypt_sql.format(self.get_key(connection))
+        return self.encrypt_sql.format(get_setting(connection, 'PGCRYPTO_KEY'))
 
 
 TextDigestField.register_lookup(HashLookup)
