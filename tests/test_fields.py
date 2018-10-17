@@ -3,7 +3,8 @@ from decimal import Decimal
 from unittest.mock import MagicMock
 
 from django import VERSION as DJANGO_VERSION
-from django.db import models
+from django.conf import settings
+from django.db import connections, models
 from django.test import TestCase
 from incuna_test_utils.utils import field_names
 
@@ -37,6 +38,7 @@ class TestTextFieldHash(TestCase):
 
 
 class TestPGPMixin(TestCase):
+    multi_db = True
     """Test `PGPMixin` behave properly."""
     def test_check(self):
         """Assert `max_length` check does not return any error."""
@@ -69,8 +71,12 @@ class TestEmailPGPMixin(TestCase):
 
 
 class TestEncryptedTextFieldModel(TestCase):
+    multi_db = True
     """Test `EncryptedTextField` can be integrated in a `Django` model."""
     model = EncryptedModel
+
+    # You have to do it here or queries is empty
+    settings.DEBUG = True
 
     def test_fields(self):
         """Assert fields are representing our model."""
@@ -1317,7 +1323,8 @@ class TestEncryptedTextFieldModel(TestCase):
             digest_field=expected,
             hmac_field=expected,
         )
-        instance.refresh_from_db()
+
+        instance = EncryptedDiff.objects.get(id=1)
 
         self.assertTrue(
             instance.pub_field,
@@ -1326,6 +1333,19 @@ class TestEncryptedTextFieldModel(TestCase):
         self.assertTrue(
             instance.sym_field,
             expected
+        )
+
+        conn = connections['diff_keys']
+        query = conn.queries[0]
+
+        self.assertIn(
+            'djangorocks',
+            str(query)
+        )
+
+        self.assertIn(
+            'mQMuBFvGJCARCAD',
+            str(query)
         )
 
         instance = EncryptedDiff.objects.get(digest_field__hash_of=expected)
