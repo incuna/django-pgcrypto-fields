@@ -91,7 +91,6 @@ class PGPMixin:
 
     def __init__(self, *args, **kwargs):
         """`max_length` should be set to None as encrypted text size is variable."""
-        kwargs['max_length'] = None
         super().__init__(*args, **kwargs)
 
     def db_type(self, connection=None):
@@ -109,10 +108,6 @@ class PGPMixin:
     def get_decrypt_sql(self, connection):
         """Get decrypt sql."""
         raise NotImplementedError('The `get_decrypt_sql` needs to be implemented.')
-
-    def _check_max_length_attribute(self, **kwargs):
-        """Override `_check_max_length_attribute` to remove check on max_length."""
-        return []
 
     def get_col(self, alias, output_field=None):
         """Get the decryption for col."""

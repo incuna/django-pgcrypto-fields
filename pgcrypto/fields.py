@@ -15,7 +15,6 @@ from pgcrypto.mixins import (
     HashMixin,
     PGPPublicKeyFieldMixin,
     PGPSymmetricKeyFieldMixin,
-    RemoveMaxLengthValidatorMixin,
 )
 
 
@@ -39,8 +38,7 @@ class TextHMACField(HashMixin, models.TextField):
 TextHMACField.register_lookup(HashLookup)
 
 
-class EmailPGPPublicKeyField(RemoveMaxLengthValidatorMixin,
-                             PGPSymmetricKeyFieldMixin, models.EmailField):
+class EmailPGPPublicKeyField(PGPSymmetricKeyFieldMixin, models.EmailField):
     """Email PGP public key encrypted field."""
 
 
@@ -52,6 +50,10 @@ class IntegerPGPPublicKeyField(PGPPublicKeyFieldMixin, models.IntegerField):
 
 class TextPGPPublicKeyField(PGPPublicKeyFieldMixin, models.TextField):
     """Text PGP public key encrypted field."""
+
+
+class CharPGPPublicKeyField(PGPPublicKeyFieldMixin, models.CharField):
+    """Char PGP public key encrypted field."""
 
 
 class DatePGPPublicKeyField(PGPPublicKeyFieldMixin, models.DateField):
@@ -66,8 +68,7 @@ class DateTimePGPPublicKeyField(PGPPublicKeyFieldMixin, models.DateTimeField):
     cast_type = 'TIMESTAMP'
 
 
-class EmailPGPSymmetricKeyField(RemoveMaxLengthValidatorMixin,
-                                PGPSymmetricKeyFieldMixin, models.EmailField):
+class EmailPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.EmailField):
     """Email PGP symmetric key encrypted field."""
 
 
@@ -79,6 +80,10 @@ class IntegerPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.IntegerField
 
 class TextPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.TextField):
     """Text PGP symmetric key encrypted field for postgres."""
+
+
+class CharPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.CharField):
+    """Char PGP symmetric key encrypted field for postgres."""
 
 
 class DatePGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.DateField):
