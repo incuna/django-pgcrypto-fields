@@ -38,7 +38,7 @@ class TextHMACField(HashMixin, models.TextField):
 TextHMACField.register_lookup(HashLookup)
 
 
-class EmailPGPPublicKeyField(PGPSymmetricKeyFieldMixin, models.EmailField):
+class EmailPGPPublicKeyField(PGPPublicKeyFieldMixin, models.EmailField):
     """Email PGP public key encrypted field."""
 
 
