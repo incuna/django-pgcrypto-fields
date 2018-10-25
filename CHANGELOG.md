@@ -1,3 +1,17 @@
+# CHANGELOG
+
+# 2.5.1
+
+* Fixed regression in the definition of EmailPGPPublicKeyField (#77)
+* Removed dead code (remove_validators and RemoveMaxLengthValidatorMixin)
+
+## 2.5.0
+
+* Added new DecimalFields for both public and symmetric key (#64)
+* Added new FloatFields for both public and symmetric key (#64)
+* Added new TimeFields for both public and symmetric key (#64)
+* Added support for different keys based on database (#67)
+
 ## 2.4.0
 
 * Added auto-decryption of all encrypted fields including FK tables

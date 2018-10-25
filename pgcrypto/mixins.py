@@ -1,4 +1,4 @@
-from django.core.validators import MaxLengthValidator
+from django.conf import settings
 from django.db.models.expressions import Col
 from django.utils.functional import cached_property
 
@@ -8,12 +8,14 @@ from pgcrypto import (
     PGP_SYM_DECRYPT_SQL,
     PGP_SYM_ENCRYPT_SQL,
 )
-from pgcrypto.forms import DateField, DateTimeField
 
 
-def remove_validators(validators, validator_class):
-    """Exclude `validator_class` instances from `validators` list."""
-    return [v for v in validators if not isinstance(v, validator_class)]
+def get_setting(connection, key):
+    """Get key from connection or default to settings."""
+    if key in connection.settings_dict:
+        return connection.settings_dict[key]
+    else:
+        return getattr(settings, key)
 
 
 class DecryptedCol(Col):
@@ -21,8 +23,6 @@ class DecryptedCol(Col):
 
     def __init__(self, alias, target, output_field=None):
         """Init the decryption."""
-        self.decrypt_sql = target.decrypt_sql
-        self.cast_type = target.cast_type
         self.target = target
 
         super(DecryptedCol, self).__init__(alias, target, output_field)
@@ -30,7 +30,7 @@ class DecryptedCol(Col):
     def as_sql(self, compiler, connection):
         """Build SQL with decryption and casting."""
         sql, params = super(DecryptedCol, self).as_sql(compiler, connection)
-        sql = self.decrypt_sql % (sql, self.cast_type)
+        sql = self.target.get_decrypt_sql(connection) % (sql, self.target.get_cast_sql())
         return sql, params
 
 
@@ -66,6 +66,11 @@ class HashMixin:
         """
         if value is None or value.startswith('\\x'):
             return '%s'
+
+        return self.get_encrypt_sql(connection)
+
+    def get_encrypt_sql(self, connection):
+        """Get encrypt sql. This may be overidden by some implementations."""
         return self.encrypt_sql
 
 
@@ -80,25 +85,23 @@ class PGPMixin:
 
     def __init__(self, *args, **kwargs):
         """`max_length` should be set to None as encrypted text size is variable."""
-        kwargs['max_length'] = None
         super().__init__(*args, **kwargs)
 
     def db_type(self, connection=None):
         """Value stored in the database is hexadecimal."""
         return 'bytea'
 
-    def get_placeholder(self, value=None, compiler=None, connection=None):
-        """
-        Tell postgres to encrypt this field using PGP.
+    def get_placeholder(self, value, compiler, connection):
+        """Tell postgres to encrypt this field using PGP."""
+        raise NotImplementedError('The `get_placeholder` needs to be implemented.')
 
-        `value`, `compiler`, and `connection` are ignored here as we don't need
-        custom operators.
-        """
-        return self.encrypt_sql
+    def get_cast_sql(self):
+        """Get cast sql. This may be overidden by some implementations."""
+        return self.cast_type
 
-    def _check_max_length_attribute(self, **kwargs):
-        """Override `_check_max_length_attribute` to remove check on max_length."""
-        return []
+    def get_decrypt_sql(self, connection):
+        """Get decrypt sql."""
+        raise NotImplementedError('The `get_decrypt_sql` needs to be implemented.')
 
     def get_col(self, alias, output_field=None):
         """Get the decryption for col."""
@@ -128,6 +131,14 @@ class PGPPublicKeyFieldMixin(PGPMixin):
     decrypt_sql = PGP_PUB_DECRYPT_SQL
     cast_type = 'TEXT'
 
+    def get_placeholder(self, value=None, compiler=None, connection=None):
+        """Tell postgres to encrypt this field using PGP."""
+        return self.encrypt_sql.format(get_setting(connection, 'PUBLIC_PGP_KEY'))
+
+    def get_decrypt_sql(self, connection):
+        """Get decrypt sql."""
+        return self.decrypt_sql.format(get_setting(connection, 'PRIVATE_PGP_KEY'))
+
 
 class PGPSymmetricKeyFieldMixin(PGPMixin):
     """PGP symmetric key encrypted field mixin for postgres."""
@@ -135,65 +146,22 @@ class PGPSymmetricKeyFieldMixin(PGPMixin):
     decrypt_sql = PGP_SYM_DECRYPT_SQL
     cast_type = 'TEXT'
 
+    def get_placeholder(self, value, compiler, connection):
+        """Tell postgres to encrypt this field using PGP."""
+        return self.encrypt_sql.format(get_setting(connection, 'PGCRYPTO_KEY'))
 
-class RemoveMaxLengthValidatorMixin:
-    """Exclude `MaxLengthValidator` from field validators."""
-    def __init__(self, *args, **kwargs):
-        """Remove `MaxLengthValidator` in parent's `.__init__`."""
-        super().__init__(*args, **kwargs)
-        self.validators = remove_validators(self.validators, MaxLengthValidator)
-
-
-class EmailPGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin, RemoveMaxLengthValidatorMixin):
-    """Email mixin for PGP public key fields."""
+    def get_decrypt_sql(self, connection):
+        """Get decrypt sql."""
+        return self.decrypt_sql.format(get_setting(connection, 'PGCRYPTO_KEY'))
 
 
-class EmailPGPSymmetricKeyFieldMixin(
-    PGPSymmetricKeyFieldMixin,
-    RemoveMaxLengthValidatorMixin
-):
-    """Email mixin for PGP symmetric key fields."""
+class DecimalPGPFieldMixin:
+    """Decimal PGP encrypted field mixin for postgres."""
+    cast_type = 'NUMERIC(%(max_digits)s, %(decimal_places)s)'
 
-
-class DatePGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin):
-    """Date mixin for PGP public key fields."""
-    cast_type = 'DATE'
-
-    def formfield(self, **kwargs):
-        """Override the form field with custom PGP DateField."""
-        defaults = {'form_class': DateField}
-        defaults.update(kwargs)
-        return super().formfield(**defaults)
-
-
-class DatePGPSymmetricKeyFieldMixin(PGPSymmetricKeyFieldMixin):
-    """Date mixin for PGP symmetric key fields."""
-    cast_type = 'DATE'
-
-    def formfield(self, **kwargs):
-        """Override the form field with custom PGP DateField."""
-        defaults = {'form_class': DateField}
-        defaults.update(kwargs)
-        return super().formfield(**defaults)
-
-
-class DateTimePGPPublicKeyFieldMixin(PGPPublicKeyFieldMixin):
-    """DateTime mixin for PGP public key fields."""
-    cast_type = 'TIMESTAMP'
-
-    def formfield(self, **kwargs):
-        """Override the form field with custom PGP DateTimeField."""
-        defaults = {'form_class': DateTimeField}
-        defaults.update(kwargs)
-        return super().formfield(**defaults)
-
-
-class DateTimePGPSymmetricKeyFieldMixin(PGPSymmetricKeyFieldMixin):
-    """DateTime mixin for PGP symmetric key fields."""
-    cast_type = 'TIMESTAMP'
-
-    def formfield(self, **kwargs):
-        """Override the form field with custom PGP DateTimeField."""
-        defaults = {'form_class': DateTimeField}
-        defaults.update(kwargs)
-        return super().formfield(**defaults)
+    def get_cast_sql(self):
+        """Get cast sql."""
+        return self.cast_type % {
+            'max_digits': self.max_digits,
+            'decimal_places': self.decimal_places
+        }
