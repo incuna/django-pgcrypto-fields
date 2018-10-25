@@ -150,13 +150,13 @@ the data and also changing the hash to match.
 Supported PGP public key fields are:
  - `CharPGPPublicKeyField`
  - `EmailPGPPublicKeyField`
- - `IntegerPGPPublicKeyField`
  - `TextPGPPublicKeyField`
  - `DatePGPPublicKeyField`
  - `DateTimePGPPublicKeyField`
+ - `TimePGPPublicKeyField`
+ - `IntegerPGPPublicKeyField`
  - `DecimalPGPPublicKeyField`
  - `FloatPGPPublicKeyField`
- - `TimePGPPublicKeyField`
 
 Public key encryption creates a token generated with a public key to
 encrypt the data and a private key to decrypt it.
@@ -169,15 +169,32 @@ Public and private keys can be set in settings with `PUBLIC_PGP_KEY` and
 Supported PGP symmetric key fields are:
  - `CharPGPSymmetricKeyField`
  - `EmailPGPSymmetricKeyField`
- - `IntegerPGPSymmetricKeyField`
  - `TextPGPSymmetricKeyField`
  - `DatePGPSymmetricKeyField`
  - `DateTimePGPSymmetricKeyField`
+ - `TimePGPSymmetricKeyField`
+ - `IntegerPGPSymmetricKeyField`
  - `DecimalPGPSymmetricKeyField`
  - `FloatPGPSymmetricKeyField`
- - `TimePGPSymmetricKeyField`
+
 
 Encrypt and decrypt the data with `settings.PGCRYPTO_KEY` which acts like a password.
+
+### Django Model Field Equivalents 
+
+| Django Field    | Public Key Field            | Symmetric Key Field            |
+|-----------------|-----------------------------|--------------------------------|
+| `CharField`     | `CharPGPPublicKeyField`     | `CharPGPSymmetricKeyField`     |
+| `EmailField`    | `EmailPGPPublicKeyField`    | `EmailPGPSymmetricKeyField`    |
+| `TextField`     | `TextPGPPublicKeyField`     | `TextPGPSymmetricKeyField`     |
+| `DateField`     | `DatePGPPublicKeyField`     | `DatePGPSymmetricKeyField`     |
+| `DateTimeField` | `DateTimePGPPublicKeyField` | `DateTimePGPSymmetricKeyField` |
+| `TimeField`     | `TimePGPPublicKeyField`     | `TimePGPSymmetricKeyField`     |
+| `IntegerField`  | `IntegerPGPPublicKeyField`  | `IntegerPGPSymmetricKeyField`  |
+| `DecimalField`  | `DecimalPGPPublicKeyField`  | `DecimalPGPSymmetricKeyField`  |
+| `FloatField`    | `FloatPGPPublicKeyField`    | `FloatPGPSymmetricKeyField`    |
+
+**Other Django model fields are not currently supported. Pull requests are welcomed.**
 
 ### Usage
 
