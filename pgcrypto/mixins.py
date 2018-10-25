@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.core.validators import MaxLengthValidator
 from django.db.models.expressions import Col
 from django.utils.functional import cached_property
 
@@ -9,11 +8,6 @@ from pgcrypto import (
     PGP_SYM_DECRYPT_SQL,
     PGP_SYM_ENCRYPT_SQL,
 )
-
-
-def remove_validators(validators, validator_class):
-    """Exclude `validator_class` instances from `validators` list."""
-    return [v for v in validators if not isinstance(v, validator_class)]
 
 
 def get_setting(connection, key):
@@ -171,11 +165,3 @@ class DecimalPGPFieldMixin:
             'max_digits': self.max_digits,
             'decimal_places': self.decimal_places
         }
-
-
-class RemoveMaxLengthValidatorMixin:
-    """Exclude `MaxLengthValidator` from field validators."""
-    def __init__(self, *args, **kwargs):
-        """Remove `MaxLengthValidator` in parent's `.__init__`."""
-        super().__init__(*args, **kwargs)
-        self.validators = remove_validators(self.validators, MaxLengthValidator)

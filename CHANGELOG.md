@@ -3,6 +3,7 @@
 # 2.5.1
 
 * Fixed regression in the definition of EmailPGPPublicKeyField (#77)
+* Removed dead code (remove_validators and RemoveMaxLengthValidatorMixin)
 
 ## 2.5.0
 
