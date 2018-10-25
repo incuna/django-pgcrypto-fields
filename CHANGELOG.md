@@ -1,5 +1,9 @@
 # CHANGELOG
 
+# 2.5.1
+
+* Fixed regression in the definition of EmailPGPPublicKeyField (#77)
+
 ## 2.5.0
 
 * Added new DecimalFields for both public and symmetric key (#64)
