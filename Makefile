@@ -76,6 +76,9 @@ test-coverage: ## Check code coverage quickly with the default Python
 	coverage run ./tests/run.py
 	coverage report -m
 
+test-coveralls: test-coverage ## Check code coverage with the default Python and Coveralls
+	coveralls
+
 test-coverage-html: test-coverage  ## Check code coverage quickly with the default Python and show report
 	coverage html
 	$(BROWSER) htmlcov/index.html
