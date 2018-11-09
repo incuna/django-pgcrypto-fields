@@ -8,7 +8,7 @@ flake8-import-order==0.18
 flake8==3.6.0
 incuna-test-utils==6.6.0
 pip==18.1
-psycopg2-binary==2.7.5
+psycopg2-binary==2.7.6
 pyflakes==2.0.0
 pycodestyle==2.4.0
 setuptools==40.5.0
