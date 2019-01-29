@@ -110,6 +110,10 @@ $ gpg -a --export 42 > public.key
 $ gpg -a --export-secret-keys 21 > private.key
 ```
 
+#### Limitations
+
+This library currently does not support Public Key Encryption private keys that are password protected yet. See Issue #89 to help implement it.
+
 ### Upgrading to 2.4.0 from previous versions
 
 The 2.4.0 version of this library received a large rewrite in order to support 
