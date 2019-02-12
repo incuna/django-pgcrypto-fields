@@ -13,4 +13,4 @@ pyflakes==2.1.0
 pycodestyle==2.5.0
 setuptools==40.8.0
 twine==1.12.1
-wheel==0.32.3
+wheel==0.33.0
