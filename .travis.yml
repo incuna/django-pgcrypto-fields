@@ -23,6 +23,7 @@ env:
     - DJANGO='django>=1.11,<2.0'
     - DJANGO='django>=2.0,<2.1'
     - DJANGO='django>=2.1,<2.2'
+    - DJANGO='django>=2.2,<2.3'
     - DJANGO='--upgrade --pre django'
 matrix:
   fast_finish: true
