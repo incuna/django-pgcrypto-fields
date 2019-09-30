@@ -1,8 +1,5 @@
+from django.contrib.postgres.operations import CreateExtension
 from django.db import migrations
-
-
-CREATE_EXTENSION = 'CREATE EXTENSION IF NOT EXISTS pgcrypto;'
-DROP_EXTENSION = 'DROP EXTENSION pgcrypto;'
 
 
 class Migration(migrations.Migration):
@@ -10,5 +7,5 @@ class Migration(migrations.Migration):
     dependencies = []
 
     operations = [
-        migrations.RunSQL(CREATE_EXTENSION, DROP_EXTENSION),
+        CreateExtension('pgcrypto'),
     ]
