@@ -1,6 +1,10 @@
 # CHANGELOG
 
-# 2.5.1
+## Master (unreleased)
+
+* Updated requirements_dev.txt
+
+## 2.5.1
 
 * Fixed regression in the definition of EmailPGPPublicKeyField (#77)
 * Removed dead code (remove_validators and RemoveMaxLengthValidatorMixin)
