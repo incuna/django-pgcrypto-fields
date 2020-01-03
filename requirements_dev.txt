@@ -1,16 +1,16 @@
 colour-runner==0.1.1
-coveralls==1.9.2
+coveralls==1.10.0
 coverage==5.0.1
 dj-database-url==0.5.0
 factory-boy==2.12.0
 flake8-docstrings==1.5.0
 flake8-import-order==0.18.1
-flake8==3.7.8
+flake8==3.7.9
 incuna-test-utils==7.0.0
 pip==19.3.1
 psycopg2-binary==2.8.4
 pyflakes==2.1.1
 pycodestyle==2.5.0
-setuptools==42.0.2
+setuptools==44.0.0
 twine==1.15.0  # Last version to support Python 3.5
 wheel==0.33.6
