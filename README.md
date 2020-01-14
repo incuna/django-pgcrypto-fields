@@ -8,7 +8,7 @@ encrypt and decrypt data for fields.
 ## Requirements
 
  - postgres with `pgcrypto`
- - Supports Django 1.11.x to 2.2.x
+ - Supports Django 1.11.x, 2.2.x, and 3.0.x
  - Compatible with Python 3 only
  
  Last version of this library that supports `Django` 1.8.x, 1.9.x, 1.10.x
