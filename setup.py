@@ -29,7 +29,7 @@ with open('README.md') as readme_file:
 with open('CHANGELOG.md') as changelog_file:
     changelog = changelog_file.read()
 
-version = '2.5.1'
+version = '2.5.2'
 
 setup(
     name='django-pgcrypto-fields',
