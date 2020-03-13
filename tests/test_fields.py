@@ -1321,7 +1321,7 @@ class TestEncryptedTextFieldModel(TestCase):
         items = self.model.objects.distinct().order_by('pgp_pub_field')
 
         self.assertEqual(
-            3,
+            6,
             len(items)
         )
 
