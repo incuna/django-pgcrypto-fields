@@ -1309,6 +1309,22 @@ class TestEncryptedTextFieldModel(TestCase):
                 len(items)
             )
 
+    def test_anonymous_distinct_with_order_by(self):
+        """Test distinct without field_names."""
+        EncryptedModelFactory.create(pgp_pub_field='Paul')
+        EncryptedModelFactory.create(pgp_pub_field='Paul')
+        EncryptedModelFactory.create(pgp_pub_field='Peter')
+        EncryptedModelFactory.create(pgp_pub_field='Peter')
+        EncryptedModelFactory.create(pgp_pub_field='Jessica')
+        EncryptedModelFactory.create(pgp_pub_field='Jessica')
+
+        items = self.model.objects.distinct().order_by('pgp_pub_field')
+
+        self.assertEqual(
+            3,
+            len(items)
+        )
+
     def test_annotate(self):
         """Test annotate support."""
         efk = EncryptedFKModelFactory.create()
