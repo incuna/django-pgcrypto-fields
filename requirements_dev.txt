@@ -11,6 +11,6 @@ pip==20.0.2
 psycopg2-binary==2.8.4
 pyflakes==2.1.1
 pycodestyle==2.5.0
-setuptools==45.1.0
+setuptools==50.1.0
 twine==1.15.0  # Last version to support Python 3.5
 wheel==0.34.2
