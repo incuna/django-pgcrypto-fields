@@ -6,7 +6,7 @@ import factory
 from .models import EncryptedFKModel, EncryptedModel
 
 
-class EncryptedFKModelFactory(factory.DjangoModelFactory):
+class EncryptedFKModelFactory(factory.django.DjangoModelFactory):
     """Factory to generate foreign key data."""
     fk_pgp_sym_field = factory.Sequence('Text with symmetric key {}'.format)
 
@@ -15,7 +15,7 @@ class EncryptedFKModelFactory(factory.DjangoModelFactory):
         model = EncryptedFKModel
 
 
-class EncryptedModelFactory(factory.DjangoModelFactory):
+class EncryptedModelFactory(factory.django.DjangoModelFactory):
     """Factory to generate hashed and encrypted data."""
 
     digest_field = factory.Sequence('Text digest {}'.format)

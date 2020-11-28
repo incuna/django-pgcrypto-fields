@@ -2,6 +2,13 @@
 
 ## Master (unreleased)
 
+## 2.5.3
+
+* Added support for Django 3.1.x
+* Updated requirements_dev.txt
+* Dropped support for Python 3.5
+* Dropped support for Django below 2.2.x LTS release
+
 ## 2.5.2
 
 * Added support for Django 3.x
