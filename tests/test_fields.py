@@ -83,11 +83,13 @@ class TestEncryptedTextFieldModel(TestCase):
             'hmac_with_original_field',
             'email_pgp_pub_field',
             'integer_pgp_pub_field',
+            'biginteger_pgp_pub_field',
             'pgp_pub_field',
             'char_pub_field',
             'decimal_pgp_pub_field',
             'email_pgp_sym_field',
             'integer_pgp_sym_field',
+            'biginteger_pgp_sym_field',
             'pgp_sym_field',
             'char_sym_field',
             'date_pgp_sym_field',
@@ -113,12 +115,14 @@ class TestEncryptedTextFieldModel(TestCase):
 
         self.assertIsInstance(instance.email_pgp_pub_field, str)
         self.assertIsInstance(instance.integer_pgp_pub_field, int)
+        self.assertIsInstance(instance.biginteger_pgp_pub_field, int)
         self.assertIsInstance(instance.pgp_pub_field, str)
         self.assertIsInstance(instance.date_pgp_pub_field, date)
         self.assertIsInstance(instance.datetime_pgp_pub_field, datetime)
 
         self.assertIsInstance(instance.email_pgp_sym_field, str)
         self.assertIsInstance(instance.integer_pgp_sym_field, int)
+        self.assertIsInstance(instance.biginteger_pgp_sym_field, int)
         self.assertIsInstance(instance.pgp_sym_field, str)
         self.assertIsInstance(instance.date_pgp_sym_field, date)
         self.assertIsInstance(instance.datetime_pgp_sym_field, datetime)
@@ -311,18 +315,38 @@ class TestEncryptedTextFieldModel(TestCase):
         self.assertEqual(updated_instance.first(), instance)
 
     def test_pgp_public_key_negative_number(self):
-        """Assert negative value is saved with an `IntegerPGPPublicKeyField` field."""
-        expected = -1
+        """
+        Assert negative value is saved with Public Key integer fields.
+
+        * `IntegerPGPPublicKeyField`
+        * `BigIntegerPGPSymmetricKeyField`
+        """
+        expected = -2147483648
         instance = EncryptedModelFactory.create(integer_pgp_pub_field=expected)
 
         self.assertEqual(instance.integer_pgp_pub_field, expected)
 
+        expected = -9223372036854775808
+        instance = EncryptedModelFactory.create(biginteger_pgp_pub_field=expected)
+
+        self.assertEqual(instance.biginteger_pgp_pub_field, expected)
+
     def test_pgp_symmetric_key_negative_number(self):
-        """Assert negative value is saved with an `IntegerPGPSymmetricKeyField` field."""
-        expected = -1
+        """
+        Assert negative value is saved with Symmetric Key fields.
+
+        * `IntegerPGPSymmetricKeyField`
+        * `BigIntegerPGPSymmetricKeyField`
+        """
+        expected = -2147483648
         instance = EncryptedModelFactory.create(integer_pgp_sym_field=expected)
 
         self.assertEqual(instance.integer_pgp_sym_field, expected)
+
+        expected = -9223372036854775808
+        instance = EncryptedModelFactory.create(biginteger_pgp_sym_field=expected)
+
+        self.assertEqual(instance.biginteger_pgp_sym_field, expected)
 
     def test_pgp_symmetric_key_date(self):
         """Assert date is save with an `DatePGPSymmetricKeyField` field."""
