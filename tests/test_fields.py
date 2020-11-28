@@ -38,7 +38,7 @@ class TestTextFieldHash(TestCase):
 
 
 class TestPGPMixin(TestCase):
-    multi_db = True
+    databases = '__all__'
     """Test `PGPMixin` behave properly."""
     def test_check(self):
         """Assert `max_length` check does not return any error."""
@@ -65,7 +65,7 @@ class TestEmailPGPMixin(TestCase):
 
 
 class TestEncryptedTextFieldModel(TestCase):
-    multi_db = True
+    databases = '__all__'
     """Test `EncryptedTextField` can be integrated in a `Django` model."""
     model = EncryptedModel
 
