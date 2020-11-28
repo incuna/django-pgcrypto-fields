@@ -9,6 +9,7 @@
 * Dropped support for Python 3.5
 * Dropped support for Django below 2.2.x LTS release
 * Added support for BigIntegerFields (#169)
+* Added documentation for migration existing data (#246)
 
 ## 2.5.2
 

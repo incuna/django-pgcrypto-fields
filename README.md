@@ -328,7 +328,7 @@ Example:
 
 ## Limitations
 
-#### `.distinct('encrypted_field_name')`
+### `.distinct('encrypted_field_name')`
 
 Due to a missing feature in the Django ORM, using `distinct()` on an encrypted field
 does not work for Django 2.0.x and lower.
@@ -364,6 +364,52 @@ items = EncryptedFKModel.objects.filter(
 This works because the annotated field is auto-decrypted by Django as a `F` field and that 
 field is used in the `distinct()`.
 
+### Migrating existing fields into PGCrypto Fields
+
+Migrating existing fields into PGCrypto Fields is not performed by this library.  You will need to migrate the data 
+in a forwards migration or other means. The only migration that is supported except to create/activate the pgcrypto 
+extension in Postgres.
+
+Migrating data is complicated as there might be a few things to consider such as:
+
+* the shape of the data
+* validations/constrains done on the table/model/form and anywhere else
+
+The library has no way of doing all these guesses or to make all these decisions.
+
+If you need to migrate data from unencrypted fields to encrypted fields, three ways to solve it:
+
+1. When there's no data in the db it should be possible to start from scratch by recreating the db
+1. When there's no data in the table it should be possible to recreate the table
+1. When there's data or if the project is shared it should be possible to do it in a non destructive way
+
+**Option 1: No data is in the db**
+
+1. Drop the database
+1. Squash the migrations
+1. Recreate the db
+
+**Option 2: No data in the table**
+
+1. Create a migration to drop the table
+1. Create a new migration for the table with the encrypted field
+1. Optionally squash the migration
+
+**Option 3: Migrating in a non-destructive way**
+
+The goal here is to be able to use to legacy field if something goes wrong.
+
+Part 1:
+
+1. Create new field
+1. When data is saved write both to legacy and new field
+1. Create a data migration to cast data from legacy field to new field
+1. check existing data from legacy and new field are the same if possible
+
+Part 2:
+
+1. Rename the fields and drop legacy fields
+1. Update the code to use only the new field
 
 ## Security Limitations
 
