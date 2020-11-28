@@ -48,6 +48,12 @@ class IntegerPGPPublicKeyField(PGPPublicKeyFieldMixin, models.IntegerField):
     cast_type = 'INT4'
 
 
+class BigIntegerPGPPublicKeyField(PGPPublicKeyFieldMixin, models.IntegerField):
+    """BigInteger PGP public key encrypted field."""
+    encrypt_sql = PGP_PUB_ENCRYPT_SQL_WITH_NULLIF
+    cast_type = 'BIGINT'
+
+
 class TextPGPPublicKeyField(PGPPublicKeyFieldMixin, models.TextField):
     """Text PGP public key encrypted field."""
 
@@ -76,6 +82,12 @@ class IntegerPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.IntegerField
     """Integer PGP symmetric key encrypted field."""
     encrypt_sql = PGP_SYM_ENCRYPT_SQL_WITH_NULLIF
     cast_type = 'INT4'
+
+
+class BigIntegerPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.IntegerField):
+    """BigInteger PGP symmetric key encrypted field."""
+    encrypt_sql = PGP_SYM_ENCRYPT_SQL_WITH_NULLIF
+    cast_type = 'BIGINT'
 
 
 class TextPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.TextField):

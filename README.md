@@ -162,6 +162,7 @@ Supported PGP public key fields are:
  - `DateTimePGPPublicKeyField`
  - `TimePGPPublicKeyField`
  - `IntegerPGPPublicKeyField`
+ - `BigIntegerPGPPublicKeyField`
  - `DecimalPGPPublicKeyField`
  - `FloatPGPPublicKeyField`
 
@@ -181,6 +182,7 @@ Supported PGP symmetric key fields are:
  - `DateTimePGPSymmetricKeyField`
  - `TimePGPSymmetricKeyField`
  - `IntegerPGPSymmetricKeyField`
+ - `BigIntegerPGPSymerticKeyField`
  - `DecimalPGPSymmetricKeyField`
  - `FloatPGPSymmetricKeyField`
 
@@ -198,6 +200,7 @@ Encrypt and decrypt the data with `settings.PGCRYPTO_KEY` which acts like a pass
 | `DateTimeField` | `DateTimePGPPublicKeyField` | `DateTimePGPSymmetricKeyField` |
 | `TimeField`     | `TimePGPPublicKeyField`     | `TimePGPSymmetricKeyField`     |
 | `IntegerField`  | `IntegerPGPPublicKeyField`  | `IntegerPGPSymmetricKeyField`  |
+| `BigIntegerField`  | `BigIntegerPGPPublicKeyField`  | `BigIntegerPGPSymmetricKeyField`  |
 | `DecimalField`  | `DecimalPGPPublicKeyField`  | `DecimalPGPSymmetricKeyField`  |
 | `FloatField`    | `FloatPGPPublicKeyField`    | `FloatPGPSymmetricKeyField`    |
 
