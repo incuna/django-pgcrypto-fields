@@ -59,7 +59,8 @@ Ready to contribute? Here's how to set up `django-pgcrypto-fields` for local dev
     $ git clone git@github.com:your_name_here/pgcrypto.git
     ```
     
-3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development:
+3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you 
+set up your fork for local development:
 
     ```bash
     $ mkvirtualenv django-pgcrypto-fields
@@ -83,6 +84,9 @@ Ready to contribute? Here's how to set up `django-pgcrypto-fields` for local dev
     ```
 
    To get flake8 and tox, just pip install them into your virtualenv.
+   
+   You will need a postgres database called `pgcrypto_fields` and `pgcrypto_fields_diff` on localhost without 
+   password authentication
 
 6. Commit your changes and push your branch to GitHub:
 
