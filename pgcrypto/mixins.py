@@ -10,12 +10,12 @@ from pgcrypto import (
 )
 
 
-def get_setting(connection, key):
+def get_setting(connection, key, default=None):
     """Get key from connection or default to settings."""
     if key in connection.settings_dict:
         return connection.settings_dict[key]
     else:
-        return getattr(settings, key)
+        return getattr(settings, key, default)
 
 
 class DecryptedCol(Col):
@@ -80,8 +80,10 @@ class PGPMixin:
     `PGPMixin` uses 'pgcrypto' to encrypt data in a postgres database.
     """
     encrypt_sql = None  # Set in implementation class
+    encrypt_options = None
     decrypt_sql = None  # Set in implementation class
-    cast_type = None
+    decrypt_options = None
+    cast_type = None  # Set in implementation class
 
     def __init__(self, *args, **kwargs):
         """`max_length` should be set to None as encrypted text size is variable."""
@@ -133,11 +135,18 @@ class PGPPublicKeyFieldMixin(PGPMixin):
 
     def get_placeholder(self, value=None, compiler=None, connection=None):
         """Tell postgres to encrypt this field using PGP."""
-        return self.encrypt_sql.format(get_setting(connection, 'PUBLIC_PGP_KEY'))
+        return self.encrypt_sql.format(
+            get_setting(connection, 'PUBLIC_PGP_KEY'),
+            self.encrypt_options if self.encrypt_options else get_setting(connection, 'PUB_ENCRYPT_OPTIONS', '')
+        )
 
     def get_decrypt_sql(self, connection):
         """Get decrypt sql."""
-        return self.decrypt_sql.format(get_setting(connection, 'PRIVATE_PGP_KEY'))
+        return self.decrypt_sql.format(
+            get_setting(connection, 'PRIVATE_PGP_KEY'),
+            self.decrypt_options if self.decrypt_options else get_setting(connection, 'PUB_DECRYPT_OPTIONS', '')
+
+        )
 
 
 class PGPSymmetricKeyFieldMixin(PGPMixin):
@@ -148,11 +157,17 @@ class PGPSymmetricKeyFieldMixin(PGPMixin):
 
     def get_placeholder(self, value, compiler, connection):
         """Tell postgres to encrypt this field using PGP."""
-        return self.encrypt_sql.format(get_setting(connection, 'PGCRYPTO_KEY'))
+        return self.encrypt_sql.format(
+            get_setting(connection, 'PGCRYPTO_KEY'),
+            self.encrypt_options if self.encrypt_options else get_setting(connection, 'SYM_ENCRYPT_OPTIONS', '')
+        )
 
     def get_decrypt_sql(self, connection):
         """Get decrypt sql."""
-        return self.decrypt_sql.format(get_setting(connection, 'PGCRYPTO_KEY'))
+        return self.decrypt_sql.format(
+            get_setting(connection, 'PGCRYPTO_KEY'),
+            self.decrypt_options if self.decrypt_options else get_setting(connection, 'SYM_DECRYPT_OPTIONS', '')
+        )
 
 
 class DecimalPGPFieldMixin:
