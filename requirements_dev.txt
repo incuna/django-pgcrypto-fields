@@ -1,6 +1,6 @@
 colour-runner==0.1.1
 coveralls==2.2.0
-coverage==5.3
+coverage==5.3.1
 dj-database-url==0.5.0
 factory-boy==3.1.0
 flake8-docstrings==1.5.0
@@ -11,6 +11,6 @@ pip==20.2.4
 psycopg2-binary==2.8.6
 pyflakes==2.2.0
 pycodestyle==2.6.0
-setuptools==50.3.2
+setuptools==51.1.1
 twine==3.3.0
-wheel==0.35.1
+wheel==0.36.2
