@@ -2,7 +2,7 @@
 
 ## Master (unreleased)
 
-## 2.5.3
+## 2.6.0
 
 * Added support for Django 3.1.x
 * Updated requirements_dev.txt
