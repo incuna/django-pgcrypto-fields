@@ -11,6 +11,6 @@ pip==20.3.3
 psycopg2-binary==2.8.6
 pyflakes==2.2.0
 pycodestyle==2.6.0
-setuptools==51.1.1
+setuptools==51.1.2
 twine==3.3.0
 wheel==0.36.2
