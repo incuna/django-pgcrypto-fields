@@ -328,6 +328,29 @@ Example:
 
 ## Limitations
 
+### Unique Indexes
+
+It is usually not possible to index a `bytea` column in the database as the value in the index exceeds the the pgsql's maximum length allowed for an index (8192 bytes). One solution is to create a digest message of the value that you want unique and apply the unique constraint to the digest.
+
+You can use the hash field ability to auto-create digest on the value of another field in the same model using the `original` argument. In the example below, a digest is created for unencrypted value that is in the `name` field when the model is saved or updated. A unique constraint exists on the name_digest so no two digests are allowed.  Note well that bulk updates do NOT cause hashes to be updated.
+
+```python
+from django.db import models
+from pgcrypto import fields
+
+class Product(models.Model):
+    name_digest = fields.TextDigestField(original='name')
+    name = fields.TextPGPSymmetricKeyField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name_digest', ],
+                name='name_digest_unique'
+            )
+       ]
+```
+
 ### `.distinct('encrypted_field_name')`
 
 Due to a missing feature in the Django ORM, using `distinct()` on an encrypted field
