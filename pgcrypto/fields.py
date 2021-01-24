@@ -71,7 +71,7 @@ class DatePGPPublicKeyField(PGPPublicKeyFieldMixin, models.DateField):
 class DateTimePGPPublicKeyField(PGPPublicKeyFieldMixin, models.DateTimeField):
     """DateTime PGP public key encrypted field for postgres."""
     encrypt_sql = PGP_PUB_ENCRYPT_SQL_WITH_NULLIF
-    cast_type = 'TIMESTAMP'
+    cast_type = 'TIMESTAMPTZ'
 
 
 class EmailPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.EmailField):
@@ -107,7 +107,7 @@ class DatePGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.DateField):
 class DateTimePGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.DateTimeField):
     """DateTime PGP symmetric key encrypted field for postgres."""
     encrypt_sql = PGP_SYM_ENCRYPT_SQL_WITH_NULLIF
-    cast_type = 'TIMESTAMP'
+    cast_type = 'TIMESTAMPTZ'
 
 
 class DecimalPGPPublicKeyField(DecimalPGPFieldMixin,
