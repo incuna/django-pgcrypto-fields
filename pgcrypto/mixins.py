@@ -148,11 +148,23 @@ class PGPSymmetricKeyFieldMixin(PGPMixin):
 
     def get_placeholder(self, value, compiler, connection):
         """Tell postgres to encrypt this field using PGP."""
-        return self.encrypt_sql.format(get_setting(connection, 'PGCRYPTO_KEY'))
+        #
+        # ' -> ''  : escape for SQL string
+        # % -> %%  : escape for Django custom SQL
+        #
+        trans_table = str.maketrans({"'": "''", "%": "%%"})
+        secret_key = get_setting(connection, 'PGCRYPTO_KEY').translate(trans_table)
+        return self.encrypt_sql.format(secret_key)
 
     def get_decrypt_sql(self, connection):
         """Get decrypt sql."""
-        return self.decrypt_sql.format(get_setting(connection, 'PGCRYPTO_KEY'))
+        #
+        # ' -> ''    : escape for SQL string
+        # % -> %%%%  : escape for Django custom SQL and Python old style % format
+        #
+        trans_table = str.maketrans({"'": "''", "%": "%%%%"})
+        secret_key = get_setting(connection, 'PGCRYPTO_KEY').translate(trans_table)
+        return self.decrypt_sql.format(secret_key)
 
 
 class DecimalPGPFieldMixin:
