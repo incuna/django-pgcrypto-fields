@@ -24,6 +24,8 @@ PGP_FIELDS = EMAIL_PGP_FIELDS + (
     fields.IntegerPGPSymmetricKeyField,
     fields.TextPGPPublicKeyField,
     fields.TextPGPSymmetricKeyField,
+    fields.BooleanPGPPublicKeyField,
+    fields.BooleanPGPSymmetricKeyField,
 )
 
 
@@ -101,6 +103,8 @@ class TestEncryptedTextFieldModel(TestCase):
             'decimal_pgp_sym_field',
             'float_pgp_pub_field',
             'float_pgp_sym_field',
+            'boolean_pgp_pub_field',
+            'boolean_pgp_sym_field',
             'fk_model',
         )
         self.assertCountEqual(fields, expected)
@@ -1128,6 +1132,106 @@ class TestEncryptedTextFieldModel(TestCase):
         self.assertTrue(
             cleaned_data['float_pgp_sym_field'],
             float(expected)
+        )
+
+    def test_boolean_pgp_pub_field(self):
+        """Test BooleanPGPPublicKeyField."""
+        expected = True
+        EncryptedModelFactory.create(boolean_pgp_pub_field=expected)
+
+        instance = EncryptedModel.objects.get()
+
+        self.assertIsInstance(
+            instance.boolean_pgp_pub_field,
+            bool
+        )
+
+        self.assertEqual(
+            instance.boolean_pgp_pub_field,
+            expected
+        )
+
+        items = EncryptedModel.objects.filter(boolean_pgp_pub_field=True)
+
+        self.assertEqual(
+            1,
+            len(items)
+        )
+
+        items = EncryptedModel.objects.filter(boolean_pgp_pub_field=False)
+
+        self.assertEqual(
+            0,
+            len(items)
+        )
+
+    def test_boolean_pgp_sym_field(self):
+        """Test BooleanPGPSymmetricKeyField."""
+        expected = False
+        EncryptedModelFactory.create(boolean_pgp_sym_field=expected)
+
+        instance = EncryptedModel.objects.get()
+
+        self.assertIsInstance(
+            instance.boolean_pgp_sym_field,
+            bool
+        )
+
+        self.assertEqual(
+            instance.boolean_pgp_sym_field,
+            expected
+        )
+
+        items = EncryptedModel.objects.filter(boolean_pgp_sym_field=False)
+
+        self.assertEqual(
+            1,
+            len(items)
+        )
+
+        items = EncryptedModel.objects.filter(float_pgp_sym_field=True)
+
+        self.assertEqual(
+            0,
+            len(items)
+        )
+
+    def test_pgp_public_key_boolean_form(self):
+        """Assert form field and widget for `BooleanPGPPublicKeyField` field."""
+        expected = False
+        instance = EncryptedModelFactory.create(boolean_pgp_pub_field=expected)
+
+        payload = {
+            'boolean_pgp_pub_field': expected
+        }
+
+        form = EncryptedForm(payload, instance=instance)
+        self.assertTrue(form.is_valid())
+
+        cleaned_data = form.cleaned_data
+
+        self.assertEqual(
+            cleaned_data['boolean_pgp_pub_field'],
+            expected
+        )
+
+    def test_pgp_symmetric_key_boolean_form(self):
+        """Assert form field and widget for `BooleanPGPSymmetricKeyField` field."""
+        expected = True
+        instance = EncryptedModelFactory.create(boolean_pgp_sym_field=expected)
+
+        payload = {
+            'boolean_pgp_sym_field': expected
+        }
+
+        form = EncryptedForm(payload, instance=instance)
+        self.assertTrue(form.is_valid())
+
+        cleaned_data = form.cleaned_data
+
+        self.assertEqual(
+            cleaned_data['boolean_pgp_sym_field'],
+            expected
         )
 
     def test_null(self):

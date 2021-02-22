@@ -30,6 +30,7 @@ class EncryptedModelFactory(factory.django.DjangoModelFactory):
     date_pgp_pub_field = date.today()
     datetime_pgp_pub_field = datetime.now()
     decimal_pgp_pub_field = Decimal('123456.78')
+    boolean_pgp_pub_field = True
 
     email_pgp_sym_field = factory.Sequence('email{}@symmetric.key'.format)
     integer_pgp_sym_field = 43
@@ -39,6 +40,7 @@ class EncryptedModelFactory(factory.django.DjangoModelFactory):
 
     date_pgp_sym_field = date.today()
     datetime_pgp_sym_field = datetime.now()
+    boolean_pgp_sym_field = False
 
     fk_model = factory.SubFactory(EncryptedFKModelFactory)
 
