@@ -2,6 +2,8 @@
 
 ## Master (unreleased)
 
+* Added support for BooleanFields (#325)
+
 ## 2.6.0
 
 * Added support for Django 3.1.x
