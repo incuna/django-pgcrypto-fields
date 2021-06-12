@@ -439,6 +439,13 @@ Part 2:
 1. Rename the fields and drop legacy fields
 1. Update the code to use only the new field
 
+## Common Errors
+
+### `psycopg2.errors.UndefinedFunction: function pgp_sym_encrypt(numeric, unknown) does not exist`
+
+This commonly means you do not have the `pgcrypto` extension installed in Postgres.  Run the migration available in this library or install it manually in pgsql console.
+
+
 ## Security Limitations
 
 Taken direction from the PostgreSQL documentation:
