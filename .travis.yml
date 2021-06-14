@@ -14,6 +14,7 @@ services:
 before_script:
   - psql -c 'CREATE DATABASE pgcrypto_fields' -U postgres
   - psql -c 'CREATE DATABASE pgcrypto_fields_diff' -U postgres
+  - psql -c 'select * from pg_available_extensions' -U postgres
 install:
   - pip install -e .
   - pip install -r requirements_dev.txt
