@@ -116,9 +116,9 @@ class DateTimePGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.DateTimeFie
     cast_type = 'TIMESTAMPTZ'
 
 
-class BooleanPGPSymmetricKeyField(PGPPublicKeyFieldMixin, models.BooleanField):
+class BooleanPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.BooleanField):
     """Boolean PGP public key encrypted field."""
-    encrypt_sql = PGP_PUB_ENCRYPT_SQL_WITH_NULLIF
+    encrypt_sql = PGP_SYM_ENCRYPT_SQL_WITH_NULLIF
     cast_type = 'BOOL'
 
 

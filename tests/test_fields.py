@@ -1189,7 +1189,7 @@ class TestEncryptedTextFieldModel(TestCase):
             len(items)
         )
 
-        items = EncryptedModel.objects.filter(float_pgp_sym_field=True)
+        items = EncryptedModel.objects.filter(boolean_pgp_sym_field=True)
 
         self.assertEqual(
             0,
