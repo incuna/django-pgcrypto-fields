@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from decimal import Decimal
 from unittest.mock import MagicMock
+from uuid import UUID
 
 from django import VERSION as DJANGO_VERSION
 from django.conf import settings
@@ -26,6 +27,8 @@ PGP_FIELDS = EMAIL_PGP_FIELDS + (
     fields.TextPGPSymmetricKeyField,
     fields.BooleanPGPPublicKeyField,
     fields.BooleanPGPSymmetricKeyField,
+    fields.UUIDPGPPublicKeyField,
+    fields.UUIDPGPSymmetricKeyField,
 )
 
 
@@ -105,6 +108,8 @@ class TestEncryptedTextFieldModel(TestCase):
             'float_pgp_sym_field',
             'boolean_pgp_pub_field',
             'boolean_pgp_sym_field',
+            'uuid_pgp_pub_field',
+            'uuid_pgp_sym_field',
             'fk_model',
         )
         self.assertCountEqual(fields, expected)
@@ -1231,6 +1236,110 @@ class TestEncryptedTextFieldModel(TestCase):
 
         self.assertEqual(
             cleaned_data['boolean_pgp_sym_field'],
+            expected
+        )
+
+    def test_uuid_pgp_pub_field(self):
+        """Test UUIDPGPPublicKeyField."""
+        expected = UUID("9bafda9e-da09-4854-a0fd-fecc11f0cebe")
+        EncryptedModelFactory.create(uuid_pgp_pub_field=expected)
+
+        instance = EncryptedModel.objects.get()
+
+        self.assertIsInstance(
+            instance.uuid_pgp_pub_field,
+            UUID
+        )
+
+        self.assertEqual(
+            instance.uuid_pgp_pub_field,
+            expected
+        )
+
+        items = EncryptedModel.objects.filter(uuid_pgp_pub_field=expected)
+
+        self.assertEqual(
+            1,
+            len(items)
+        )
+
+        items = EncryptedModel.objects.filter(
+            uuid_pgp_pub_field=UUID("db4a70c3-de7d-4399-a4a5-b6c58a09de54")
+        )
+
+        self.assertEqual(
+            0,
+            len(items)
+        )
+
+    def test_uuid_pgp_sym_field(self):
+        """Test UUIDPGPSymmetricKeyField."""
+        expected = UUID("b5cf88e6-12b6-4f01-af68-a9e5ca0f7eeb")
+        EncryptedModelFactory.create(uuid_pgp_sym_field=expected)
+
+        instance = EncryptedModel.objects.get()
+
+        self.assertIsInstance(
+            instance.uuid_pgp_sym_field,
+            UUID
+        )
+
+        self.assertEqual(
+            instance.uuid_pgp_sym_field,
+            expected
+        )
+
+        items = EncryptedModel.objects.filter(uuid_pgp_sym_field=expected)
+
+        self.assertEqual(
+            1,
+            len(items)
+        )
+
+        items = EncryptedModel.objects.filter(
+            uuid_pgp_sym_field=UUID("9b92f000-7c35-478b-acc9-e0d4c74c7d07")
+        )
+
+        self.assertEqual(
+            0,
+            len(items)
+        )
+
+    def test_pgp_public_key_uuid_form(self):
+        """Assert form field and widget for `UUIDPGPPublicKeyField` field."""
+        expected = UUID("54ced67e-4598-4797-9df9-4b814aae5cbe")
+        instance = EncryptedModelFactory.create(uuid_pgp_pub_field=expected)
+
+        payload = {
+            'uuid_pgp_pub_field': expected
+        }
+
+        form = EncryptedForm(payload, instance=instance)
+        self.assertTrue(form.is_valid())
+
+        cleaned_data = form.cleaned_data
+
+        self.assertEqual(
+            cleaned_data['uuid_pgp_pub_field'],
+            expected
+        )
+
+    def test_pgp_symmetric_key_uuid_form(self):
+        """Assert form field and widget for `UUIDPGPSymmetricKeyField` field."""
+        expected = UUID("53dd4e17-5bd7-49b2-921f-bfec43a5405b")
+        instance = EncryptedModelFactory.create(uuid_pgp_sym_field=expected)
+
+        payload = {
+            'uuid_pgp_sym_field': expected
+        }
+
+        form = EncryptedForm(payload, instance=instance)
+        self.assertTrue(form.is_valid())
+
+        cleaned_data = form.cleaned_data
+
+        self.assertEqual(
+            cleaned_data['uuid_pgp_sym_field'],
             expected
         )
 

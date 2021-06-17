@@ -166,6 +166,7 @@ Supported PGP public key fields are:
  - `DecimalPGPPublicKeyField`
  - `FloatPGPPublicKeyField`
  - `BooleanPGPPublicKeyField`
+ - `UUIDPGPPublicKeyField`
 
 Public key encryption creates a token generated with a public key to
 encrypt the data and a private key to decrypt it.
@@ -187,6 +188,7 @@ Supported PGP symmetric key fields are:
  - `DecimalPGPSymmetricKeyField`
  - `FloatPGPSymmetricKeyField`
  - `BooleanPGPSymmetricKeyField`
+ - `UUIDPGPSymmetricKeyField`
 
 
 Encrypt and decrypt the data with `settings.PGCRYPTO_KEY` which acts like a password.
@@ -206,6 +208,7 @@ Encrypt and decrypt the data with `settings.PGCRYPTO_KEY` which acts like a pass
 | `DecimalField`  | `DecimalPGPPublicKeyField`  | `DecimalPGPSymmetricKeyField`  |
 | `FloatField`    | `FloatPGPPublicKeyField`    | `FloatPGPSymmetricKeyField`    |
 | `BooleanField`  | `BooleanPGPPublicKeyField`  | `BooleanPGPSymmetricKeyField`  |
+| `UUIDField`     | `UUIDPGPPublicKeyField`     | `UUIDPGPSymmetricKeyField`     |
 
 **Other Django model fields are not currently supported. Pull requests are welcomed.**
 
@@ -233,6 +236,7 @@ class MyModel(models.Model):
     decimal_pgp_pub_field = fields.DecimalPGPPublicKeyField()
     float_pgp_pub_field = fields.FloatPGPPublicKeyField()
     boolean_pgp_pub_field = fields.BooleanPGPPublicKeyField()
+    uuid_pgp_pub_field = fields.UUIDPGPPublicKeyField()
     
     email_pgp_sym_field = fields.EmailPGPSymmetricKeyField()
     integer_pgp_sym_field = fields.IntegerPGPSymmetricKeyField()
@@ -243,6 +247,7 @@ class MyModel(models.Model):
     decimal_pgp_sym_field = fields.DecimalPGPSymmetricKeyField()
     float_pgp_sym_field = fields.FloatPGPSymmetricKeyField()
     boolean_pgp_sym_field = fields.BooleanPGPSymmetricKeyField()
+    uuid_pgp_sym_field = fields.UUIDPGPSymmetricKeyField()
 ```
 
 #### Encrypting

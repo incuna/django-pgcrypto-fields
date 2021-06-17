@@ -80,6 +80,12 @@ class BooleanPGPPublicKeyField(PGPPublicKeyFieldMixin, models.BooleanField):
     cast_type = 'BOOL'
 
 
+class UUIDPGPPublicKeyField(PGPPublicKeyFieldMixin, models.UUIDField):
+    """UUID PGP public key encrypted field."""
+    encrypt_sql = PGP_PUB_ENCRYPT_SQL_WITH_NULLIF
+    cast_type = 'UUID'
+
+
 class EmailPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.EmailField):
     """Email PGP symmetric key encrypted field."""
 
@@ -120,6 +126,12 @@ class BooleanPGPSymmetricKeyField(PGPPublicKeyFieldMixin, models.BooleanField):
     """Boolean PGP public key encrypted field."""
     encrypt_sql = PGP_PUB_ENCRYPT_SQL_WITH_NULLIF
     cast_type = 'BOOL'
+
+
+class UUIDPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.UUIDField):
+    """UUID PGP symmetric key encrypted field."""
+    encrypt_sql = PGP_SYM_ENCRYPT_SQL_WITH_NULLIF
+    cast_type = 'UUID'
 
 
 class DecimalPGPPublicKeyField(DecimalPGPFieldMixin,
