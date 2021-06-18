@@ -22,6 +22,12 @@ DIFF_PUBLIC_PGP_KEY_PATH = os.path.abspath(
 DIFF_PRIVATE_PGP_KEY_PATH = os.path.abspath(
     os.path.join(BASEDIR, 'tests/keys/private_diff.key')
 )
+PASSWORD_PUBLIC_PGP_KEY_PATH = os.path.abspath(
+    os.path.join(BASEDIR, 'tests/keys/public_password.key')
+)
+PASSWORD_PRIVATE_PGP_KEY_PATH = os.path.abspath(
+    os.path.join(BASEDIR, 'tests/keys/private_password.key')
+)
 
 diff_keys = dj_database_url.config(
     default='postgres://localhost/pgcrypto_fields_diff'
@@ -34,16 +40,29 @@ diff_keys.update({
     'PGCRYPTO_KEY': 'djangorocks',
 })
 
+password_protected = dj_database_url.config(
+    default='postgres://localhost/pgcrypto_fields_password'
+)
+
+password_protected.update({
+    'PUBLIC_PGP_KEY': open(PASSWORD_PUBLIC_PGP_KEY_PATH, 'r').read(),
+    'PRIVATE_PGP_KEY': open(PASSWORD_PRIVATE_PGP_KEY_PATH, 'r').read(),
+    'PRIVATE_PGP_KEY_PASSWORD': 'this is a test',
+    'PGCRYPTO_KEY': 'djangorules',
+})
+
 settings.configure(
     DATABASES={
         'default': dj_database_url.config(
             default='postgres://localhost/pgcrypto_fields'
         ),
         'diff_keys': diff_keys,
+        'password_protected': password_protected,
     },
     INSTALLED_APPS=(
         'pgcrypto',
         "tests.diff_keys",
+        'tests.password_protected',
         'tests',
     ),
     DATABASE_ROUTERS=('dbrouters.TestRouter',),

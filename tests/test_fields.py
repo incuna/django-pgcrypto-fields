@@ -14,6 +14,7 @@ from .factories import EncryptedFKModelFactory, EncryptedModelFactory
 from .forms import EncryptedForm
 from .models import EncryptedDateTime, EncryptedFKModel, \
     EncryptedModel, RelatedDateTime
+from .password_protected.models import EncryptedPasswordProtected
 
 KEYED_FIELDS = (fields.TextDigestField, fields.TextHMACField)
 EMAIL_PGP_FIELDS = (fields.EmailPGPPublicKeyField, fields.EmailPGPSymmetricKeyField)
@@ -1544,5 +1545,15 @@ class TestEncryptedTextFieldModel(TestCase):
 
         self.assertTrue(
             instance.hmac_field,
+            expected
+        )
+
+    def test_write_to_password_protected(self):
+        """Test writing to password_protected db which uses a password-protected keys."""
+        expected = 'test value'
+        instance = EncryptedPasswordProtected.objects.create(pub_field=expected)
+        instance.refresh_from_db()
+        self.assertTrue(
+            instance.pub_field,
             expected
         )

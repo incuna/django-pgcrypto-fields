@@ -41,6 +41,7 @@ PRIVATE_PGP_KEY_PATH = os.path.abspath(os.path.join(BASEDIR, 'private.key'))
 # Used by PGPPublicKeyField used by default if not specified by the db
 PUBLIC_PGP_KEY = open(PUBLIC_PGP_KEY_PATH).read()
 PRIVATE_PGP_KEY = open(PRIVATE_PGP_KEY_PATH).read()
+PRIVATE_PGP_KEY_PASSWORD = 'optional password for the private key'
 
 # Used by TextHMACField and PGPSymmetricKeyField if not specified by the db
 PGCRYPTO_KEY='ultrasecret'
@@ -85,6 +86,7 @@ DATABASES = {
         'PGCRYPTO_KEY': 'djangorocks',
         'PUBLIC_PGP_KEY': open(DIFF_PUBLIC_PGP_KEY_PATH, 'r').read(),
         'PRIVATE_PGP_KEY': open(DIFF_PRIVATE_PGP_KEY_PATH, 'r').read(),
+        'PRIVATE_PGP_KEY_PASSWORD': 'your password',
     },
 }
 ```
@@ -112,10 +114,6 @@ ssb   2048R/42 2014-10-23
 $ gpg -a --export 42 > public.key
 $ gpg -a --export-secret-keys 21 > private.key
 ```
-
-#### Limitations
-
-This library currently does not support Public Key Encryption private keys that are password protected yet. See Issue #89 to help implement it.
 
 ### Upgrading to 2.4.0 from previous versions
 
@@ -171,7 +169,8 @@ Public key encryption creates a token generated with a public key to
 encrypt the data and a private key to decrypt it.
 
 Public and private keys can be set in settings with `PUBLIC_PGP_KEY` and
-`PRIVATE_PGP_KEY`.
+`PRIVATE_PGP_KEY`. If the private key is password-protected, use the
+`PRIVATE_PGP_KEY_PASSWORD` setting to specify the password.
 
 #### Symmetric Key Encryption Fields
 

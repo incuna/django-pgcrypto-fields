@@ -10,12 +10,12 @@ from pgcrypto import (
 )
 
 
-def get_setting(connection, key):
+def get_setting(connection, key, default=None):
     """Get key from connection or default to settings."""
     if key in connection.settings_dict:
         return connection.settings_dict[key]
     else:
-        return getattr(settings, key)
+        return getattr(settings, key, default)
 
 
 class DecryptedCol(Col):
@@ -137,7 +137,10 @@ class PGPPublicKeyFieldMixin(PGPMixin):
 
     def get_decrypt_sql(self, connection):
         """Get decrypt sql."""
-        return self.decrypt_sql.format(get_setting(connection, 'PRIVATE_PGP_KEY'))
+        return self.decrypt_sql.format(
+            get_setting(connection, 'PRIVATE_PGP_KEY'),
+            get_setting(connection, 'PRIVATE_PGP_KEY_PASSWORD', '')
+        )
 
 
 class PGPSymmetricKeyFieldMixin(PGPMixin):
