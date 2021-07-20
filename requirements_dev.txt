@@ -12,5 +12,5 @@ psycopg2-binary==2.8.6
 pyflakes==2.3.1
 pycodestyle==2.7.0
 setuptools==57.0.0
-twine==3.4.1
+twine==3.4.2
 wheel==0.36.2
