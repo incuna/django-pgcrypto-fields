@@ -65,7 +65,7 @@ class HashMixin:
 
         `compiler` and `connection` is ignored here as we don't need custom operators.
         """
-        if value is None or value.startswith('\\x'):
+        if value is None or type(value) is Cast or value.startswith('\\x'):
             return '%s'
 
         return self.get_encrypt_sql(connection)
