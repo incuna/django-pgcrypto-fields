@@ -10,7 +10,7 @@ EXCEPTION
                         SQLSTATE,SQLERRM),
        HINT = 'pgp_sym_encrypt(...) failed; check your key',
        ERRCODE = 'external_routine_invocation_exception';
-    RETURN NULL;
+    RETURN '';
 END;
 $$ LANGUAGE plpgsql;'''
 
