@@ -9,7 +9,7 @@ flake8==3.9.2
 incuna-test-utils==8.0.0
 pip==22.3
 psycopg2-binary==2.8.6
-pyflakes==2.3.1
+pyflakes==3.1.0
 pycodestyle==2.7.0
 setuptools==65.5.0
 twine==3.4.1
