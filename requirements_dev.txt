@@ -7,7 +7,7 @@ flake8-docstrings==1.6.0
 flake8-import-order==0.18.1
 flake8==3.9.2
 incuna-test-utils==8.0.0
-pip==22.3
+pip==23.3
 psycopg2-binary==2.8.6
 pyflakes==2.3.1
 pycodestyle==2.7.0
