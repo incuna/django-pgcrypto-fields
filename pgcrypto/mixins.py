@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db.models.expressions import Col
 from django.utils.functional import cached_property
+from django.db.models.functions.comparison import Cast
 
 from pgcrypto import (
     PGP_PUB_DECRYPT_SQL,
@@ -64,7 +65,7 @@ class HashMixin:
 
         `compiler` and `connection` is ignored here as we don't need custom operators.
         """
-        if value is None or value.startswith('\\x'):
+        if value is None or type(value) is Cast or value.startswith('\\x'):
             return '%s'
 
         return self.get_encrypt_sql(connection)
@@ -132,7 +133,17 @@ class PGPPublicKeyFieldMixin(PGPMixin):
     cast_type = 'TEXT'
 
     def get_placeholder(self, value=None, compiler=None, connection=None):
-        """Tell postgres to encrypt this field using PGP."""
+        """
+        Tell postgres to encrypt this field using PGP.
+
+        The `value` string is checked to determine if we need to hash or keep
+        the current value.
+
+        `Cast` and is ignored here as we don't need custom operators.
+        """
+        if type(value) is Cast:
+            return '%s'
+
         return self.encrypt_sql.format(get_setting(connection, 'PUBLIC_PGP_KEY'))
 
     def get_decrypt_sql(self, connection):
@@ -147,7 +158,17 @@ class PGPSymmetricKeyFieldMixin(PGPMixin):
     cast_type = 'TEXT'
 
     def get_placeholder(self, value, compiler, connection):
-        """Tell postgres to encrypt this field using PGP."""
+        """
+        Tell postgres to encrypt this field using PGP.
+
+        The `value` string is checked to determine if we need to hash or keep
+        the current value.
+
+        `Cast` and is ignored here as we don't need custom operators.
+        """
+        if type(value) is Cast:
+            return '%s'
+
         return self.encrypt_sql.format(get_setting(connection, 'PGCRYPTO_KEY'))
 
     def get_decrypt_sql(self, connection):
