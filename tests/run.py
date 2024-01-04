@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 """From http://stackoverflow.com/a/12260597/400691."""
 import os
+import string
 import sys
 
 import dj_database_url
@@ -34,12 +35,20 @@ diff_keys.update({
     'PGCRYPTO_KEY': 'djangorocks',
 })
 
+punct_keys = dj_database_url.config(
+    default='postgres://localhost/pgcrypto_fields_punct'
+)
+punct_keys.update({
+    'PGCRYPTO_KEY': string.punctuation
+})
+
 settings.configure(
     DATABASES={
         'default': dj_database_url.config(
             default='postgres://localhost/pgcrypto_fields'
         ),
         'diff_keys': diff_keys,
+        'punct_keys': punct_keys,
     },
     INSTALLED_APPS=(
         'pgcrypto',

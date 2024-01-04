@@ -1546,3 +1546,13 @@ class TestEncryptedTextFieldModel(TestCase):
             instance.hmac_field,
             expected
         )
+
+    def test_value_pgp_sym_with_punct_key(self):
+        """Assert we can get back the decrypted value."""
+        expected = 'bonjour'
+        instance = EncryptedModel.objects.using('punct_keys').create(
+            pgp_sym_field=expected
+        )
+        instance = self.model.objects.using('punct_keys').get()
+        value = instance.pgp_sym_field
+        self.assertEqual(value, expected)
