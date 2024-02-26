@@ -1,7 +1,9 @@
-from datetime import date, datetime
+from datetime import date
 from decimal import Decimal
 
 import factory
+from django.utils import timezone
+
 
 from .models import EncryptedFKModel, EncryptedModel
 
@@ -28,7 +30,7 @@ class EncryptedModelFactory(factory.django.DjangoModelFactory):
     char_pub_field = factory.Sequence('Text {}'.format)
 
     date_pgp_pub_field = date.today()
-    datetime_pgp_pub_field = datetime.now()
+    datetime_pgp_pub_field = timezone.now()
     decimal_pgp_pub_field = Decimal('123456.78')
     boolean_pgp_pub_field = True
 
@@ -39,7 +41,7 @@ class EncryptedModelFactory(factory.django.DjangoModelFactory):
     char_sym_field = factory.Sequence('Text {}'.format)
 
     date_pgp_sym_field = date.today()
-    datetime_pgp_sym_field = datetime.now()
+    datetime_pgp_sym_field = timezone.now()
     boolean_pgp_sym_field = False
 
     fk_model = factory.SubFactory(EncryptedFKModelFactory)
