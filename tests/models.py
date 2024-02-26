@@ -59,6 +59,9 @@ class EncryptedModel(models.Model):
     float_pgp_sym_field = fields.FloatPGPSymmetricKeyField(blank=True, null=True)
     boolean_pgp_sym_field = fields.BooleanPGPSymmetricKeyField(blank=True, null=True)
 
+    json_pgp_pub_field = fields.JSONPGPPublicKeyField(blank=True, null=True)
+    json_pgp_sym_field = fields.JSONPGPSymmetricKeyField(blank=True, null=True)
+
     fk_model = models.ForeignKey(
         EncryptedFKModel, blank=True, null=True, on_delete=models.CASCADE
     )
