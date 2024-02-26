@@ -52,6 +52,7 @@ settings.configure(
     PRIVATE_PGP_KEY=open(PRIVATE_PGP_KEY_PATH, 'r').read(),
     PGCRYPTO_KEY='ultrasecret',
     DEBUG=True,
+    DEFAULT_AUTO_FIELD='django.db.models.BigAutoField'
 )
 django.setup()
 
