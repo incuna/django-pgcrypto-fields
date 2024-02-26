@@ -1,6 +1,6 @@
 colour-runner==0.1.1
-coveralls==3.3.1
-coverage==6.5.0
+coveralls==1.8.0
+coverage==7.4.3
 dj-database-url==0.5.0
 factory-boy==3.3.0
 flake8-docstrings==1.7.0
