@@ -8,6 +8,18 @@ import django
 from colour_runner.django_runner import ColourRunnerMixin
 from django.conf import settings
 from django.test.runner import DiscoverRunner
+from tests import db_setup
+
+default_db_config = {
+    'dbname': 'postgres',
+    'user': 'postgres',
+    'password': 'postgres',
+    'host': 'localhost',
+    'port': 5432,
+}
+
+db_setup.create_dbs(default_db_config,
+                    databases=('pgcrypto_fields', 'pgcrypto_fields_diff'))
 
 BASEDIR = os.path.dirname(os.path.dirname(__file__))
 PUBLIC_PGP_KEY_PATH = os.path.abspath(
@@ -24,7 +36,7 @@ DIFF_PRIVATE_PGP_KEY_PATH = os.path.abspath(
 )
 
 diff_keys = dj_database_url.config(
-    default='postgres://localhost/pgcrypto_fields_diff'
+    default='postgres://postgres:postgres@localhost/pgcrypto_fields_diff'
 )
 
 # Cannot chain onto the config() call due to error
@@ -37,7 +49,7 @@ diff_keys.update({
 settings.configure(
     DATABASES={
         'default': dj_database_url.config(
-            default='postgres://localhost/pgcrypto_fields'
+            default='postgres://postgres:postgres@localhost/pgcrypto_fields'
         ),
         'diff_keys': diff_keys,
     },
