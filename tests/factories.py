@@ -44,6 +44,9 @@ class EncryptedModelFactory(factory.django.DjangoModelFactory):
     datetime_pgp_sym_field = timezone.now()
     boolean_pgp_sym_field = False
 
+    json_pgp_pub_field = {"key": "value"}
+    json_pgp_sym_field = {"key": "value"}
+
     fk_model = factory.SubFactory(EncryptedFKModelFactory)
 
     class Meta:

@@ -106,6 +106,8 @@ class TestEncryptedTextFieldModel(TestCase):
             'float_pgp_sym_field',
             'boolean_pgp_pub_field',
             'boolean_pgp_sym_field',
+            'json_pgp_pub_field',
+            'json_pgp_sym_field',
             'fk_model',
         )
         self.assertCountEqual(fields, expected)
@@ -1615,5 +1617,119 @@ class TestEncryptedTextFieldModel(TestCase):
 
         self.assertTrue(
             instance.hmac_field,
+            expected
+        )
+
+    def test_json_pgp_pub_field(self):
+        """Test JSONPGPPublicKeyField."""
+        expected = {'a': 1, 'b': '2', 'c': [1, 2, 3]}
+        EncryptedModelFactory.create(json_pgp_pub_field=expected)
+
+        instance = EncryptedModel.objects.get()
+
+        self.assertIsInstance(
+            instance.json_pgp_pub_field,
+            dict
+        )
+
+        self.assertEqual(
+            instance.json_pgp_pub_field,
+            expected
+        )
+
+        items = EncryptedModel.objects.filter(json_pgp_pub_field__a=1)
+
+        self.assertEqual(
+            1,
+            len(items)
+        )
+
+        items = EncryptedModel.objects.filter(json_pgp_pub_field__c__contains=2)
+
+        self.assertEqual(
+            1,
+            len(items)
+        )
+
+        items = EncryptedModel.objects.filter(json_pgp_pub_field__b=2)
+
+        self.assertEqual(
+            0,
+            len(items)
+        )
+
+    def test_json_pgp_sym_field(self):
+        """Test JsonPGPSymmetricKeyField."""
+        expected = {'a': 1, 'b': '2', 'c': [1, 2, 3]}
+        EncryptedModelFactory.create(json_pgp_sym_field=expected)
+
+        instance = EncryptedModel.objects.get()
+
+        self.assertIsInstance(
+            instance.json_pgp_sym_field,
+            dict
+        )
+
+        self.assertEqual(
+            instance.json_pgp_sym_field,
+            expected
+        )
+
+        items = EncryptedModel.objects.filter(json_pgp_sym_field__a=1)
+
+        self.assertEqual(
+            1,
+            len(items)
+        )
+
+        items = EncryptedModel.objects.filter(json_pgp_sym_field__c__contains=2)
+
+        self.assertEqual(
+            1,
+            len(items)
+        )
+
+        items = EncryptedModel.objects.filter(json_pgp_sym_field__b=2)
+
+        self.assertEqual(
+            0,
+            len(items)
+        )
+
+    def test_pgp_public_key_json_form(self):
+        """Assert form field and widget for `JSONPGPSymmetricKeyField` field."""
+        expected = {'a': 1, 'b': '2', 'c': [1, 2, 3]}
+        instance = EncryptedModelFactory.create(json_pgp_pub_field=expected)
+
+        payload = {
+            'json_pgp_pub_field': expected
+        }
+
+        form = EncryptedForm(payload, instance=instance)
+        self.assertTrue(form.is_valid())
+
+        cleaned_data = form.cleaned_data
+
+        self.assertTrue(
+            cleaned_data['json_pgp_pub_field'],
+            expected
+        )
+
+    def test_pgp_symmetric_key_json_form(self):
+        """Assert form field and widget for `JSONPGPSymmetricKeyField` field."""
+        expected = {'a': 1, 'b': '2', 'c': [1, 2, 3]}
+        instance = EncryptedModelFactory.create(json_pgp_sym_field=expected)
+
+        payload = {
+            'json_pgp_sym_field': expected
+        }
+
+        form = EncryptedForm(payload, instance=instance)
+        self.assertTrue(form.is_valid())
+
+        cleaned_data = form.cleaned_data
+
+        self.assertTrue(
+            cleaned_data['json_pgp_sym_field'],
             expected
         )
