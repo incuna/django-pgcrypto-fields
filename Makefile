@@ -69,7 +69,7 @@ build: clean-build ## Builds source and wheel package
 release: ## Package and upload a release
 	twine upload dist/*
 
-test: clean-build ## Run tests quickly with the default Python
+test: clean-build lint ## Run tests quickly with the default Python
 	./tests/run.py
 
 test-coverage: ## Check code coverage quickly with the default Python
