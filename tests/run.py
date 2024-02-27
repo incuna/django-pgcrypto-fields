@@ -9,6 +9,23 @@ from colour_runner.django_runner import ColourRunnerMixin
 from django.conf import settings
 from django.test.runner import DiscoverRunner
 
+print("Current directory:", os.getcwd())
+print("Contents of the directory:", os.listdir(os.getcwd()))
+print("Contents of the directory of run.py:", os.listdir(os.chdir(os.path.dirname(os.path.abspath(__file__)))))
+
+from db_setup import create_dbs
+
+default_db_config = {
+    'dbname': 'postgres',
+    'user': 'postgres',
+    'password': 'postgres',
+    'host': 'localhost',
+    'port': 5432,
+}
+
+create_dbs(default_db_config,
+                    databases=('pgcrypto_fields', 'pgcrypto_fields_diff'))
+
 BASEDIR = os.path.dirname(os.path.dirname(__file__))
 PUBLIC_PGP_KEY_PATH = os.path.abspath(
     os.path.join(BASEDIR, 'tests/keys/public.key')
@@ -24,7 +41,7 @@ DIFF_PRIVATE_PGP_KEY_PATH = os.path.abspath(
 )
 
 diff_keys = dj_database_url.config(
-    default='postgres://localhost/pgcrypto_fields_diff'
+    default='postgres://postgres:postgres@localhost/pgcrypto_fields_diff'
 )
 
 # Cannot chain onto the config() call due to error
@@ -37,7 +54,7 @@ diff_keys.update({
 settings.configure(
     DATABASES={
         'default': dj_database_url.config(
-            default='postgres://localhost/pgcrypto_fields'
+            default='postgres://postgres:postgres@localhost/pgcrypto_fields'
         ),
         'diff_keys': diff_keys,
     },
@@ -52,6 +69,8 @@ settings.configure(
     PRIVATE_PGP_KEY=open(PRIVATE_PGP_KEY_PATH, 'r').read(),
     PGCRYPTO_KEY='ultrasecret',
     DEBUG=True,
+    DEFAULT_AUTO_FIELD='django.db.models.BigAutoField',
+    USE_TZ=True,
 )
 django.setup()
 

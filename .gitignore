@@ -48,6 +48,9 @@ coverage.xml
 *.log
 local_settings.py
 
+# pyenv
+.python-version
+
 # virtualenv
 .venv/
 venv/

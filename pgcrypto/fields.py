@@ -125,11 +125,13 @@ class BooleanPGPSymmetricKeyField(PGPPublicKeyFieldMixin, models.BooleanField):
 class DecimalPGPPublicKeyField(DecimalPGPFieldMixin,
                                PGPPublicKeyFieldMixin, models.DecimalField):
     """Decimal PGP public key encrypted field for postgres."""
+    encrypt_sql = PGP_PUB_ENCRYPT_SQL_WITH_NULLIF
 
 
 class DecimalPGPSymmetricKeyField(DecimalPGPFieldMixin,
                                   PGPSymmetricKeyFieldMixin, models.DecimalField):
     """Decimal PGP symmetric key encrypted field for postgres."""
+    encrypt_sql = PGP_SYM_ENCRYPT_SQL_WITH_NULLIF
 
 
 class FloatPGPPublicKeyField(PGPPublicKeyFieldMixin, models.FloatField):
@@ -154,3 +156,15 @@ class TimePGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.TimeField):
     """Float PGP symmetric key encrypted field for postgres."""
     encrypt_sql = PGP_SYM_ENCRYPT_SQL_WITH_NULLIF
     cast_type = 'TIME'
+
+
+class JSONPGPPublicKeyField(PGPPublicKeyFieldMixin, models.JSONField):
+    """JSON PGP public key encrypted field for postgres."""
+    encrypt_sql = PGP_PUB_ENCRYPT_SQL_WITH_NULLIF
+    cast_type = 'jsonb'
+
+
+class JSONPGPSymmetricKeyField(PGPSymmetricKeyFieldMixin, models.JSONField):
+    """Float PGP symmetric key encrypted field for postgres."""
+    encrypt_sql = PGP_SYM_ENCRYPT_SQL_WITH_NULLIF
+    cast_type = 'jsonb'
