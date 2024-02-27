@@ -13,7 +13,7 @@ print("Current directory:", os.getcwd())
 print("Contents of the directory:", os.listdir(os.getcwd()))
 print("Contents of the directory of run.py:", os.listdir(os.chdir(os.path.dirname(os.path.abspath(__file__)))))
 
-from tests import db_setup
+from db_setup import create_dbs
 
 default_db_config = {
     'dbname': 'postgres',
@@ -23,7 +23,7 @@ default_db_config = {
     'port': 5432,
 }
 
-db_setup.create_dbs(default_db_config,
+create_dbs(default_db_config,
                     databases=('pgcrypto_fields', 'pgcrypto_fields_diff'))
 
 BASEDIR = os.path.dirname(os.path.dirname(__file__))
