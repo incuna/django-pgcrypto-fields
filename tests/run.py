@@ -11,6 +11,7 @@ from django.test.runner import DiscoverRunner
 
 print("Current directory:", os.getcwd())
 print("Contents of the directory:", os.listdir(os.getcwd()))
+print("Contents of the directory of run.py:", os.listdir(os.chdir(os.path.dirname(os.path.abspath(__file__)))))
 
 from tests import db_setup
 
