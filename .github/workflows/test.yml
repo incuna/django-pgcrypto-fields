@@ -49,7 +49,7 @@ jobs:
         run: |
           pip install -e .
           pip install -r requirements_dev.txt
-          pip install '${{ matrix.django-version }}'
+          pip install ${{ matrix.django-version }}
       - name: Run tests
         run: |
           make test
