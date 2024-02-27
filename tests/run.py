@@ -8,6 +8,10 @@ import django
 from colour_runner.django_runner import ColourRunnerMixin
 from django.conf import settings
 from django.test.runner import DiscoverRunner
+
+print("Current directory:", os.getcwd())
+print("Contents of the directory:", os.listdir(os.getcwd()))
+
 from tests import db_setup
 
 default_db_config = {
