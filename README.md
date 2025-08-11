@@ -148,7 +148,7 @@ Supported hash based fields are:
 using the `sha512` algorithm.
 
 `TextHMACField` is hashed in the database using the `hmac` pgcrypto function 
-using a key and the `sha512` algorithm. This is similar to the digest version however
+using `settings.PGCRYPTO_KEY` for the key and the `sha512` algorithm. This is similar to the digest version however
 the hash can only be recalculated knowing the key. This prevents someone from altering 
 the data and also changing the hash to match.
 
