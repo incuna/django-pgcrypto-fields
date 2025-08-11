@@ -22,10 +22,6 @@ class TextDigestField(HashMixin, models.TextField):
     """Text digest field for postgres."""
     encrypt_sql = DIGEST_SQL
 
-    def get_encrypt_sql(self, connection):
-        """Get encrypt sql."""
-        return self.encrypt_sql.format(get_setting(connection, 'PGCRYPTO_KEY'))
-
 
 TextDigestField.register_lookup(HashLookup)
 
@@ -33,6 +29,10 @@ TextDigestField.register_lookup(HashLookup)
 class TextHMACField(HashMixin, models.TextField):
     """Text HMAC field for postgres."""
     encrypt_sql = HMAC_SQL
+
+    def get_encrypt_sql(self, connection):
+        """Get encrypt sql."""
+        return self.encrypt_sql.format(get_setting(connection, 'PGCRYPTO_KEY'))
 
 
 TextHMACField.register_lookup(HashLookup)
