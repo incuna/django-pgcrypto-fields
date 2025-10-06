@@ -10,12 +10,34 @@ from pgcrypto import (
 )
 
 
-def get_setting(connection, key):
+def get_setting(connection, key, **kwargs):
     """Get key from connection or default to settings."""
     if key in connection.settings_dict:
         return connection.settings_dict[key]
     else:
+        if 'default' in kwargs:
+            return getattr(settings, key, kwargs['default'])
         return getattr(settings, key)
+
+
+def get_pgp_public_key_sql(connection):
+    dearmored_file = get_setting(connection, 'PUBLIC_PGP_KEY_DEARMORED_FILE', default=None)
+    if dearmored_file is not None:
+        return "pg_read_binary_file('{}')".format(dearmored_file)
+    armored_file = get_setting(connection, 'PUBLIC_PGP_KEY_ARMORED_FILE', default=None)
+    if armored_file is not None:
+        return "dearmor(pg_read_file('{}'))".format(armored_file)
+    return "dearmor('{}')".format(get_setting(connection, 'PUBLIC_PGP_KEY'))
+
+
+def get_pgp_private_key_sql(connection):
+    dearmored_file = get_setting(connection, 'PRIVATE_PGP_KEY_DEARMORED_FILE', default=None)
+    if dearmored_file is not None:
+        return "pg_read_binary_file('{}')".format(dearmored_file)
+    armored_file = get_setting(connection, 'PRIVATE_PGP_KEY_ARMORED_FILE', default=None)
+    if armored_file is not None:
+        return "dearmor(pg_read_file('{}'))".format(armored_file)
+    return "dearmor('{}')".format(get_setting(connection, 'PRIVATE_PGP_KEY'))
 
 
 class DecryptedCol(Col):
@@ -133,11 +155,11 @@ class PGPPublicKeyFieldMixin(PGPMixin):
 
     def get_placeholder(self, value=None, compiler=None, connection=None):
         """Tell postgres to encrypt this field using PGP."""
-        return self.encrypt_sql.format(get_setting(connection, 'PUBLIC_PGP_KEY'))
+        return self.encrypt_sql.format(get_pgp_public_key_sql(connection))
 
     def get_decrypt_sql(self, connection):
         """Get decrypt sql."""
-        return self.decrypt_sql.format(get_setting(connection, 'PRIVATE_PGP_KEY'))
+        return self.decrypt_sql.format(get_pgp_private_key_sql(connection))
 
 
 class PGPSymmetricKeyFieldMixin(PGPMixin):
