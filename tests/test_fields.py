@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 from django import VERSION as DJANGO_VERSION
 from django.conf import settings
-from django.db import connections, models, reset_queries
+from django.db import connection, connections, models, reset_queries
 from django.test import TestCase
 from incuna_test_utils.utils import field_names
 
@@ -38,6 +38,18 @@ class TestTextFieldHash(TestCase):
                 placeholder = field().get_placeholder('\\x')
                 self.assertEqual(placeholder, '%s')
 
+    def test_get_placeholder_sql(self):
+        """Assert `get_placeholder_sql` returns tuple of placeholder and params."""
+        for field in KEYED_FIELDS:
+            with self.subTest(field=field):
+                placeholder, params = field().get_placeholder_sql('\\x', None, None)
+                self.assertEqual(placeholder, '%s')
+                self.assertEqual(params, ['\\x'])
+
+                placeholder, params = field().get_placeholder_sql('value', None, None)
+                self.assertNotEqual(placeholder, '%s')
+                self.assertEqual(params, ['value'])
+
 
 class TestPGPMixin(TestCase):
     databases = '__all__'
@@ -54,6 +66,16 @@ class TestPGPMixin(TestCase):
         for field in PGP_FIELDS:
             with self.subTest(field=field):
                 self.assertEqual(field().db_type(), 'bytea')
+
+    def test_get_placeholder_sql(self):
+        """Assert `get_placeholder_sql` returns expected tuple for PGP fields."""
+        for field in PGP_FIELDS:
+            with self.subTest(field=field):
+                f = field()
+                placeholder, params = f.get_placeholder_sql('test_val', None, None)
+                expected_placeholder = f.get_placeholder('test_val', None, None)
+                self.assertEqual(placeholder, expected_placeholder)
+                self.assertEqual(params, ['test_val'])
 
 
 class TestEmailPGPMixin(TestCase):
@@ -174,6 +196,26 @@ class TestEncryptedTextFieldModel(TestCase):
         value = instance.pgp_sym_field
 
         self.assertEqual(value, expected)
+
+    def test_email_pgp_symmetric_key_field_integration(self):
+        """Integration regression test for EmailPGPSymmetricKeyField."""
+        email_value = 'test_user@example.com'
+        instance = EncryptedModelFactory.create(email_pgp_sym_field=email_value)
+
+        # Refresh from database and verify decrypted value matches original
+        instance.refresh_from_db()
+        self.assertEqual(instance.email_pgp_sym_field, email_value)
+
+        # Verify database contains encrypted bytea data rather than plaintext
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f'SELECT email_pgp_sym_field FROM {self.model._meta.db_table} WHERE id = %s',
+                [instance.id]
+            )
+            raw_value = cursor.fetchone()[0]
+
+        self.assertIsInstance(raw_value, (bytes, memoryview))
+        self.assertNotIn(email_value.encode('utf-8'), bytes(raw_value))
 
     def test_instance_not_saved(self):
         """Assert not saved instance return the value to be encrypted."""

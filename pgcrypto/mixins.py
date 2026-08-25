@@ -12,7 +12,7 @@ from pgcrypto import (
 
 def get_setting(connection, key):
     """Get key from connection or default to settings."""
-    if key in connection.settings_dict:
+    if connection and key in connection.settings_dict:
         return connection.settings_dict[key]
     else:
         return getattr(settings, key)
@@ -69,6 +69,11 @@ class HashMixin:
 
         return self.get_encrypt_sql(connection)
 
+    def get_placeholder_sql(self, value, compiler, connection):
+        """Get placeholder SQL and parameters for modern Django."""
+        placeholder = self.get_placeholder(value, compiler, connection)
+        return placeholder, [value]
+
     def get_encrypt_sql(self, connection):
         """Get encrypt sql. This may be overidden by some implementations."""
         return self.encrypt_sql
@@ -94,6 +99,11 @@ class PGPMixin:
     def get_placeholder(self, value, compiler, connection):
         """Tell postgres to encrypt this field using PGP."""
         raise NotImplementedError('The `get_placeholder` needs to be implemented.')
+
+    def get_placeholder_sql(self, value, compiler, connection):
+        """Get placeholder SQL and parameters for modern Django."""
+        placeholder = self.get_placeholder(value, compiler, connection)
+        return placeholder, [value]
 
     def get_cast_sql(self):
         """Get cast sql. This may be overidden by some implementations."""
